@@ -1,4 +1,5 @@
 from django.core.management import BaseCommand
+from ._websocket_client import WebsocketClient
 
 
 class Command(BaseCommand):
@@ -18,3 +19,6 @@ class Command(BaseCommand):
         #     poll.opened = False
         #     poll.save()
         self.stdout.write(self.style.SUCCESS('Successfully'))
+        WebsocketClient().start_forever()
+
+        print('ended')
