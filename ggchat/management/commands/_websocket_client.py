@@ -1,11 +1,13 @@
 import asyncio
 import json
 import time
+import logging
 
 import websockets
 from django.utils import timezone
 
-from ggchat.models import CommonMessage, User, Channel, ChannelStatus
+from ggchat import models
+from ggchat.models import CommonMessage, User, Channel, ChannelStatus, ChannelStats, Follow
 
 GG_CHAT_API2_ENDPOINT = 'ws://chat.goodgame.ru:8081/chat/websocket'
 PERIODIC_PROCESSING_INTERVAL = 5 * 60
@@ -14,9 +16,12 @@ PERIODIC_PROCESSING_INTERVAL = 5 * 60
 class WebsocketClient():
     def __init__(self):
         self.reset()
+        logging.basicConfig()
+        self.log = logging.getLogger()
+        self.log.setLevel(logging.INFO)
 
     def reset(self):
-        self.joined_channels = set()
+        self.joined_channels = []
 
     def save_common_message(self, type, data):
         common_msg = CommonMessage(type=type, data=data)
@@ -27,16 +32,18 @@ class WebsocketClient():
         # print(received)
         msg = json.loads(received)
 
-        if msg['type'] not in ('welcome', 'error'):
-            self.save_common_message(msg['type'], msg['data'])
-        else:
-            print('skipped', msg)
+        if msg['type'] not in ('welcome', 'error', 'success_join', 'channel_counters', 'message', 'channels_list'):
+            self.log.info('{}'.format(msg))
+        #     self.save_common_message(msg['type'], msg['data'])
+        # else:
+
 
         if msg['type'] == 'welcome':
             # {'type': 'welcome',
             #  'data': {'protocolVersion': 1.1,
             #           'serverIdent': 'GG-chat/1.0 beta'}}
             pass
+
         elif msg['type'] == 'channels_list':
             # {'type': 'channels_list',
             #  'data': {'channels': [{'channel_id': '5',
@@ -64,7 +71,8 @@ class WebsocketClient():
             # }
             for channel in msg['data']['channels']:
                 channel_id = channel['channel_id']
-                if channel not in self.joined_channels:
+                if channel_id not in self.joined_channels:
+                    # print('"{}" not in {}'.format(channel_id, self.joined_channels))
                     join_channel_query = {"type": "join", "data": {"channel_id": str(channel_id), "hidden": False}}
                     await ws.send(json.dumps(join_channel_query))
 
@@ -103,8 +111,9 @@ class WebsocketClient():
             #           'paidsmiles': []
             #           }
             #  }
-            channel_id = int(msg['data']['channel_id'])
-            self.joined_channels.add(channel_id)
+            channel_id = str(msg['data']['channel_id'])
+            self.joined_channels.append(channel_id)
+            #self.log.info('joined: {}'.format(self.joined_channels))
 
             streamer_id = msg['data']['channel_streamer']['id']
             streamer_username = msg['data']['channel_streamer']['name']
@@ -125,16 +134,21 @@ class WebsocketClient():
             users = int(msg['data']['users_in_channel'])
             clients = int(msg['data']['clients_in_channel'])
 
-            last_status = ChannelStatus.objects.filter(channel_id=channel_id).latest('timestamp')
-            if last_status.timestamp > timezone.now() + timezone.timedelta(minutes=5):
-                current_status = ChannelStatus(channel=channel_id, users=users, clients=clients)
+            try:
+                last_status = ChannelStatus.objects.filter(channel_id=channel_id).latest('timestamp')
+                last_timestamp = last_status.timestamp
+            except ChannelStatus.DoesNotExist:
+                last_timestamp = None
+            if not last_timestamp or timezone.now() > last_timestamp + timezone.timedelta(minutes=5):
+                current_status = ChannelStats(channel_id=channel_id, users=users, clients=clients)
                 current_status.save()
 
         elif msg['type'] == 'premium':
             # {'type': 'premium',
             #  'data': {'channel_id': 58636,
             #           'userName': 'dmitrii.93'}}
-            print(msg)
+            # print(msg)
+            pass
 
         elif msg['type'] == 'update_channel_info':
             # {'type': 'update_channel_info',
@@ -143,6 +157,7 @@ class WebsocketClient():
             #             'started': 1493051455}
             #  }
             pass
+
         elif msg['type'] == 'payment':
             # {'type': 'payment',
             #    'data': {'channel_id': 54105,
@@ -153,7 +168,8 @@ class WebsocketClient():
             #             'title': '',
             #             'link': ''}
             #  }
-            print(msg)
+            # print(msg)
+            pass
 
         elif msg['type'] == 'user_ban':
             # {'type': 'user_ban',
@@ -169,12 +185,14 @@ class WebsocketClient():
             #           'reason': 'На месяц',
             #           'show': True}}
             pass
+
         elif msg['type'] == 'remove_message':
             # {'type': 'remove_message',
             #  'data': {'channel_id': 39803,
             #           'message_id': 207609,
             #           'adminName': 'iLame_ru'}}
             pass
+
         elif msg['type'] == 'setting':
             # {'type': 'setting',
             #  'data': {'channel_id': 24477,
@@ -186,11 +204,16 @@ class WebsocketClient():
             #           'moder_premium': True,
             #           'silent': 1}}
             pass
+
         elif msg['type'] == 'follower':
             # {'type': 'follower',
             #  'data': {'channel_id': 32399,
             #           'userName': 'Timorfiys'}}
-            pass
+            channel_id = msg['data']['channel_id']
+            username = msg['data']['userName']
+
+            # follow = Follow()
+
         elif msg['type'] == 'user_warn':
             # {'type': 'user_warn',
             #  'data': {'channel_id': 9348,
@@ -202,6 +225,7 @@ class WebsocketClient():
             #           'moder_premium': 1,
             #           'reason': ''}}
             pass
+
         elif msg['type'] == 'random_result':
             # {'type': 'random_result',
             #  'data': {'channel_id': 5,
@@ -220,6 +244,7 @@ class WebsocketClient():
             #           }
             # }
             pass
+
         elif msg['type'] == 'new_poll':
             # {{'type': 'new_poll',
             #   'data': {'channel_id': 184,
@@ -233,12 +258,14 @@ class WebsocketClient():
             #            }
             # }
             pass
+
         elif msg['type'] == 'error':
             # {'type': 'error',
             #  'data': {'channel_id': 5,
             #           'error_num': 0,
             #           'errorMsg': 'You are already connected to the channel `5`.'}}
             pass
+
         elif msg['type'] == 'message':
             # {'type': 'message',
             #  'data': {'channel_id': 3893,
@@ -280,10 +307,13 @@ class WebsocketClient():
             #           'text': 'Pontya, прекрасно выглядишь)', 'parsed': 'Pontya, прекрасно выглядишь)'
             #           }
             #  }
+            # print(msg)
             pass
+
         else:
             # unknown type
-            print('unknown type:', msg)
+            self.log.warning('Unknown type: {}'.format(msg))
+            # print('unknown type:', msg)
 
     async def periodic_processing(self, ws):
         print('periodic_processing')
