@@ -1,10 +1,11 @@
+import asyncio
 import json
 import time
 
-import asyncio
 import websockets
+from django.utils import timezone
 
-from ggchat.models import CommonMessage
+from ggchat.models import CommonMessage, User, Channel, ChannelStatus
 
 GG_CHAT_API2_ENDPOINT = 'ws://chat.goodgame.ru:8081/chat/websocket'
 PERIODIC_PROCESSING_INTERVAL = 5 * 60
@@ -12,12 +13,15 @@ PERIODIC_PROCESSING_INTERVAL = 5 * 60
 
 class WebsocketClient():
     def __init__(self):
-        pass
+        self.reset()
+
+    def reset(self):
+        self.joined_channels = set()
 
     def save_common_message(self, type, data):
         common_msg = CommonMessage(type=type, data=data)
         common_msg.save()
-        print('saved', type)
+        # print('saved', type)
 
     async def parse_received(self, ws, received):
         # print(received)
@@ -60,8 +64,10 @@ class WebsocketClient():
             # }
             for channel in msg['data']['channels']:
                 channel_id = channel['channel_id']
-                join_channel_query = {"type": "join", "data": {"channel_id": str(channel_id), "hidden": False}}
-                await ws.send(json.dumps(join_channel_query))
+                if channel not in self.joined_channels:
+                    join_channel_query = {"type": "join", "data": {"channel_id": str(channel_id), "hidden": False}}
+                    await ws.send(json.dumps(join_channel_query))
+
         elif msg['type'] == 'success_join':
             # {'type': 'success_join',
             #  'data': {'channel_id': 5,
@@ -97,18 +103,39 @@ class WebsocketClient():
             #           'paidsmiles': []
             #           }
             #  }
-            pass
+            channel_id = int(msg['data']['channel_id'])
+            self.joined_channels.add(channel_id)
+
+            streamer_id = msg['data']['channel_streamer']['id']
+            streamer_username = msg['data']['channel_streamer']['name']
+            streamer = User(user_id=streamer_id, username=streamer_username)
+            streamer.save()
+
+            channel = Channel(channel_id=channel_id, streamer=streamer)
+            channel.save()
+
+            # streamer premiums and resubs save
+
         elif msg['type'] == 'channel_counters':
             # {'type': 'channel_counters',
             #  'data': {'channel_id': '39803',
             #           'clients_in_channel': '1126',
             #           'users_in_channel': 633}}
-            pass
+            channel_id = msg['data']['channel_id']
+            users = int(msg['data']['users_in_channel'])
+            clients = int(msg['data']['clients_in_channel'])
+
+            last_status = ChannelStatus.objects.filter(channel_id=channel_id).latest('timestamp')
+            if last_status.timestamp > timezone.now() + timezone.timedelta(minutes=5):
+                current_status = ChannelStatus(channel=channel_id, users=users, clients=clients)
+                current_status.save()
+
         elif msg['type'] == 'premium':
             # {'type': 'premium',
             #  'data': {'channel_id': 58636,
             #           'userName': 'dmitrii.93'}}
-            pass
+            print(msg)
+
         elif msg['type'] == 'update_channel_info':
             # {'type': 'update_channel_info',
             #    'data': {'channel_id': '58636',
@@ -126,7 +153,8 @@ class WebsocketClient():
             #             'title': '',
             #             'link': ''}
             #  }
-            pass
+            print(msg)
+
         elif msg['type'] == 'user_ban':
             # {'type': 'user_ban',
             #  'data': {'channel_id': 5,
@@ -267,6 +295,7 @@ class WebsocketClient():
     async def run(self):
         while True:
             try:
+                self.reset()
                 ws = await websockets.connect(GG_CHAT_API2_ENDPOINT)
                 last_periodic_processing = time.time() - PERIODIC_PROCESSING_INTERVAL -2
                 while True:

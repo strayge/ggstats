@@ -12,7 +12,7 @@ class CommonMessage(models.Model):
 
 class Channel(models.Model):
     channel_id = models.PositiveIntegerField(primary_key=True)
-    streamer = models.ForeignKey(User, on_delete=models.SET_NULL)
+    streamer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
 
 
 class ChannelStatus(models.Model):
@@ -55,6 +55,7 @@ class PremiumStatus(models.Model):
     started = models.DateField(default=datetime.date.today())
     ended = models.DateField(default=datetime.date.today())
     modified = models.DateTimeField(default=timezone.now)
+    resubs = models.PositiveSmallIntegerField()
 
 
 class Poll(models.Model):
