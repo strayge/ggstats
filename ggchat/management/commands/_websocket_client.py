@@ -193,13 +193,13 @@ class WebsocketClient():
             clients = int(msg['data']['clients_in_channel'])
 
             try:
-                last_status = ChannelStatus.objects.filter(channel_id=channel_id).latest('timestamp')
+                last_status = ChannelStats.objects.filter(channel_id=channel_id).latest('timestamp')
                 last_timestamp = last_status.timestamp
-            except ChannelStatus.DoesNotExist:
+            except ChannelStats.DoesNotExist:
                 last_timestamp = None
 
-            # one time per 30 minutes save counter for each channel
-            if not last_timestamp or timezone.now() > last_timestamp + timezone.timedelta(minutes=30):
+            # one time per 5 minutes save counter for each channel
+            if not last_timestamp or timezone.now() > last_timestamp + timezone.timedelta(minutes=5):
                 current_status = ChannelStats(channel_id=channel_id, users=users, clients=clients)
                 current_status.save()
 
