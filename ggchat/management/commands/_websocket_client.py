@@ -6,7 +6,7 @@ import time
 import websockets
 from django.utils import timezone
 
-from ggchat.models import CommonMessage, User, Channel, ChannelStatus, ChannelStats, Follow, Message, Donation, Ban
+from ggchat.models import CommonMessage, User, Channel, ChannelStatus, ChannelStats, Follow, Message, Donation, Ban, Warning
 
 GG_CHAT_API2_ENDPOINT = 'ws://chat.goodgame.ru:8081/chat/websocket'
 PERIODIC_PROCESSING_INTERVAL = 5 * 60
@@ -245,6 +245,8 @@ class WebsocketClient():
 
             channel_id = msg['data']['channel_id']
             user_id = msg['data']['user_id']
+            username = msg['data']['user_name']
+            moderator_id = msg['data']['moder_id']
             moderator_username = msg['data']['moder_name']
             reason = msg['data']['reason']
             duration = int(msg['data']['duration'])
@@ -252,13 +254,43 @@ class WebsocketClient():
             permanent = bool(msg['data']['permanent'])
 
             channel = Channel.objects.filter(channel_id=channel_id).first()
-            user = User.objects.filter(user_id=user_id).first()
-            moderator = User.objects.filter(username=moderator_username).first()
+            user = User(user_id=user_id, username=username)
+            user.save()
+            moderator = User(user_id=moderator_id, username=moderator_username)
+            moderator.save()
 
-            if channel and user and moderator:
+            if channel:
                 ban = Ban(user=user, channel=channel, moderator=moderator, duration=duration,
                           reason=reason, show=show, permanent=permanent)
                 ban.save()
+
+        elif msg['type'] == 'user_warn':
+            # {'type': 'user_warn',
+            #  'data': {'channel_id': 9348,
+            #           'user_id': 800206,
+            #           'user_name': 'ekvilior',
+            #           'moder_id': 108148,
+            #           'moder_name': 'Alice',
+            #           'moder_rights': 40,
+            #           'moder_premium': 1,
+            #           'reason': ''}}
+
+            channel_id = msg['data']['channel_id']
+            user_id = msg['data']['user_id']
+            username = msg['data']['user_name']
+            moderator_id = msg['data']['moder_id']
+            moderator_username = msg['data']['moder_name']
+            reason = msg['data']['reason']
+
+            channel = Channel.objects.filter(channel_id=channel_id).first()
+            user = User(user_id=user_id, username=username)
+            user.save()
+            moderator = User(user_id=moderator_id, username=moderator_username)
+            moderator.save()
+
+            if channel:
+                warning = Warning(user=user, channel=channel, moderator=moderator, reason=reason)
+                warning.save()
 
         elif msg['type'] == 'remove_message':
             # {'type': 'remove_message',
@@ -303,18 +335,6 @@ class WebsocketClient():
             if user:
                 follow = Follow(user=user, channel_id=channel_id)
                 follow.save()
-
-        elif msg['type'] == 'user_warn':
-            # {'type': 'user_warn',
-            #  'data': {'channel_id': 9348,
-            #           'user_id': 800206,
-            #           'user_name': 'ekvilior',
-            #           'moder_id': 108148,
-            #           'moder_name': 'Alice',
-            #           'moder_rights': 40,
-            #           'moder_premium': 1,
-            #           'reason': ''}}
-            pass
 
         elif msg['type'] == 'random_result':
             # {'type': 'random_result',
