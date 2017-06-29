@@ -27,12 +27,13 @@ class ChannelStatus(models.Model):
 
 
 class Message(models.Model):
+    message_id = models.IntegerField(primary_key=True)
     channel = models.ForeignKey(Channel, on_delete=models.SET_NULL, null=True)
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     timestamp = models.DateTimeField(default=timezone.now)
     text = models.CharField(max_length=2000)
     removed = models.BooleanField(default=False)
-    removed_by = models.ForeignKey(User, related_name='removed_by', on_delete=models.SET_NULL, null=True)
+    removed_by = models.ForeignKey(User, related_name='removed_by', on_delete=models.SET_NULL, null=True, default=None)
 
 
 class Donation(models.Model):

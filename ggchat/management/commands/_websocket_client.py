@@ -7,7 +7,7 @@ import websockets
 from django.utils import timezone
 
 from ggchat import models
-from ggchat.models import CommonMessage, User, Channel, ChannelStatus, ChannelStats, Follow
+from ggchat.models import CommonMessage, User, Channel, ChannelStatus, ChannelStats, Follow, Message
 
 GG_CHAT_API2_ENDPOINT = 'ws://chat.goodgame.ru:8081/chat/websocket'
 PERIODIC_PROCESSING_INTERVAL = 5 * 60
@@ -148,6 +148,9 @@ class WebsocketClient():
             #  'data': {'channel_id': 58636,
             #           'userName': 'dmitrii.93'}}
             # print(msg)
+
+            # {'type': 'premium', 'data': {'channel_id': 5, 'resub': '1', 'userName': 'dudeonthehorse', 'payment': '1'}}
+
             pass
 
         elif msg['type'] == 'update_channel_info':
@@ -169,7 +172,14 @@ class WebsocketClient():
             #             'link': ''}
             #  }
             # print(msg)
-            pass
+
+            # {'type': 'payment', 'data': {'total': 0, 'amount': '100.00', 'channel_id': 27338, 'title': '', 'userName': 'Aard', 'message': '╨í╨╛╤é╨╡╨╜╤ç╨╕╨║ ╨╜╨░ ╨┐╨╕╨▓╨░╤ü. ╨ö╨╛╨╗╨│╨╛ ╨╡╤ë╨╡ ╨║╨░╤é╨░╤é╤î ╨▒╤â╨┤╨╡╤ê╤î?', 'link': ''}}
+
+
+            channel_id = msg['data']['channel_id']
+            username = msg['data']['userName']
+            amount = msg['data']['amount']
+            text = msg['data']['message']
 
         elif msg['type'] == 'user_ban':
             # {'type': 'user_ban',
@@ -184,6 +194,8 @@ class WebsocketClient():
             #           'permanent': 0,
             #           'reason': 'На месяц',
             #           'show': True}}
+
+            # {'type': 'user_ban', 'data': {'reason': '╨¥╨░ ╨╝╨╡╤ü╤Å╤å', 'user_id': '290711', 'permanent': 0, 'moder_rights': 10, 'moder_name': 'METALLman', 'channel_id': 21793, 'user_name': 'iloveoov13', 'moder_id': 52304, 'duration': 2592000, 'show': True, 'moder_premium': True}}
             pass
 
         elif msg['type'] == 'remove_message':
@@ -191,7 +203,20 @@ class WebsocketClient():
             #  'data': {'channel_id': 39803,
             #           'message_id': 207609,
             #           'adminName': 'iLame_ru'}}
-            pass
+
+            channel_id = msg['data']['channel_id']
+            message_id = msg['data']['message_id']
+            moderator_username = msg['data']['adminName']
+
+            removed_message = Message.objects.filter(message_id=message_id).first()
+            # todo: exception here?
+            if removed_message:
+                removed_message.removed=True
+                moderator = User.objects.filter(username=moderator_username).first()
+                # todo: exception here?
+                if moderator:
+                    removed_message.removed_by=moderator
+                removed_message.save()
 
         elif msg['type'] == 'setting':
             # {'type': 'setting',
@@ -212,7 +237,11 @@ class WebsocketClient():
             channel_id = msg['data']['channel_id']
             username = msg['data']['userName']
 
-            # follow = Follow()
+            user = User.objects.filter(username=username).first()
+            # todo: exception here?
+            if user:
+                follow = Follow(user=user, channel_id=channel_id)
+                follow.save()
 
         elif msg['type'] == 'user_warn':
             # {'type': 'user_warn',
@@ -308,7 +337,27 @@ class WebsocketClient():
             #           }
             #  }
             # print(msg)
-            pass
+            channel_id = msg['data']['channel_id']
+            user_id = msg['data']['user_id']
+            message_id = msg['data']['message_id']
+            username = msg['data']['user_name']
+            user_premiums = msg['data']['premiums']
+            message_text = msg['data']['text']
+
+            # user = User.objects.filter(user_id=user_id).first()
+            user = User(user_id=user_id, username=username)
+            user.save()
+
+            channel = Channel.objects.filter(channel_id=channel_id).first()
+            if not channel:
+                channel = Channel(channel_id=channel_id, streamer=None)
+                channel.save()
+
+            message = Message(message_id=message_id, channel=channel, user=user, text=message_text)
+            message.save()
+
+            # todo: processing payments and resubs?
+
 
         else:
             # unknown type
@@ -327,7 +376,7 @@ class WebsocketClient():
             try:
                 self.reset()
                 ws = await websockets.connect(GG_CHAT_API2_ENDPOINT)
-                last_periodic_processing = time.time() - PERIODIC_PROCESSING_INTERVAL -2
+                last_periodic_processing = 0
                 while True:
                     if time.time() > last_periodic_processing + PERIODIC_PROCESSING_INTERVAL:
                         last_periodic_processing = time.time()
