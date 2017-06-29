@@ -162,7 +162,6 @@ class WebsocketClient():
 
             channel_id = msg['data']['channel_id']
             username = msg['data']['userName']
-            user_premiums = msg['data']['premiums']
             user_resubs = msg['data']['resub']
             payment = msg['data']['payment']
 
@@ -183,25 +182,6 @@ class WebsocketClient():
 
                 premium_status = PremiumActivation(user=user, channel=channel, resubs=user_resubs, payment=payment)
                 premium_status.save()
-            #
-            #
-            # for premium_id in user_premiums:
-            #     if str(premium_id) in user_resubs:
-            #         resubs = user_resubs[str(premium_id)]
-            #     else:
-            #         resubs = 0
-            #
-            #     channel = Channel.objects.filter(channel_id=premium_id).first()
-            #     if channel:
-            #         last_premium = PremiumStatus.objects.filter(user=user, channel=channel).order_by('-modified').first()
-            #         if not last_premium or last_premium.ended is not None:
-            #             new_premium = PremiumStatus(user=user, channel=channel, ended=None, resubs=resubs)
-            #             new_premium.save()
-            #         else:
-            #             last_premium.modified = timezone.now()
-            #             last_premium.resubs = resubs
-            #             last_premium.save()
-
 
         elif msg['type'] == 'update_channel_info':
             # {'type': 'update_channel_info',
