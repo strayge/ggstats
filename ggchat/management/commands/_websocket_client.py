@@ -6,7 +6,8 @@ import time
 import websockets
 from django.utils import timezone
 
-from ggchat.models import CommonMessage, User, Channel, ChannelStatus, ChannelStats, Follow, Message, Donation, Ban, Warning
+from ggchat.models import CommonMessage, User, Channel, ChannelStatus, ChannelStats, Follow, Message, Donation, Ban, \
+    Warning, PremiumStatus
 
 GG_CHAT_API2_ENDPOINT = 'ws://chat.goodgame.ru:8081/chat/websocket'
 PERIODIC_PROCESSING_INTERVAL = 5 * 60
@@ -422,7 +423,6 @@ class WebsocketClient():
             #           }
             #  }
 
-            # print(msg)
             channel_id = msg['data']['channel_id']
             user_id = msg['data']['user_id']
             message_id = msg['data']['message_id']
@@ -444,9 +444,23 @@ class WebsocketClient():
             message = Message(message_id=message_id, channel=channel, user=user, text=message_text)
             message.save()
 
-            
+            for premium_id in user_premiums:
+                if str(premium_id) in user_resubs:
+                    resubs = user_resubs[str(premium_id)]
+                else:
+                    resubs = 0
 
-            # todo: processing payments and resubs?
+                channel = Channel.objects.filter(channel_id=premium_id).filter()
+                if channel:
+                    last_premium = PremiumStatus.objects.filter(user=user, channel=channel).order_by('-modified').first()
+                    if not last_premium or last_premium.ended is not None:
+                        new_premium = PremiumStatus(user=user, channel=channel, ended=None, resubs=resubs)
+                        new_premium.save()
+                    else:
+                        last_premium.modified = timezone.now()
+                        last_premium.resubs = resubs
+                        last_premium.save()
+
         else:
             # unknown type
             self.log.warning('Unknown type: {}'.format(msg))

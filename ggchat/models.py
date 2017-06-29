@@ -67,7 +67,7 @@ class PremiumStatus(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     channel = models.ForeignKey(Channel, on_delete=models.SET_NULL, null=True)
     started = models.DateField(default=datetime.date.today)
-    ended = models.DateField(default=datetime.date.today)
+    ended = models.DateField(default=datetime.date.today, null=True)
     modified = models.DateTimeField(default=timezone.now)
     resubs = models.PositiveSmallIntegerField()
 
