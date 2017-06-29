@@ -6,7 +6,7 @@ import time
 import websockets
 from django.utils import timezone
 
-from ggchat.models import CommonMessage, User, Channel, ChannelStatus, ChannelStats, Follow, Message
+from ggchat.models import CommonMessage, User, Channel, ChannelStatus, ChannelStats, Follow, Message, Donation
 
 GG_CHAT_API2_ENDPOINT = 'ws://chat.goodgame.ru:8081/chat/websocket'
 PERIODIC_PROCESSING_INTERVAL = 5 * 60
@@ -110,19 +110,22 @@ class WebsocketClient():
             #           'paidsmiles': []
             #           }
             #  }
+
+            # keep joined channels to avoid retrying connections to it
             channel_id = str(msg['data']['channel_id'])
             self.joined_channels.append(channel_id)
-            # self.log.info('joined: {}'.format(self.joined_channels))
 
+            # save all changes in streamer (as user)
             streamer_id = msg['data']['channel_streamer']['id']
             streamer_username = msg['data']['channel_streamer']['name']
             streamer = User(user_id=streamer_id, username=streamer_username)
             streamer.save()
 
+            # save channel
             channel = Channel(channel_id=channel_id, streamer=streamer)
             channel.save()
 
-            # streamer premiums and resubs save
+            # todo: streamer premiums and resubs save
 
         elif msg['type'] == 'channel_counters':
             # {'type': 'channel_counters',
@@ -139,6 +142,7 @@ class WebsocketClient():
             except ChannelStatus.DoesNotExist:
                 last_timestamp = None
 
+            # one time per 5 minutes save counter for each channel
             if not last_timestamp or timezone.now() > last_timestamp + timezone.timedelta(minutes=5):
                 current_status = ChannelStats(channel_id=channel_id, users=users, clients=clients)
                 current_status.save()
@@ -177,7 +181,6 @@ class WebsocketClient():
             #             'title': '',
             #             'link': ''}
             #  }
-
             # {'type': 'payment',
             #  'data': {'total': 0,
             #           'amount': '100.00',
@@ -189,11 +192,27 @@ class WebsocketClient():
             #           }
             #  }
 
-
             channel_id = msg['data']['channel_id']
             username = msg['data']['userName']
             amount = msg['data']['amount']
             text = msg['data']['message']
+            link = msg['data']['link']
+
+            user = User.objects.filter(username=username).first()
+            # skip donations from not exists users
+            if user:
+                # donations to cups, showed on all subscribed channels
+                if link:
+                    latest_donation_with_this_url = Donation.objects.filter(link=link, user=user,
+                        amount=amount, timestamp__gte=timezone.now() - timezone.timedelta(seconds=15)).first()
+                    if not latest_donation_with_this_url:
+                        donation = Donation(user=user, channel=None, amount=amount, text=text, link=link)
+                        donation.save()
+                else:
+                    channel = Channel(channel_id=channel_id)
+                    if channel:
+                        donation = Donation(user=user, channel=channel, amount=amount, text=text, link=link)
+                        donation.save()
 
         elif msg['type'] == 'user_ban':
             # {'type': 'user_ban',

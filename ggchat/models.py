@@ -53,7 +53,8 @@ class Donation(models.Model):
     channel = models.ForeignKey(Channel, on_delete=models.SET_NULL, null=True)
     amount = models.FloatField()
     text = models.CharField(max_length=500)
-    timestamp = models.DateTimeField()
+    link = models.CharField(max_length=500)
+    timestamp = models.DateTimeField(default=timezone.now)
 
 
 class PremiumActivation(models.Model):
