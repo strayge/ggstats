@@ -7,7 +7,7 @@ import websockets
 from django.utils import timezone
 
 from ggchat.models import CommonMessage, User, Channel, ChannelStatus, ChannelStats, Follow, Message, Donation, Ban, \
-    Warning, PremiumStatus
+    Warning, PremiumStatus, PremiumActivation
 
 GG_CHAT_API2_ENDPOINT = 'ws://chat.goodgame.ru:8081/chat/websocket'
 PERIODIC_PROCESSING_INTERVAL = 5 * 60
@@ -32,7 +32,7 @@ class WebsocketClient():
         # print(received)
         msg = json.loads(received)
 
-        if msg['type'] not in ('welcome', 'error', 'success_join', 'channel_counters', 'channels_list'):
+        if msg['type'] not in ('welcome', 'error', 'success_join', 'channel_counters', 'channels_list', 'message'):
             self.log.info('{}'.format(msg))
         # self.save_common_message(msg['type'], msg['data'])
         # else:
@@ -159,7 +159,49 @@ class WebsocketClient():
             #           'payment': '1'
             #           }
             #  }
-            pass
+
+            channel_id = msg['data']['channel_id']
+            username = msg['data']['userName']
+            user_premiums = msg['data']['premiums']
+            user_resubs = msg['data']['resub']
+            payment = msg['data']['payment']
+
+            channel = Channel.objects.filter(channel_id=channel_id).first()
+            if not channel:
+                channel = Channel(channel_id=channel_id, streamer=None)
+                channel.save()
+
+            user = User.objects.filter(username=username).first()
+            if user:
+                last_premium = PremiumStatus.objects.filter(user=user, channel=channel).order_by('-modified').first()
+                if not last_premium or last_premium.ended is not None:
+                    new_premium = PremiumStatus(user=user, channel=channel, ended=None, resubs=user_resubs)
+                    new_premium.save()
+                else:
+                    # todo: had active premium and activated new, skip it?
+                    pass
+
+                premium_status = PremiumActivation(user=user, channel=channel, resubs=user_resubs, payment=payment)
+                premium_status.save()
+            #
+            #
+            # for premium_id in user_premiums:
+            #     if str(premium_id) in user_resubs:
+            #         resubs = user_resubs[str(premium_id)]
+            #     else:
+            #         resubs = 0
+            #
+            #     channel = Channel.objects.filter(channel_id=premium_id).first()
+            #     if channel:
+            #         last_premium = PremiumStatus.objects.filter(user=user, channel=channel).order_by('-modified').first()
+            #         if not last_premium or last_premium.ended is not None:
+            #             new_premium = PremiumStatus(user=user, channel=channel, ended=None, resubs=resubs)
+            #             new_premium.save()
+            #         else:
+            #             last_premium.modified = timezone.now()
+            #             last_premium.resubs = resubs
+            #             last_premium.save()
+
 
         elif msg['type'] == 'update_channel_info':
             # {'type': 'update_channel_info',
@@ -239,6 +281,18 @@ class WebsocketClient():
             #           'moder_premium': True
             #           }
             # }
+            #
+            # {'type': 'user_ban',
+            #  'data': {'channel_id': 1644,
+            #           'user_id': 559101,
+            #           'user_name': 'Nerazim',
+            #           'moder_id': 108148,
+            #           'moder_name': 'Alice',
+            #           'moder_rights': 40,
+            #           'moder_premium': 1,
+            #           'duration': 3600,
+            #           'reason': 'Маты, оскорбления',
+            #           'show': True}}
             channel_id = msg['data']['channel_id']
             user_id = msg['data']['user_id']
             username = msg['data']['user_name']
@@ -247,7 +301,11 @@ class WebsocketClient():
             reason = msg['data']['reason']
             duration = int(msg['data']['duration'])
             show = bool(msg['data']['show'])
-            permanent = bool(msg['data']['permanent'])
+            if 'permanent' in msg['data']['permanent']
+                permanent = bool(msg['data']['permanent'])
+            else:
+                # Alice sends msg without 'permanent' key
+                permanent = False
 
             channel = Channel.objects.filter(channel_id=channel_id).first()
             user = User(user_id=user_id, username=username)

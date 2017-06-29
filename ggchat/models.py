@@ -61,7 +61,8 @@ class PremiumActivation(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     channel = models.ForeignKey(Channel, on_delete=models.SET_NULL, null=True)
     timestamp = models.DateTimeField(default=timezone.now)
-
+    resubs = models.PositiveSmallIntegerField()
+    payment = models.PositiveSmallIntegerField()
 
 class PremiumStatus(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
