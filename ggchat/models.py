@@ -2,7 +2,7 @@ import datetime
 
 from django.db import models
 from django.utils import timezone
-
+from django.core.exceptions import ObjectDoesNotExist
 
 class CommonMessage(models.Model):
     type = models.CharField(max_length=100)
@@ -14,10 +14,19 @@ class User(models.Model):
     user_id = models.PositiveIntegerField(primary_key=True)
     username = models.CharField(max_length=50)
 
+    def __str__(self):
+        return '{} (#{})'.format(self.username, self.user_id)
+
 
 class Channel(models.Model):
     channel_id = models.CharField(max_length=50, primary_key=True)
     streamer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+
+    def __str__(self):
+        try:
+            return '{} (#{})'.format(self.streamer.username, self.channel_id)
+        except ObjectDoesNotExist:
+            return '#{}'.format(self.channel_id)
 
 
 class ChannelStatus(models.Model):
@@ -34,6 +43,9 @@ class Message(models.Model):
     text = models.CharField(max_length=2000)
     removed = models.BooleanField(default=False)
     removed_by = models.ForeignKey(User, related_name='removed_by', on_delete=models.SET_NULL, null=True, default=None)
+
+    def __str__(self):
+        return '#{} {} @ {}: "{}"'.format(self.message_id, self.user, self.channel, self.text, )
 
 
 class Donation(models.Model):

@@ -1,12 +1,11 @@
 import asyncio
 import json
-import time
 import logging
+import time
 
 import websockets
 from django.utils import timezone
 
-from ggchat import models
 from ggchat.models import CommonMessage, User, Channel, ChannelStatus, ChannelStats, Follow, Message
 
 GG_CHAT_API2_ENDPOINT = 'ws://chat.goodgame.ru:8081/chat/websocket'
@@ -34,7 +33,7 @@ class WebsocketClient():
 
         if msg['type'] not in ('welcome', 'error', 'success_join', 'channel_counters', 'message', 'channels_list'):
             self.log.info('{}'.format(msg))
-        #     self.save_common_message(msg['type'], msg['data'])
+        # self.save_common_message(msg['type'], msg['data'])
         # else:
 
 
@@ -113,7 +112,7 @@ class WebsocketClient():
             #  }
             channel_id = str(msg['data']['channel_id'])
             self.joined_channels.append(channel_id)
-            #self.log.info('joined: {}'.format(self.joined_channels))
+            # self.log.info('joined: {}'.format(self.joined_channels))
 
             streamer_id = msg['data']['channel_streamer']['id']
             streamer_username = msg['data']['channel_streamer']['name']
@@ -139,6 +138,7 @@ class WebsocketClient():
                 last_timestamp = last_status.timestamp
             except ChannelStatus.DoesNotExist:
                 last_timestamp = None
+
             if not last_timestamp or timezone.now() > last_timestamp + timezone.timedelta(minutes=5):
                 current_status = ChannelStats(channel_id=channel_id, users=users, clients=clients)
                 current_status.save()
@@ -149,7 +149,13 @@ class WebsocketClient():
             #           'userName': 'dmitrii.93'}}
             # print(msg)
 
-            # {'type': 'premium', 'data': {'channel_id': 5, 'resub': '1', 'userName': 'dudeonthehorse', 'payment': '1'}}
+            # {'type': 'premium',
+            #  'data': {'channel_id': 5,
+            #           'resub': '1',
+            #           'userName': 'dudeonthehorse',
+            #           'payment': '1'
+            #           }
+            #  }
 
             pass
 
@@ -171,9 +177,17 @@ class WebsocketClient():
             #             'title': '',
             #             'link': ''}
             #  }
-            # print(msg)
 
-            # {'type': 'payment', 'data': {'total': 0, 'amount': '100.00', 'channel_id': 27338, 'title': '', 'userName': 'Aard', 'message': '╨í╨╛╤é╨╡╨╜╤ç╨╕╨║ ╨╜╨░ ╨┐╨╕╨▓╨░╤ü. ╨ö╨╛╨╗╨│╨╛ ╨╡╤ë╨╡ ╨║╨░╤é╨░╤é╤î ╨▒╤â╨┤╨╡╤ê╤î?', 'link': ''}}
+            # {'type': 'payment',
+            #  'data': {'total': 0,
+            #           'amount': '100.00',
+            #           'channel_id': 27338,
+            #           'title': '',
+            #           'userName': 'Aard',
+            #           'message': '╨í╨╛╤é╨╡╨╜╤ç╨╕╨║ ╨╜╨░ ╨┐╨╕╨▓╨░╤ü. ╨ö╨╛╨╗╨│╨╛ ╨╡╤ë╨╡ ╨║╨░╤é╨░╤é╤î ╨▒╤â╨┤╨╡╤ê╤î?',
+            #           'link': ''
+            #           }
+            #  }
 
 
             channel_id = msg['data']['channel_id']
@@ -195,7 +209,20 @@ class WebsocketClient():
             #           'reason': 'На месяц',
             #           'show': True}}
 
-            # {'type': 'user_ban', 'data': {'reason': '╨¥╨░ ╨╝╨╡╤ü╤Å╤å', 'user_id': '290711', 'permanent': 0, 'moder_rights': 10, 'moder_name': 'METALLman', 'channel_id': 21793, 'user_name': 'iloveoov13', 'moder_id': 52304, 'duration': 2592000, 'show': True, 'moder_premium': True}}
+            # {'type': 'user_ban',
+            #  'data': {'reason': '╨¥╨░ ╨╝╨╡╤ü╤Å╤å',
+            #           'user_id': '290711',
+            #           'permanent': 0,
+            #           'moder_rights': 10,
+            #           'moder_name': 'METALLman',
+            #           'channel_id': 21793,
+            #           'user_name': 'iloveoov13',
+            #           'moder_id': 52304,
+            #           'duration': 2592000,
+            #           'show': True,
+            #           'moder_premium': True
+            #           }
+            # }
             pass
 
         elif msg['type'] == 'remove_message':
@@ -209,13 +236,12 @@ class WebsocketClient():
             moderator_username = msg['data']['adminName']
 
             removed_message = Message.objects.filter(message_id=message_id).first()
-            # todo: exception here?
+
             if removed_message:
-                removed_message.removed=True
+                removed_message.removed = True
                 moderator = User.objects.filter(username=moderator_username).first()
-                # todo: exception here?
                 if moderator:
-                    removed_message.removed_by=moderator
+                    removed_message.removed_by = moderator
                 removed_message.save()
 
         elif msg['type'] == 'setting':
@@ -238,7 +264,7 @@ class WebsocketClient():
             username = msg['data']['userName']
 
             user = User.objects.filter(username=username).first()
-            # todo: exception here?
+
             if user:
                 follow = Follow(user=user, channel_id=channel_id)
                 follow.save()
@@ -357,8 +383,6 @@ class WebsocketClient():
             message.save()
 
             # todo: processing payments and resubs?
-
-
         else:
             # unknown type
             self.log.warning('Unknown type: {}'.format(msg))
