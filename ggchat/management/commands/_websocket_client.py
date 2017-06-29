@@ -3,11 +3,15 @@ import json
 import logging
 import time
 
+import datetime
+
+import aiohttp
+import parsel
 import websockets
 from django.utils import timezone
 
 from ggchat.models import CommonMessage, User, Channel, ChannelStatus, ChannelStats, Follow, Message, Donation, Ban, \
-    Warning, PremiumStatus, PremiumActivation
+    Warning, PremiumStatus, PremiumActivation, CommonPremium, CommonPremiumPayments
 
 GG_CHAT_API2_ENDPOINT = 'ws://chat.goodgame.ru:8081/chat/websocket'
 PERIODIC_PROCESSING_INTERVAL = 5 * 60
@@ -23,16 +27,17 @@ class WebsocketClient():
     def reset(self):
         self.joined_channels = []
 
-    def save_common_message(self, type, data):
-        common_msg = CommonMessage(type=type, data=data)
-        common_msg.save()
-        # print('saved', type)
+    # def save_common_message(self, type, data):
+    #     common_msg = CommonMessage(type=type, data=data)
+    #     common_msg.save()
+    #     # print('saved', type)
 
     async def parse_received(self, ws, received):
         # print(received)
         msg = json.loads(received)
 
-        if msg['type'] not in ('welcome', 'error', 'success_join', 'channel_counters', 'channels_list', 'message'):
+        if msg['type'] not in ('welcome', 'error', 'success_join', 'channel_counters', 'channels_list', 'message',
+                               'follower'):
             self.log.info('{}'.format(msg))
         # self.save_common_message(msg['type'], msg['data'])
         # else:
@@ -112,15 +117,50 @@ class WebsocketClient():
             #           }
             #  }
 
+            # {'type': 'success_join',
+            #  'data': {'channel_id': 56532,
+            #           'channel_name': 'Top 2 Tinker DotabuFF, Tinker, Invoker, Storm gameplay',
+            #           'channel_streamer': {},
+            #           'motd': '',
+            #           'slowmod': 0,
+            #           'smiles': 1,
+            #           'smilePeka': 1,
+            #           'clients_in_channel': '9',
+            #           'users_in_channel': 5,
+            #           'user_id': 0, 'name': '',
+            #           'access_rights': 0,
+            #           'premium_only': 0,
+            #           'started': 1498752541,
+            #           'room_privacy': 0,
+            #           'room_role': 0,
+            #           'premium': 0,
+            #           'premiums': [],
+            #           'notifies': {},
+            #           'resubs': {},
+            #           'staff': [],
+            #           'is_banned': False,
+            #           'banned_time': 0,
+            #           'reason': '',
+            #           'permanent': 0,
+            #           'payments': 0,
+            #           'paidsmiles': []
+            #           }
+            #  }
+
             # keep joined channels to avoid retrying connections to it
             channel_id = str(msg['data']['channel_id'])
             self.joined_channels.append(channel_id)
 
             # save all changes in streamer (as user)
-            streamer_id = msg['data']['channel_streamer']['id']
-            streamer_username = msg['data']['channel_streamer']['name']
-            streamer = User(user_id=streamer_id, username=streamer_username)
-            streamer.save()
+            if 'id' in msg['data']['channel_streamer']:
+                streamer_id = msg['data']['channel_streamer']['id']
+                streamer_username = msg['data']['channel_streamer']['name']
+                streamer = User(user_id=streamer_id, username=streamer_username)
+                streamer.save()
+                # print('channel_streamer', channel_id)
+            else:
+                # print('NOT channel_streamer', channel_id)
+                streamer = None
 
             # save channel
             channel = Channel(channel_id=channel_id, streamer=streamer)
@@ -504,12 +544,90 @@ class WebsocketClient():
             self.log.warning('Unknown type: {}'.format(msg))
             # print('unknown type:', msg)
 
+    async def get_common_premiums(self):
+        common_premiums_counter = [0, 0, 0, 0]
+        common_premiums_payments = {}
+        async with aiohttp.ClientSession(read_timeout=20, conn_timeout=20) as session:
+            async with session.get('https://goodgame.ru/payments/premiums/?current=true') as resp:
+                if resp.status == 200:
+                    html = await resp.text()
+                    sel = parsel.Selector(text=html)
+                    rows_common = sel.xpath('//table')[0].xpath('.//tr')
+                    # table can have repeater, so sum it
+                    for row in rows_common:
+                        row_text = row.xpath('.//td/text()').extract()
+                        if len(row_text) != 4:
+                            continue
+                        premium_type = row_text[0]
+                        count = row_text[2]
+                        if '1 year' in premium_type:
+                            common_premiums_counter[0] += int(count)
+                        elif '180 days' in premium_type:
+                            common_premiums_counter[1] += int(count)
+                        elif '90 days' in premium_type:
+                            common_premiums_counter[2] += int(count)
+                        elif '30 days' in premium_type:
+                            common_premiums_counter[3] += int(count)
+                    rows_per_streamer = sel.xpath('//table')[1].xpath('.//tr')
+                    for row in rows_per_streamer:
+                        row_text = row.xpath('.//td/text()').extract()
+                        if len(row_text) != 3:
+                            continue
+                        streamer_name = row_text[0]
+                        bonus = row_text[2]
+                        if len(bonus) and bonus[0].isdigit():
+                            bonus = float(bonus.replace(' ', ''))
+                            common_premiums_payments[streamer_name.strip()] = bonus
+        return common_premiums_counter, common_premiums_payments
+
     async def periodic_processing(self, ws):
         print('periodic_processing')
         for i in range(5):
             # overlapping by 5
             get_channels_query = {"type": "get_channels_list", "data": {"start": str(i * 45), "count": "50"}}
             await ws.send(json.dumps(get_channels_query))
+
+        # get common premium statistics
+        yesterday = datetime.date.today() - datetime.timedelta(days=1)
+        common_premiums_yesterday = CommonPremium.objects.filter(date=yesterday).first()
+        # save current data all
+        if not common_premiums_yesterday:
+            two_days_ago = datetime.date.today() - datetime.timedelta(days=2)
+            common_premiums_prev = CommonPremium.objects.filter(date=two_days_ago).first()
+
+            common_premiums_counter, common_premiums_payments = await self.get_common_premiums()
+
+            per_year = common_premiums_counter[0]
+            per_180_days = common_premiums_counter[1]
+            per_90_days = common_premiums_counter[2]
+            per_30_days = common_premiums_counter[3]
+
+            if common_premiums_prev:
+                # fix: wrong, if 1 day in month more donations than all previous month
+                if per_year >= common_premiums_prev.per_year:
+                    per_year -= common_premiums_prev.per_year
+                if per_180_days >= common_premiums_prev.per_180_days:
+                    per_180_days -= common_premiums_prev.per_180_days
+                if per_90_days >= common_premiums_prev.per_90_days:
+                    per_90_days -= common_premiums_prev.per_90_days
+                if per_30_days >= common_premiums_prev.per_30_days:
+                    per_30_days -= common_premiums_prev.per_30_days
+
+            common_premiums = CommonPremium(date=yesterday, per_year=per_year, per_180_days=per_180_days,
+                                            per_90_days=per_90_days, per_30_days=per_30_days)
+            common_premiums.save()
+
+            for streamer_username, amount in common_premiums_payments.items():
+                user = User.objects.filter(username=streamer_username).first()
+                if user:
+                    channel = Channel.objects.filter(streamer=user).first()
+                    if channel:
+                        payments_previous = CommonPremiumPayments.objects.filter(channel=channel, date=two_days_ago).first()
+                        # fix: wrong, if 1 day in month more donations than all previous month
+                        if payments_previous and amount >= payments_previous.amount:
+                            amount -= payments_previous.amount
+                        payments = CommonPremiumPayments(channel=channel, amount=amount, date=yesterday)
+                        payments.save()
 
     async def run(self):
         while True:
