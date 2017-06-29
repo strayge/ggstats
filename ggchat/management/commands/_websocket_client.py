@@ -301,7 +301,7 @@ class WebsocketClient():
             reason = msg['data']['reason']
             duration = int(msg['data']['duration'])
             show = bool(msg['data']['show'])
-            if 'permanent' in msg['data']['permanent']:
+            if 'permanent' in msg['data']:
                 permanent = bool(msg['data']['permanent'])
             else:
                 # Alice sends msg without 'permanent' key
