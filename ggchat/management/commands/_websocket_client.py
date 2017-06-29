@@ -6,7 +6,7 @@ import time
 import websockets
 from django.utils import timezone
 
-from ggchat.models import CommonMessage, User, Channel, ChannelStatus, ChannelStats, Follow, Message, Donation
+from ggchat.models import CommonMessage, User, Channel, ChannelStatus, ChannelStats, Follow, Message, Donation, Ban
 
 GG_CHAT_API2_ENDPOINT = 'ws://chat.goodgame.ru:8081/chat/websocket'
 PERIODIC_PROCESSING_INTERVAL = 5 * 60
@@ -209,7 +209,7 @@ class WebsocketClient():
                         donation = Donation(user=user, channel=None, amount=amount, text=text, link=link)
                         donation.save()
                 else:
-                    channel = Channel(channel_id=channel_id)
+                    channel = Channel.objects.filter(channel_id=channel_id).first()
                     if channel:
                         donation = Donation(user=user, channel=channel, amount=amount, text=text, link=link)
                         donation.save()
@@ -242,7 +242,23 @@ class WebsocketClient():
             #           'moder_premium': True
             #           }
             # }
-            pass
+
+            channel_id = msg['data']['channel_id']
+            user_id = msg['data']['user_id']
+            moderator_username = msg['data']['moder_name']
+            reason = msg['data']['reason']
+            duration = int(msg['data']['duration'])
+            show = bool(msg['data']['show'])
+            permanent = bool(msg['data']['permanent'])
+
+            channel = Channel.objects.filter(channel_id=channel_id).first()
+            user = User.objects.filter(user_id=user_id).first()
+            moderator = User.objects.filter(username=moderator_username).first()
+
+            if channel and user and moderator:
+                ban = Ban(user=user, channel=channel, moderator=moderator, duration=duration,
+                          reason=reason, show=show, permanent=permanent)
+                ban.save()
 
         elif msg['type'] == 'remove_message':
             # {'type': 'remove_message',

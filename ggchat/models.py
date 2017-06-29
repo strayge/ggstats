@@ -96,6 +96,7 @@ class Ban(models.Model):
     duration = models.PositiveIntegerField()
     reason = models.CharField(max_length=200)
     show = models.BooleanField(default=True)
+    permanent = models.BooleanField(default=False)
 
 
 class ChannelStats(models.Model):
