@@ -165,7 +165,23 @@ class WebsocketClient():
             channel = Channel(channel_id=channel_id, streamer=streamer)
             channel.save()
 
-            # todo: streamer premiums and resubs save
+            # streamer premiums and resubs save
+            if streamer:
+                streamer_resubs = msg['data']['channel_streamer']['premiumResubs']
+                streamer_premiums = msg['data']['channel_streamer']['premiumChannels']
+                for premium_id in streamer_premiums:
+                    if str(premium_id) in streamer_resubs:
+                        resubs = streamer_resubs[str(premium_id)]
+                    else:
+                        resubs = 0
+                    last_premium = PremiumStatus.objects.filter(user=streamer, channel=channel).order_by('-modified').first()
+                    if not last_premium or last_premium.ended is not None:
+                        new_premium = PremiumStatus(user=streamer, channel=channel, ended=None, resubs=resubs)
+                        new_premium.save()
+                    else:
+                        last_premium.modified = timezone.now()
+                        last_premium.resubs = resubs
+                        last_premium.save()
 
         elif msg['type'] == 'channel_counters':
             # {'type': 'channel_counters',
