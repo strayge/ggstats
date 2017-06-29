@@ -450,7 +450,7 @@ class WebsocketClient():
                 else:
                     resubs = 0
 
-                channel = Channel.objects.filter(channel_id=premium_id).filter()
+                channel = Channel.objects.filter(channel_id=premium_id).first()
                 if channel:
                     last_premium = PremiumStatus.objects.filter(user=user, channel=channel).order_by('-modified').first()
                     if not last_premium or last_premium.ended is not None:
