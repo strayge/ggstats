@@ -31,7 +31,7 @@ class WebsocketClient():
         # print(received)
         msg = json.loads(received)
 
-        if msg['type'] not in ('welcome', 'error', 'success_join', 'channel_counters', 'message', 'channels_list'):
+        if msg['type'] not in ('welcome', 'error', 'success_join', 'channel_counters', 'channels_list'):
             self.log.info('{}'.format(msg))
         # self.save_common_message(msg['type'], msg['data'])
         # else:
@@ -151,8 +151,6 @@ class WebsocketClient():
             # {'type': 'premium',
             #  'data': {'channel_id': 58636,
             #           'userName': 'dmitrii.93'}}
-            # print(msg)
-
             # {'type': 'premium',
             #  'data': {'channel_id': 5,
             #           'resub': '1',
@@ -160,7 +158,6 @@ class WebsocketClient():
             #           'payment': '1'
             #           }
             #  }
-
             pass
 
         elif msg['type'] == 'update_channel_info':
@@ -191,7 +188,6 @@ class WebsocketClient():
             #           'link': ''
             #           }
             #  }
-
             channel_id = msg['data']['channel_id']
             username = msg['data']['userName']
             amount = msg['data']['amount']
@@ -242,7 +238,6 @@ class WebsocketClient():
             #           'moder_premium': True
             #           }
             # }
-
             channel_id = msg['data']['channel_id']
             user_id = msg['data']['user_id']
             username = msg['data']['user_name']
@@ -259,10 +254,13 @@ class WebsocketClient():
             moderator = User(user_id=moderator_id, username=moderator_username)
             moderator.save()
 
-            if channel:
-                ban = Ban(user=user, channel=channel, moderator=moderator, duration=duration,
-                          reason=reason, show=show, permanent=permanent)
-                ban.save()
+            if not channel:
+                channel = Channel(channel_id=channel_id, streamer=None)
+                channel.save()
+
+            ban = Ban(user=user, channel=channel, moderator=moderator, duration=duration,
+                      reason=reason, show=show, permanent=permanent)
+            ban.save()
 
         elif msg['type'] == 'user_warn':
             # {'type': 'user_warn',
@@ -274,7 +272,6 @@ class WebsocketClient():
             #           'moder_rights': 40,
             #           'moder_premium': 1,
             #           'reason': ''}}
-
             channel_id = msg['data']['channel_id']
             user_id = msg['data']['user_id']
             username = msg['data']['user_name']
@@ -288,9 +285,12 @@ class WebsocketClient():
             moderator = User(user_id=moderator_id, username=moderator_username)
             moderator.save()
 
-            if channel:
-                warning = Warning(user=user, channel=channel, moderator=moderator, reason=reason)
-                warning.save()
+            if not channel:
+                channel = Channel(channel_id=channel_id, streamer=None)
+                channel.save()
+
+            warning = Warning(user=user, channel=channel, moderator=moderator, reason=reason)
+            warning.save()
 
         elif msg['type'] == 'remove_message':
             # {'type': 'remove_message',
@@ -378,54 +378,61 @@ class WebsocketClient():
 
         elif msg['type'] == 'message':
             # {'type': 'message',
-            #  'data': {'channel_id': 3893,
-            #           'user_id': 322403,
-            #           'user_name': 'Xippy',
-            #           'user_rights': 0,
-            #           'premium': True,
-            #           'premiums': [3893],
-            #           'stuff': '0',
+            #  'data': {'channel_id': 96424,
+            #           'user_id': 152472,
+            #           'user_name': 'QuicklyDotaTV',
+            #           'user_rights': 20,
+            #           'premium': 0,
+            #           'premiums': [86096],
+            #           'resubs': {'86096': 1},
+            #           'staff': '0',
             #           'hideIcon': 0,
-            #           'color': 'premium-personal',
-            #           'icon': 'star',
+            #           'color': 'streamer',
+            #           'icon': 'none',
             #           'isStatus': 0,
             #           'mobile': 0,
             #           'payments': '0',
             #           'paidsmiles': [],
-            #           'message_id': 203096,
-            #           'timestamp': 1493061113,
-            #           'text': 'ну из них же бандиты не очень', 'parsed': 'ну из них же бандиты не очень'
+            #           'message_id': 19423,
+            #           'timestamp': 1498743747,
+            #           'text': 'если будет стрим, зовите :D',
+            #           'parsed': 'если будет стрим, зовите :D'
             #           }
             #  }
             # {'type': 'message',
-            #  'data': {'channel_id': 26967,
-            #           'user_id': 513167,
-            #           'user_name': 'Nigruma',
-            #           'user_rights': 10,
-            #           'premium': True,
-            #           'premiums': [0, 11123, 17966, 26967, 30023, 65484],
-            #           'stuff': '0',
+            #  'data': {'channel_id': 53637,
+            #           'user_id': 237309,
+            #           'user_name': 'Sleepman',
+            #           'user_rights': 0,
+            #           'premium': 0,
+            #           'premiums': [],
+            #           'resubs': {},
+            #           'staff': '0',
             #           'hideIcon': 0,
-            #           'color': 'streamer',
-            #           'icon': 'helper',
+            #           'color': 'simple',
+            #           'icon': 'none',
             #           'isStatus': 0,
             #           'mobile': 0,
-            #           'payments': '4',
+            #           'payments': '0',
             #           'paidsmiles': [],
-            #           'message_id': 215033,
-            #           'timestamp': 1493061526,
-            #           'text': 'Pontya, прекрасно выглядишь)', 'parsed': 'Pontya, прекрасно выглядишь)'
+            #           'message_id': 251406,
+            #           'timestamp': 1498743736,
+            #           'text': 'ner_uto, <a target="_blank" rel="nofollow" href="https://eu.battle.net/download/getInstaller?os=win&amp;installer=StarCraft-Setup.exe">https://eu.battle.net/download/getInstaller?os=win&amp;installer=StarCraft-Setup.exe</a> - попробуй',
+            #           'parsed': 'ner_uto, <a target="_blank" rel="nofollow" href="https://eu.battle.net/download/getInstaller?os=win&amp;installer=StarCraft-Setup.exe">https://eu.battle.net/download/getInstaller?os=win&amp;installer=StarCraft-Setup.exe</a> - попробуй'
             #           }
             #  }
+
             # print(msg)
             channel_id = msg['data']['channel_id']
             user_id = msg['data']['user_id']
             message_id = msg['data']['message_id']
             username = msg['data']['user_name']
-            user_premiums = msg['data']['premiums']
+
             message_text = msg['data']['text']
 
-            # user = User.objects.filter(user_id=user_id).first()
+            user_premiums = msg['data']['premiums']
+            user_resubs = msg['data']['resubs']
+
             user = User(user_id=user_id, username=username)
             user.save()
 
@@ -436,6 +443,8 @@ class WebsocketClient():
 
             message = Message(message_id=message_id, channel=channel, user=user, text=message_text)
             message.save()
+
+            
 
             # todo: processing payments and resubs?
         else:
