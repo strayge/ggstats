@@ -15,7 +15,7 @@ class User(models.Model):
     username = models.CharField(max_length=50)
 
     def __str__(self):
-        return '{} (#{})'.format(self.username, self.user_id)
+        return '{}#{}'.format(self.username, self.user_id)
 
 
 class Channel(models.Model):
@@ -24,7 +24,7 @@ class Channel(models.Model):
 
     def __str__(self):
         try:
-            return '{} (#{})'.format(self.streamer.username, self.channel_id)
+            return '{}#{}'.format(self.streamer.username, self.channel_id)
         except ObjectDoesNotExist:
             return '#{}'.format(self.channel_id)
 
@@ -55,6 +55,9 @@ class Donation(models.Model):
     text = models.CharField(max_length=500)
     link = models.CharField(max_length=500)
     timestamp = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return '{} donated to {} {} rub. with text "{}"'.format(self.user, self.channel, self.amount, self.text)
 
 
 class PremiumActivation(models.Model):
