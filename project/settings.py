@@ -25,7 +25,7 @@ SECRET_KEY = '@zir3zi%ad+g3roix8#e1cx5c_rin3ow$h6e_8c9gz@f7n6n21'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['strayge.com']
+ALLOWED_HOSTS = ['strayge.com', '127.0.0.1']
 
 
 # Application definition
