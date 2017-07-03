@@ -1,8 +1,8 @@
 from django.http import HttpResponse
-from django.shortcuts import render
+from django.shortcuts import render_to_response
 from django.template import loader
 
-from ggchat.models import Donation
+from ggchat.models import Donation, ChannelStats
 
 
 def index(request):
@@ -18,3 +18,14 @@ def stats(request):
     if latest_donation:
         output += str(latest_donation)
     return HttpResponse(output)
+
+
+def chart(request):
+    all_needed_data = ChannelStats.objects.filter(channel_id='5').values('timestamp', 'users').all()
+    data = ''
+    for row in all_needed_data:
+        x = row['timestamp'].timestamp() * 1000
+        y = row['users']
+        data += '[%s, %s],' % (x, y)
+    data = '[' + data + ']'
+    return render_to_response('ggchat/chart.html', {'data': data})

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/javascript"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highcharts/5.0.12/highcharts.js" type="text/javascript"></script>
+</head>
+<body>
+<div id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+<script>
+    Highcharts.chart('container', {
+        chart: {
+            zoomType: 'x'
+        },
+        xAxis: {
+            type: 'datetime',
+            title: {
+                text: 'xAxis title'
+            }
+        },
+        series: [{
+            type: 'line',
+            data: {{ data }},
+            name: 'series1 name'
+        }],
+        title: {
+            text: 'Main title'
+        },
+        yAxis: {
+            title: {
+                text: 'yAxis title'
+            }
+        },
+        legend: {
+            enabled: false
+        },
+    });
+</script>
+
+</body>
+</html>
