@@ -28,5 +28,6 @@ def chart(request):
               'zoom': True,
               'title': 'Зрители',
               'y_title': 'Количество',
-              'series_name': 'Зрителей'}
+              'series_name': 'Зрителей',
+              'type': 'area'}
     return render_to_response('ggchat/chart.html', {'chart1': chart1})
