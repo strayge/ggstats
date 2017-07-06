@@ -22,5 +22,11 @@ def stats(request):
 
 def chart(request):
     all_needed_data = ChannelStats.objects.filter(channel_id='5').values('timestamp', 'users').all()
-    chart1 = {'data': all_needed_data, 'x_keyword': 'timestamp', 'y_keyword': 'users'}
+    chart1 = {'data': all_needed_data,
+              'x_keyword': 'timestamp',
+              'y_keyword': 'users',
+              'zoom': True,
+              'title': 'Зрители',
+              'y_title': 'Количество',
+              'series_name': 'Зрителей'}
     return render_to_response('ggchat/chart.html', {'chart1': chart1})
