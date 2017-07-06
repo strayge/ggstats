@@ -1,3 +1,6 @@
+import datetime
+
+import itertools
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
 
@@ -91,12 +94,57 @@ def channel(request, channel_id):
     last_follows = Follow.objects.filter(channel_id=channel_id).order_by('-timestamp')[:10]
     active_premiums = PremiumStatus.objects.filter(channel_id=channel_id, ended=None)
 
+    week_ago = datetime.datetime.now() - datetime.timedelta(days=7)
+    chart_clients_data = ChannelStats.objects.filter(channel_id=channel_id, timestamp__gte=week_ago).values('timestamp', 'clients').all()
+    chart_users_data = ChannelStats.objects.filter(channel_id=channel_id, timestamp__gte=week_ago).values('timestamp', 'users').all()
+    chart_people = {'data': chart_clients_data,
+                    'x_keyword': 'timestamp',
+                    'y_keyword': 'clients',
+                    'type': 'area',
+                    'name': 'Всего',
+
+                    'data2': chart_users_data,
+                    'x_keyword2': 'timestamp',
+                    'y_keyword2': 'users',
+                    'type2': 'area',
+                    'name2': 'Залогиненных',
+
+                    'zoom': True,
+                    'legend': True,
+                    'title': '',
+                    'y_title': 'Количество',
+                    }
+
+    donates_data = Donation.objects.filter(channel_id=channel_id, timestamp__gte=week_ago).order_by('-timestamp').values('timestamp', 'amount')
+    donates_grouped = [list(g) for t, g in itertools.groupby(donates_data, key=lambda donate: donate['timestamp'].date())]
+    donates_grouped_and_summed = []
+    for group in donates_grouped:
+        date = group[0]['timestamp'].date()
+        amount = 0
+        for donate in group:
+            amount += donate['amount']
+        donates_grouped_and_summed.append({'date': date, 'amount': amount})
+
+    chart_income = {'data': donates_grouped_and_summed,
+                    'x_keyword': 'date',
+                    'y_keyword': 'amount',
+                    'type': 'column',
+                    'name': 'Донат',
+
+                    'zoom': True,
+                    'legend': True,
+                    'title': '',
+                    'y_title': 'Рублей',
+                    }
+
     content = {'channel': channel_obj,
                'messages': last_messages,
                'donations': last_donations,
                'premiums': last_premiums,
                'follows': last_follows,
                'active_premiums': active_premiums,
+               'chart_people': chart_people,
+               'chart_income': chart_income,
     }
 
     return render_to_response('ggchat/channel.html', content)

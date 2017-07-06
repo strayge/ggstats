@@ -1,5 +1,10 @@
 {% extends "ggchat/base.html" %}
 
+{% block head %}
+    {% load chart %}
+    {% chart_load_js %}
+{% endblock %}
+
 {% block page_title %}
     {% if channel %}
         Канал #{{ channel.channel_id }}
@@ -64,6 +69,20 @@
                         </tbody>
                     </table>
                 </div>
+            </div>
+        </div>
+
+
+        <div class="row">
+            <div class="col-sm-6">
+                <h4>Число людей на стриме</h4>
+                <div id="chart_people"></div>
+                {% chart_datetime "chart_people" chart_people %}
+            </div>
+            <div class="col-sm-6">
+                <h4>Донат за неделю</h4>
+                <div id="chart_income"></div>
+                {% chart_datetime "chart_income" chart_income %}
             </div>
         </div>
 

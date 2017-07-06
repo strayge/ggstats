@@ -1,3 +1,5 @@
+import calendar
+import datetime
 from django import template
 from django.utils.html import conditional_escape, format_html
 from django.utils.safestring import mark_safe
@@ -49,6 +51,7 @@ def chart_datetime(container, chart_data):
     x_title = conditional_escape(chart_data.get('x_title', ''))
     y_title = conditional_escape(chart_data.get('y_title', ''))
     # name = conditional_escape(chart_data.get('name', ''))
+    x_type = conditional_escape(chart_data.get('x_type', 'datetime'))
 
     all_js_series = ''
     for i in range(1, 10):
@@ -63,7 +66,13 @@ def chart_datetime(container, chart_data):
 
             js_data = ''
             for row in data:
-                x = row[x_keyword].timestamp() * 1000
+                if type(row[x_keyword]) is datetime.datetime:
+                    x = row[x_keyword].timestamp() * 1000
+                elif type(row[x_keyword]) is datetime.date:
+                    date = row[x_keyword]
+                    x = calendar.timegm(date.timetuple()) * 1000
+                else:
+                    x = row[x_keyword]
                 y = row[y_keyword]
                 js_data += format_html('[{}, {}],', x, y)
             js_data = '[' + js_data + ']'
@@ -80,7 +89,7 @@ def chart_datetime(container, chart_data):
     if zoom:
         js_chart = "zoomType: 'x'"
 
-    js_xaxis = "type: 'datetime',"
+    js_xaxis = "type: '%s'," % x_type
     if x_title:
         js_xaxis += "title: {text: '%s'}" % x_title
 
@@ -91,6 +100,8 @@ def chart_datetime(container, chart_data):
     js_title = ''
     if title:
         js_title = "text: '%s'" % title
+    else:
+        js_title = "text: '', style: {display: 'none'}"
 
     js_legend = "enabled: false"
     if legend:
