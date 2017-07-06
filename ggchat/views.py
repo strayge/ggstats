@@ -23,11 +23,11 @@ def stats(request):
 def chart(request):
     all_needed_data = ChannelStats.objects.filter(channel_id='5').values('timestamp', 'users').all()
     all_needed_data2 = ChannelStats.objects.filter(channel_id='5').values('timestamp', 'clients').all()
-    chart1 = {'data': all_needed_data,
-              'x_keyword': 'timestamp',
-              'y_keyword': 'users',
-              'type': 'area',
-              'name': 'Зрителей',
+    chart1 = {'data3': all_needed_data,
+              'x_keyword3': 'timestamp',
+              'y_keyword3': 'users',
+              'type3': 'area',
+              'name3': 'Зрителей',
 
               'data2': all_needed_data2,
               'x_keyword2': 'timestamp',
@@ -36,6 +36,7 @@ def chart(request):
               'name2': 'Клиентов',
 
               'zoom': True,
+              'legend': True,
               'title': 'Зрители',
               'y_title': 'Количество',
               }
