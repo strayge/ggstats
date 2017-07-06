@@ -39,28 +39,42 @@ def chart_load_js():
 
 @register.simple_tag()
 def chart_datetime(container, chart_data):
-    data = chart_data.get('data', [])
+    # data = chart_data.get('data', [])
     zoom = bool(chart_data.get('zoom', False))
     legend = bool(chart_data.get('legend', False))
-    x_keyword = conditional_escape(chart_data.get('x_keyword'))
-    y_keyword = conditional_escape(chart_data.get('y_keyword'))
-    chart_type = conditional_escape(chart_data.get('type', 'line'))
+    # x_keyword = conditional_escape(chart_data.get('x_keyword'))
+    # y_keyword = conditional_escape(chart_data.get('y_keyword'))
+    # chart_type = conditional_escape(chart_data.get('type', 'line'))
     title = conditional_escape(chart_data.get('title', ''))
     x_title = conditional_escape(chart_data.get('x_title', ''))
     y_title = conditional_escape(chart_data.get('y_title', ''))
-    series_name = conditional_escape(chart_data.get('series_name', ''))
+    # name = conditional_escape(chart_data.get('name', ''))
 
-    js_data = ''
-    for row in data:
-        x = row[x_keyword].timestamp() * 1000
-        y = row[y_keyword]
-        js_data += format_html('[{}, {}],', x, y)
-    js_data = '[' + js_data + ']'
+    all_js_series = ''
+    for i in range(1, 10):
+        if i == 1:
+            i = ''
+        if 'data{}'.format(i) in chart_data and 'x_keyword{}'.format(i) in chart_data and 'y_keyword{}'.format(i) in chart_data:
+            data = chart_data.get('data{}'.format(i), [])
+            x_keyword = conditional_escape(chart_data.get('x_keyword{}'.format(i)))
+            y_keyword = conditional_escape(chart_data.get('y_keyword{}'.format(i)))
+            chart_type = conditional_escape(chart_data.get('type{}'.format(i), 'line'))
+            name = conditional_escape(chart_data.get('name{}'.format(i), ''))
 
-    js_series = "type: '%s'," % chart_type
-    js_series += "data: %s," % js_data
-    if series_name:
-        js_series += "name: '%s'," % series_name
+            js_data = ''
+            for row in data:
+                x = row[x_keyword].timestamp() * 1000
+                y = row[y_keyword]
+                js_data += format_html('[{}, {}],', x, y)
+            js_data = '[' + js_data + ']'
+
+            js_series = "type: '%s'," % chart_type
+            js_series += "data: %s," % js_data
+            if name:
+                js_series += "name: '%s'," % name
+
+            js_series = '{' + js_series + '},'
+            all_js_series += js_series
 
     js_chart = ''
     if zoom:
@@ -82,8 +96,8 @@ def chart_datetime(container, chart_data):
     if legend:
         js_legend = "enabled: true"
 
-    js = '<script>Highcharts.chart("%s",{chart:{%s},xAxis:{%s},yAxis:{%s},series:[{%s}],title:{%s},legend:{%s}});</script>' % \
-         (container, js_chart, js_xaxis,  js_yaxis, js_series, js_title, js_legend)
+    js = '<script>Highcharts.chart("%s",{chart:{%s},xAxis:{%s},yAxis:{%s},series:[%s],title:{%s},legend:{%s}});</script>' % \
+         (container, js_chart, js_xaxis,  js_yaxis, all_js_series, js_title, js_legend)
 
     return mark_safe(js)
 
