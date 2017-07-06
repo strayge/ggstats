@@ -24,7 +24,7 @@ def stats(request):
 
 
 @cache_page(60 * 60)
-def chart(request):
+def viewers(request):
     week_ago = timezone.now() - datetime.timedelta(days=7)
     full_data = ChannelStats.objects.filter(timestamp__gte=week_ago).values('channel_id', 'timestamp', 'users', 'clients').all()
 
@@ -216,3 +216,13 @@ def channel(request, channel_id):
     }
 
     return render_to_response('ggchat/channel.html', content)
+
+
+# @cache_page(60 * 1)
+def users(request):
+    return render_to_response('ggchat/base.html', {})
+
+
+# @cache_page(60 * 1)
+def chat(request):
+    return render_to_response('ggchat/base.html', {})
