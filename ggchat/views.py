@@ -81,8 +81,22 @@ def user(request, user_id):
 
 
 def channel(request, channel_id):
+    channel_obj = Channel.objects.filter(channel_id=channel_id).first()
+    if not channel_obj:
+        return render_to_response('ggchat/channel.html', {'title': 'Канал #{}'.format(channel_id)})
 
+    last_messages = Message.objects.filter(channel_id=channel_id).order_by('-timestamp')[:10]
+    last_donations = Donation.objects.filter(channel_id=channel_id).order_by('-timestamp')[:10]
+    last_premiums = PremiumActivation.objects.filter(channel_id=channel_id).order_by('-timestamp')[:10]
+    last_follows = Follow.objects.filter(channel_id=channel_id).order_by('-timestamp')[:10]
+    active_premiums = PremiumStatus.objects.filter(channel_id=channel_id, ended=None)
 
+    content = {'channel': channel_obj,
+               'messages': last_messages,
+               'donations': last_donations,
+               'premiums': last_premiums,
+               'follows': last_follows,
+               'active_premiums': active_premiums,
+    }
 
-
-    return render_to_response('ggchat/channel.html', {'title': 'Канал #{}'.format(channel_id)})
+    return render_to_response('ggchat/channel.html', content)

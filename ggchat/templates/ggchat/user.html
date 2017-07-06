@@ -1,11 +1,14 @@
 {% extends "ggchat/base.html" %}
 
 {% block page_title %}
-    Пользователь {% if name %} {{ name }} {% endif %} #{{ user_id }}
-    {% if channel %}
-        <a href="/channel/{{ channel.channel_id }}">(Канал #{{ channel.channel_id }})</a>
+    {% if user_id %}
+        Пользователь {% if name %} {{ name }} {% endif %} #{{ user_id }}
+        {% if channel %}
+            <a href="/channel/{{ channel.channel_id }}">(Канал #{{ channel.channel_id }})</a>
     {% endif %}
-
+    {% else %}
+        Неизвестный пользователь
+    {% endif %}
 {% endblock %}
 
 {% block main %}
