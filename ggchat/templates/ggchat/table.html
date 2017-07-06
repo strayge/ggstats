@@ -1,0 +1,24 @@
+{% extends "ggchat/base.html" %}
+
+{% block main %}
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover table-striped">
+            <thead>
+            <tr>
+                {% for header in headers %}
+                    <th>{{ header }}</th>
+                {% endfor %}
+            </tr>
+            </thead>
+            <tbody>
+            {% for row in data %}
+                <tr>
+                    {% for cell in row %}
+                        <td>{{ cell }}</td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

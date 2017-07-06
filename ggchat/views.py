@@ -1,15 +1,13 @@
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
-from django.template import loader
 
 from ggchat.models import Donation, ChannelStats
 
 
 def index(request):
-    latest_payments = Donation.objects.order_by('-timestamp')[:5]
-    template = loader.get_template('ggchat/index.html')
-    context = {'latest_payments': latest_payments}
-    return HttpResponse(template.render(context, request))
+    latest_payments = Donation.objects.order_by('-timestamp')[:10]
+    return render_to_response('ggchat/index.html', {'latest_payments': latest_payments,
+                                                    'title': 'Последние донаты'})
 
 
 def stats(request):
@@ -41,3 +39,16 @@ def chart(request):
               'y_title': 'Количество',
               }
     return render_to_response('ggchat/chart.html', {'chart1': chart1})
+
+
+def money(request):
+    headers = ['Pag1', 'Page2', 'Pag3e', 'Page4']
+    data = [['/index.html', '1265', '32.3%', '$321.33', ],
+            ['/about.html', '261', '33.3%', '$234.12', ],
+            ['/sales.html', '665', '21.3%', '$16.34', ], ]
+
+    return render_to_response('ggchat/table.html', {'headers': headers,
+                                                    'data': data,
+                                                    'title': 'Деньги',
+                                                    'text_pre': 'pre',
+                                                    'text_after': 'after'})

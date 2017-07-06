@@ -1,21 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Статистика GG</title>
-</head>
-<body>
+{% extends "ggchat/base.html" %}
 
-{% if latest_payments %}
-    <ul>
-    {% for donation in latest_payments %}
-        <li>{{ donation.timestamp }}: {{ donation }}</li>
-{#        <li><a href="/polls/{{ question.id }}/">{{ question.question_text }}</a></li>#}
-    {% endfor %}
-    </ul>
-{% else %}
-    <p>No donations =(</p>
-{% endif %}
-
-</body>
-</html>
+{% block main %}
+    {% if latest_payments %}
+        <ul>
+            {% for donation in latest_payments %}
+                <li><p>{{ donation.timestamp }}: {{ donation }}</p></li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No donations =(</p>
+    {% endif %}
+{% endblock %}
