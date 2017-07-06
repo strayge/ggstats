@@ -11,7 +11,7 @@ def chart_datetime(container, chart_data):
     legend = bool(chart_data.get('legend', False))
     x_keyword = conditional_escape(chart_data.get('x_keyword'))
     y_keyword = conditional_escape(chart_data.get('y_keyword'))
-    chart_type = conditional_escape(chart_data.get('chart_type', 'line'))
+    chart_type = conditional_escape(chart_data.get('type', 'line'))
     title = conditional_escape(chart_data.get('title', ''))
     x_title = conditional_escape(chart_data.get('x_title', ''))
     y_title = conditional_escape(chart_data.get('y_title', ''))
