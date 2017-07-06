@@ -4,6 +4,7 @@ import itertools
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from django.utils import timezone
+from django.views.decorators.cache import cache_page
 
 from ggchat.models import Donation, ChannelStats, User, Message, PremiumActivation, Follow, PremiumStatus, Channel
 
@@ -22,29 +23,61 @@ def stats(request):
     return HttpResponse(output)
 
 
+@cache_page(60 * 60)
 def chart(request):
-    all_needed_data = ChannelStats.objects.filter(channel_id='5').values('timestamp', 'users').all()
-    all_needed_data2 = ChannelStats.objects.filter(channel_id='5').values('timestamp', 'clients').all()
-    chart1 = {'data3': all_needed_data,
-              'x_keyword3': 'timestamp',
-              'y_keyword3': 'users',
-              'type3': 'area',
-              'name3': 'Зрителей',
+    week_ago = timezone.now() - datetime.timedelta(days=7)
+    full_data = ChannelStats.objects.filter(timestamp__gte=week_ago).values('channel_id', 'timestamp', 'users', 'clients').all()
 
-              'data2': all_needed_data2,
-              'x_keyword2': 'timestamp',
-              'y_keyword2': 'clients',
-              'type2': 'area',
-              'name2': 'Клиентов',
+    data = {}
+    for d in full_data:
+        channel_id = d['channel_id']
+        if channel_id not in data:
+            data[channel_id] = {}
+        timestamp = int(d['timestamp'].timestamp() // 600)
+        if timestamp not in data[channel_id]:
+            data[channel_id][timestamp] = (d['users'], d['clients'])
 
-              'zoom': True,
-              'legend': True,
-              'title': 'Зрители',
-              'y_title': 'Количество',
-              }
-    return render_to_response('ggchat/chart.html', {'chart1': chart1})
+    data_sum_users = {}
+    data_sum_clients = {}
+    for channel_id in data:
+        for timestamp in data[channel_id]:
+            users, clients = data[channel_id][timestamp]
+            data_sum_users[timestamp] = data_sum_users.get(timestamp, 0) + users
+            data_sum_clients[timestamp] = data_sum_clients.get(timestamp, 0) + clients
+
+    data_sum_users_list = []
+    for timestamp, value in data_sum_users.items():
+        data_sum_users_list.append({'timestamp': timestamp*600*1000, 'value': value})
+
+    data_sum_clients_list = []
+    for timestamp, value in data_sum_clients.items():
+        data_sum_clients_list.append({'timestamp': timestamp*600*1000, 'value': value})
+
+    data_sum_users_list.sort(key=lambda x: x['timestamp'])
+    data_sum_clients_list.sort(key=lambda x: x['timestamp'])
+
+    chart_users_total = {'data': data_sum_clients_list,
+                         'x_keyword': 'timestamp',
+                         'y_keyword': 'value',
+                         'type': 'area',
+                         'name': 'Всего',
+
+                         'data2': data_sum_users_list,
+                         'x_keyword2': 'timestamp',
+                         'y_keyword2': 'value',
+                         'type2': 'area',
+                         'name2': 'Залогиненных',
+
+                         'zoom': True,
+                         'legend': True,
+                         # 'title': 'Зрители',
+                         'y_title': 'Количество',
+                         }
+    return render_to_response('ggchat/chart.html', {'chart1': chart_users_total,
+                                                    'title': 'Общее число зрителей'})
 
 
+@cache_page(60 * 1)
 def money(request):
     week_ago = timezone.now() - datetime.timedelta(days=7)
     donates_data = Donation.objects.filter(timestamp__gte=week_ago).order_by('-timestamp').values('user_id', 'channel_id', 'amount', 'timestamp')
@@ -90,6 +123,7 @@ def money(request):
     return render_to_response('ggchat/money.html', content)
 
 
+@cache_page(60 * 1)
 def user(request, user_id):
     user_obj = User.objects.filter(user_id=user_id).first()
     if not user_obj:
@@ -116,6 +150,7 @@ def user(request, user_id):
     return render_to_response('ggchat/user.html', content)
 
 
+@cache_page(60 * 1)
 def channel(request, channel_id):
     channel_obj = Channel.objects.filter(channel_id=channel_id).first()
     if not channel_obj:
