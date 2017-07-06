@@ -1,7 +1,7 @@
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
 
-from ggchat.models import Donation, ChannelStats, User, Message, PremiumActivation, Follow, PremiumStatus
+from ggchat.models import Donation, ChannelStats, User, Message, PremiumActivation, Follow, PremiumStatus, Channel
 
 
 def index(request):
@@ -64,20 +64,25 @@ def user(request, user_id):
     last_donations = Donation.objects.filter(user_id=user_id).order_by('-timestamp')[:10]
     last_premiums = PremiumActivation.objects.filter(user_id=user_id).order_by('-timestamp')[:10]
     last_follows = Follow.objects.filter(user_id=user_id).order_by('-timestamp')[:10]
-
     active_premiums = PremiumStatus.objects.filter(user_id=user_id, ended=None)
+    channel = Channel.objects.filter(streamer_id=user_id).first()
 
-    content = {'title': 'Пользователь {} #{}'.format(username, user_id),
-               'name': username,
+    content = {'name': username,
                'messages': last_messages,
                'donations': last_donations,
                'premiums': last_premiums,
                'follows': last_follows,
-               'active_premiums': active_premiums
+               'active_premiums': active_premiums,
+               'user_id': user_id,
+               'channel': channel
                }
 
     return render_to_response('ggchat/user.html', content)
 
 
 def channel(request, channel_id):
-    return render_to_response('ggchat/base.html', {'title': 'Канал #{}'.format(channel_id)})
+
+
+
+
+    return render_to_response('ggchat/channel.html', {'title': 'Канал #{}'.format(channel_id)})
