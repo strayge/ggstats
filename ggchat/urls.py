@@ -22,4 +22,6 @@ urlpatterns = [
     url(r'^stats$', views.stats, name='stats'),
     url(r'^chart$', views.chart, name='chart'),
     url(r'^money$', views.money, name='money'),
+    url(r'^user/(?P<user_id>\d+)$', views.user, name='user'),
+    url(r'^channel/(?P<channel_id>\w+)$', views.channel, name='channel'),
 ]

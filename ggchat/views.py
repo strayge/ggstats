@@ -1,7 +1,7 @@
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
 
-from ggchat.models import Donation, ChannelStats
+from ggchat.models import Donation, ChannelStats, User, Message, PremiumActivation, Follow, PremiumStatus
 
 
 def index(request):
@@ -52,3 +52,32 @@ def money(request):
                                                     'title': 'Деньги',
                                                     'text_pre': 'pre',
                                                     'text_after': 'after'})
+
+
+def user(request, user_id):
+    user_obj = User.objects.filter(user_id=user_id).first()
+    if not user_obj:
+        return render_to_response('ggchat/user.html', {'title': 'Пользователь #{}'.format(user_id)})
+
+    username = user_obj.username
+    last_messages = Message.objects.filter(user_id=user_id).order_by('-timestamp')[:10]
+    last_donations = Donation.objects.filter(user_id=user_id).order_by('-timestamp')[:10]
+    last_premiums = PremiumActivation.objects.filter(user_id=user_id).order_by('-timestamp')[:10]
+    last_follows = Follow.objects.filter(user_id=user_id).order_by('-timestamp')[:10]
+
+    active_premiums = PremiumStatus.objects.filter(user_id=user_id, ended=None)
+
+    content = {'title': 'Пользователь {} #{}'.format(username, user_id),
+               'name': username,
+               'messages': last_messages,
+               'donations': last_donations,
+               'premiums': last_premiums,
+               'follows': last_follows,
+               'active_premiums': active_premiums
+               }
+
+    return render_to_response('ggchat/user.html', content)
+
+
+def channel(request, channel_id):
+    return render_to_response('ggchat/base.html', {'title': 'Канал #{}'.format(channel_id)})
