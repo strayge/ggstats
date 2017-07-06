@@ -8,35 +8,10 @@
 </head>
 <body>
 <div id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
-<script>
-    Highcharts.chart('container', {
-        chart: {
-            zoomType: 'x'
-        },
-        xAxis: {
-            type: 'datetime',
-            title: {
-                text: 'xAxis title'
-            }
-        },
-        series: [{
-            type: 'line',
-            data: {{ data }},
-            name: 'series1 name'
-        }],
-        title: {
-            text: 'Main title'
-        },
-        yAxis: {
-            title: {
-                text: 'yAxis title'
-            }
-        },
-        legend: {
-            enabled: false
-        },
-    });
-</script>
+
+{% load chart %}
+{% chart_datetime "container" chart1 %}
+
 
 </body>
 </html>
