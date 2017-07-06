@@ -6,6 +6,10 @@ body {
     /*background-color: #fff;*/
 }
 
+a {
+    color: #5151aa;
+}
+
 #wrapper {
     padding-left: 0;
 }
