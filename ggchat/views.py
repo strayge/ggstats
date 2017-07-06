@@ -3,6 +3,7 @@ import datetime
 import itertools
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
+from django.utils import timezone
 
 from ggchat.models import Donation, ChannelStats, User, Message, PremiumActivation, Follow, PremiumStatus, Channel
 
@@ -94,7 +95,7 @@ def channel(request, channel_id):
     last_follows = Follow.objects.filter(channel_id=channel_id).order_by('-timestamp')[:10]
     active_premiums = PremiumStatus.objects.filter(channel_id=channel_id, ended=None)
 
-    week_ago = datetime.datetime.now() - datetime.timedelta(days=7)
+    week_ago = timezone.now() - datetime.timedelta(days=7)
     chart_clients_data = ChannelStats.objects.filter(channel_id=channel_id, timestamp__gte=week_ago).values('timestamp', 'clients').all()
     chart_users_data = ChannelStats.objects.filter(channel_id=channel_id, timestamp__gte=week_ago).values('timestamp', 'users').all()
     chart_people = {'data': chart_clients_data,
