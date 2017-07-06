@@ -11,6 +11,30 @@ def chart_load_js():
     out = ''
     out += '<script src="{}" type="text/javascript"></script>\n'.format(jquery_path)
     out += '<script src="{}" type="text/javascript"></script>\n'.format(highcharts_path)
+
+    highcharts_set_lang = '''
+    Highcharts.setOptions({
+            lang: {
+                loading: 'Загрузка...',
+                months: ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'],
+                weekdays: ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'],
+                shortWeekdays: ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
+                shortMonths: ['Янв', 'Фев', 'Март', 'Апр', 'Май', 'Июнь', 'Июль', 'Авг', 'Сент', 'Окт', 'Нояб', 'Дек'],
+                downloadPNG: 'Скачать PNG',
+                downloadJPEG: 'Скачать JPEG',
+                downloadPDF: 'Скачать PDF',
+                downloadSVG: 'Скачать SVG',
+                printChart: 'Напечатать график',
+                resetZoom: "Весь график",
+                resetZoomTitle: "Сбросить увеличение до 1:1",
+                noData: "Нет данных для отображения",
+                drillUpText: "Назад к {series.name}",
+            }
+    });
+    '''
+
+    out += '<script>%s</script>\n' % highcharts_set_lang
+
     return mark_safe(out)
 
 @register.simple_tag()
