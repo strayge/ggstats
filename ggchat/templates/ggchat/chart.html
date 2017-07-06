@@ -1,17 +1,17 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/javascript"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highcharts/5.0.12/highcharts.js" type="text/javascript"></script>
+    {% load chart %}
+    {% chart_load_js %}
 </head>
 <body>
 <div id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
 
-{% load chart %}
 {% chart_datetime "container" chart1 %}
-
 
 </body>
 </html>

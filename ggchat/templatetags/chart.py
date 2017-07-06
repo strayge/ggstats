@@ -5,6 +5,15 @@ from django.utils.safestring import mark_safe
 register = template.Library()
 
 @register.simple_tag()
+def chart_load_js():
+    jquery_path = 'https://cdnjs.cloudflare.com/ajax/libs/jquery/1.7.2/jquery.min.js'
+    highcharts_path = 'https://cdnjs.cloudflare.com/ajax/libs/highcharts/5.0.12/highcharts.js'
+    out = ''
+    out += '<script src="{}" type="text/javascript"></script>\n'.format(jquery_path)
+    out += '<script src="{}" type="text/javascript"></script>\n'.format(highcharts_path)
+    return mark_safe(out)
+
+@register.simple_tag()
 def chart_datetime(container, chart_data):
     data = chart_data.get('data', [])
     zoom = bool(chart_data.get('zoom', False))
