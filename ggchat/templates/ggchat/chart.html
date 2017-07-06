@@ -1,17 +1,11 @@
+{% extends "ggchat/base.html" %}
 
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+{% block head %}
     {% load chart %}
     {% chart_load_js %}
-</head>
-<body>
-<div id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+{% endblock %}
 
-{% chart_datetime "container" chart1 %}
-
-</body>
-</html>
+{% block main %}
+    <div id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+    {% chart_datetime "container" chart1 %}
+{% endblock %}
