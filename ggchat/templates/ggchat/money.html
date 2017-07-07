@@ -38,7 +38,7 @@
                     <tbody>
                     {% for donate in donate_top_per_channel %}
                         <tr>
-                            <td><a href="/channel/{{ donate.channel_id }}"> {{ donate.username }} #{{ donate.channel_id }}</a></td>
+                            <td><a href="/channel/{{ donate.channel_id }}"> {{ donate.username }}</a></td>
                             <td>{{ donate.amount }}</td>
                         </tr>
                     {% endfor %}

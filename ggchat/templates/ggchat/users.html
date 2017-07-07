@@ -25,7 +25,7 @@
                     <tbody>
                     {% for donate in max_sum_donations %}
                         <tr>
-                            <td><a href="/user/{{ donate.user_id }}"> {{ donate.user__username }} #{{ donate.user_id }}</a></td>
+                            <td><a href="/user/{{ donate.user_id }}"> {{ donate.user__username }}</a></td>
                             <td>{{ donate.sum }}</td>
                         </tr>
                     {% endfor %}
@@ -46,7 +46,7 @@
                     <tbody>
                     {% for donate in max_count_donations %}
                         <tr>
-                            <td><a href="/user/{{ donate.user_id }}"> {{ donate.user__username }} #{{ donate.user_id }}</a></td>
+                            <td><a href="/user/{{ donate.user_id }}"> {{ donate.user__username }}</a></td>
                             <td>{{ donate.count }}</td>
                         </tr>
                     {% endfor %}
@@ -70,7 +70,7 @@
                     <tbody>
                     {% for msg in max_messages %}
                         <tr>
-                            <td><a href="/user/{{ msg.user_id }}"> {{ msg.user__username }} #{{ msg.user_id }}</a></td>
+                            <td><a href="/user/{{ msg.user_id }}"> {{ msg.user__username }}</a></td>
                             <td>{{ msg.count }}</td>
                         </tr>
                     {% endfor %}
@@ -91,7 +91,7 @@
                     <tbody>
                     {% for p in pekas %}
                         <tr>
-                            <td><a href="/user/{{ p.user_id }}"> {{ p.user__username }} #{{ p.user_id }}</a></td>
+                            <td><a href="/user/{{ p.user_id }}"> {{ p.user__username }}</a></td>
                             <td>{{ p.count }}</td>
                         </tr>
                     {% endfor %}
@@ -115,7 +115,7 @@
                     <tbody>
                     {% for p in max_premiums %}
                         <tr>
-                            <td><a href="/user/{{ p.user_id }}"> {{ p.user__username }} #{{ p.user_id }}</a></td>
+                            <td><a href="/user/{{ p.user_id }}"> {{ p.user__username }}</a></td>
                             <td>{{ p.count }}</td>
                         </tr>
                     {% endfor %}
