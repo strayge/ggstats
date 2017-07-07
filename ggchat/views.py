@@ -10,6 +10,7 @@ from ggchat.models import Donation, ChannelStats, User, Message, PremiumActivati
 
 
 def index(request):
+    # todo: краткое описание
     latest_payments = Donation.objects.order_by('-timestamp')[:10]
     return render_to_response('ggchat/index.html', {'latest_payments': latest_payments,
                                                     'title': 'Последние донаты'})
@@ -27,6 +28,8 @@ def stats(request):
 def viewers(request):
     week_ago = timezone.now() - datetime.timedelta(days=7)
     full_data = ChannelStats.objects.filter(timestamp__gte=week_ago).values('channel_id', 'timestamp', 'users', 'clients').all()
+
+    # todo: rewrite this part (OOM)
 
     data = {}
     for d in full_data:
@@ -77,7 +80,7 @@ def viewers(request):
                                                     'title': 'Общее число зрителей'})
 
 
-@cache_page(60 * 1)
+@cache_page(60 * 30)
 def money(request):
     week_ago = timezone.now() - datetime.timedelta(days=7)
     donates_data = Donation.objects.filter(timestamp__gte=week_ago).order_by('-timestamp').values('user_id', 'channel_id', 'amount', 'timestamp')
@@ -116,6 +119,8 @@ def money(request):
         grouped_by_channel_list.append({'channel_id': channel_id, 'amount': int(amount), 'username': streamer_name})
     grouped_by_channel_list.sort(key=lambda x: x['amount'], reverse=True)
 
+    # todo: Недополученная прибыль от общих премов за месяц
+
     content = {'chart_donate_total': chart_donate_total,
                'donate_top_per_channel': grouped_by_channel_list[:15],
                }
@@ -123,7 +128,7 @@ def money(request):
     return render_to_response('ggchat/money.html', content)
 
 
-@cache_page(60 * 1)
+@cache_page(60 * 30)
 def user(request, user_id):
     user_obj = User.objects.filter(user_id=user_id).first()
     if not user_obj:
@@ -150,7 +155,7 @@ def user(request, user_id):
     return render_to_response('ggchat/user.html', content)
 
 
-@cache_page(60 * 1)
+@cache_page(60 * 30)
 def channel(request, channel_id):
     channel_obj = Channel.objects.filter(channel_id=channel_id).first()
     if not channel_obj:
@@ -218,11 +223,30 @@ def channel(request, channel_id):
     return render_to_response('ggchat/channel.html', content)
 
 
-# @cache_page(60 * 1)
+# @cache_page(60 * 30)
 def users(request):
+    # todo: лидер по числу премов
+    # лидер по числу донатов
+    # лидер по общей сумме донатов
+    # самый многословный
+    # активный большую часть времени
+    # больше всего пек в чате (стандартных)
     return render_to_response('ggchat/base.html', {})
 
 
-# @cache_page(60 * 1)
-def chat(request):
+# @cache_page(60 * 30)
+def chats(request):
+    # todo:
+    # последние удаленные сообщения
+    # ходящий по грани (больше всего предупреждений без банов?)
+    # наиболее популярные смайлы
+    # самые активные чаты
+    return render_to_response('ggchat/base.html', {})
+
+# @cache_page(60 * 30)
+def moderators(request):
+    # больше всех удаляет сообщения
+    # больше всего предов
+    # больше всего банов
+    # лояльный: отношения предов к банам
     return render_to_response('ggchat/base.html', {})
