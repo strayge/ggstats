@@ -75,6 +75,12 @@ class PremiumStatus(models.Model):
     modified = models.DateTimeField(default=timezone.now)
     resubs = models.PositiveSmallIntegerField()
 
+    def __str__(self):
+        if self.ended is None:
+            return '{} has premium to {}'.format(self.user, self.channel)
+        else:
+            return '{} had premium to {} (ended)'.format(self.user, self.channel)
+
 
 class Poll(models.Model):
     channel = models.ForeignKey(Channel, on_delete=models.SET_NULL, null=True)
