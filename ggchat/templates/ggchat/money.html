@@ -66,7 +66,7 @@
                     {% for common in common_prems %}
                         <tr>
                             <td><a href="{% url 'channel' common.channel_id %}"> {{ common.channel__streamer__username }}</a></td>
-                            <td>{{ common.sum|floatformat:0 }}</td>
+                            <td>{{ common.amount|floatformat:0 }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>

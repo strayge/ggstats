@@ -137,6 +137,9 @@ class CommonPremiumPayments(models.Model):
     date = models.DateField(default=datetime.date.today)
     amount = models.FloatField()
 
+    def __str__(self):
+        return '{} {} {} rub.'.format(self.date, self.channel, self.amount)
+
 
 class TotalStats(models.Model):
     timestamp = models.DateTimeField(primary_key=True)

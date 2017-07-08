@@ -607,8 +607,8 @@ class WebsocketClient():
         common_premiums_yesterday = CommonPremium.objects.filter(date=yesterday).first()
         # save current data all
         if not common_premiums_yesterday:
-            two_days_ago = datetime.date.today() - datetime.timedelta(days=2)
-            common_premiums_prev = CommonPremium.objects.filter(date=two_days_ago).first()
+            # two_days_ago = datetime.date.today() - datetime.timedelta(days=2)
+            # common_premiums_prev = CommonPremium.objects.filter(date=two_days_ago).first()
 
             common_premiums_counter, common_premiums_payments = await self.get_common_premiums()
 
@@ -617,16 +617,16 @@ class WebsocketClient():
             per_90_days = common_premiums_counter[2]
             per_30_days = common_premiums_counter[3]
 
-            if common_premiums_prev:
-                # fix: wrong, if 1 day in month more donations than all previous month
-                if per_year >= common_premiums_prev.per_year:
-                    per_year -= common_premiums_prev.per_year
-                if per_180_days >= common_premiums_prev.per_180_days:
-                    per_180_days -= common_premiums_prev.per_180_days
-                if per_90_days >= common_premiums_prev.per_90_days:
-                    per_90_days -= common_premiums_prev.per_90_days
-                if per_30_days >= common_premiums_prev.per_30_days:
-                    per_30_days -= common_premiums_prev.per_30_days
+            # if common_premiums_prev:
+            #     # fix: wrong, if 1 day in month more donations than all previous month
+            #     if per_year >= common_premiums_prev.per_year:
+            #         per_year -= common_premiums_prev.per_year
+            #     if per_180_days >= common_premiums_prev.per_180_days:
+            #         per_180_days -= common_premiums_prev.per_180_days
+            #     if per_90_days >= common_premiums_prev.per_90_days:
+            #         per_90_days -= common_premiums_prev.per_90_days
+            #     if per_30_days >= common_premiums_prev.per_30_days:
+            #         per_30_days -= common_premiums_prev.per_30_days
 
             common_premiums = CommonPremium(date=yesterday, per_year=per_year, per_180_days=per_180_days,
                                             per_90_days=per_90_days, per_30_days=per_30_days)
@@ -637,10 +637,10 @@ class WebsocketClient():
                 if user:
                     channel = Channel.objects.filter(streamer=user).first()
                     if channel:
-                        payments_previous = CommonPremiumPayments.objects.filter(channel=channel, date=two_days_ago).first()
+                        # payments_previous = CommonPremiumPayments.objects.filter(channel=channel, date=two_days_ago).first()
                         # fix: wrong, if 1 day in month more donations than all previous month
-                        if payments_previous and amount >= payments_previous.amount:
-                            amount -= payments_previous.amount
+                        # if payments_previous and amount >= payments_previous.amount:
+                        #     amount -= payments_previous.amount
                         payments = CommonPremiumPayments(channel=channel, amount=amount, date=yesterday)
                         payments.save()
 
