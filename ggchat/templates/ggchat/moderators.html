@@ -1,0 +1,143 @@
+{% extends "ggchat/base.html" %}
+
+{% block head %}
+    {% load chart %}
+    {% chart_load_js %}
+{% endblock %}
+
+{% block page_title %}
+    Модерирование
+{% endblock %}
+
+{% block main %}
+
+    <div class="row">
+        {# bans #}
+        <div class="col-md-6 col-sm-12">
+            <h4>Баны</h4>
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover table-striped">
+                    <thead>
+                    <tr>
+                        <th>Модер</th><th>Банов</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for ban in bans %}
+                        <tr>
+                            <td><a href="/user/{{ ban.moderator_id }}"> {{ ban.moderator__username }}</a></td>
+                            <td>{{ ban.count }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {# warns #}
+        <div class="col-md-6 col-sm-12">
+            <h4>Преды</h4>
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover table-striped">
+                    <thead>
+                    <tr>
+                        <th>Модер</th><th>Предов</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for warn in warns %}
+                        <tr>
+                            <td><a href="/user/{{ warn.moderator_id }}"> {{ warn.moderator__username }}</a></td>
+                            <td>{{ warn.count }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+
+        {# removed_msgs #}
+        <div class="col-md-6 col-sm-12">
+            <h4>Удалено сообщений</h4>
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover table-striped">
+                    <thead>
+                    <tr>
+                        <th>Модер</th><th>Сообщений</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for msg in removed_msgs %}
+                        <tr>
+                            <td><a href="/user/{{ msg.removed_by_id }}"> {{ msg.removed_by__username }}</a></td>
+                            <td>{{ msg.count }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {# loyal_moders #}
+        <div class="col-md-6 col-sm-12">
+            <h4>Добрые модеры</h4>
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover table-striped">
+                    <thead>
+                    <tr>
+                        <th>Модер</th><th>Предов / банов</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for moder in loyal_moders %}
+                        <tr>
+                            <td><a href="/user/{{ moder.moderator_id }}"> {{ moder.moderator__username }}</a></td>
+                            <td>
+                                {% if moder.score >= 100000 %}
+                                    &#8734;
+                                {% else %}
+                                    {{ moder.score }}
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row">
+
+        {# stupid_moders #}
+        <div class="col-md-6 col-sm-12">
+            <h4>Уменьшающие аудиторию</h4>
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover table-striped">
+                    <thead>
+                    <tr>
+                        <th>Модер</th><th>Перманентов за неделю</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for moder in stupid_moders %}
+                        <tr>
+                            <td><a href="/user/{{ moder.moderator_id }}"> {{ moder.moderator__username }}</a></td>
+                            <td>{{ moder.count }}</tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+{% endblock %}
+
+
+
+

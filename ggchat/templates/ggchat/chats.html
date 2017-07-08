@@ -1,0 +1,110 @@
+{% extends "ggchat/base.html" %}
+
+{% block head %}
+    {% load chart %}
+    {% chart_load_js %}
+{% endblock %}
+
+{% block page_title %}
+    Чатики
+{% endblock %}
+
+{% block main %}
+
+    <div class="row">
+        {# deleted_messages #}
+        <div class="col-md-12 col-sm-12">
+            <h4>Удаленные сообщения</h4>
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover table-striped">
+                    <thead>
+                    <tr>
+                        <th>Дата</th>
+                        <th>Канал</th>
+                        <th>Пользователь</th>
+                        <th>Удалил</th>
+                        <th>Сообщения</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for msg in deleted_messages %}
+                        <tr>
+                            <td>{{ msg.timestamp }}</td>
+                            <td><a href="/channel/{{ msg.channel_id }}"> {{ msg.channel.streamer.username }}</a></td>
+                            <td><a href="/user/{{ msg.user_id }}"> {{ msg.user.username }}</a></td>
+                            <td><a href="/user/{{ msg.removed_by.user_id }}"> {{ msg.removed_by.username }}</a></td>
+                            <td>{{ msg.text }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-sm-12">
+
+        </div>
+    </div>
+
+    <div class="row">
+        {# popular_chats #}
+        <div class="col-md-6 col-sm-12">
+            <h4>Популярные чаты</h4>
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover table-striped">
+                    <thead>
+                    <tr>
+                        <th>Канал</th>
+                        <th>Сообщений</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for chat in popular_chats %}
+                        <tr>
+                            <td><a href="/channel/{{ chat.channel_id }}"> {{ chat.channel__streamer__username }}</a></td>
+                            <td>{{ chat.count }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+        {# top_trols #}
+        <div class="col-md-6 col-sm-12">
+            <h4>Наиболее жирные троли</h4>
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover table-striped">
+                    <thead>
+                    <tr>
+                        <th>Юзер</th>
+                        <th>Предупреждений</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for troll in top_trols %}
+                        <tr>
+                            <td><a href="/user/{{ troll.user_id }}"> {{ troll.user__username }}</a></td>
+                            <td>{{ troll.count }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 col-sm-12">
+
+        </div>
+        <div class="col-md-6 col-sm-12">
+
+        </div>
+    </div>
+
+{% endblock %}
+
+
+
+

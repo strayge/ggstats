@@ -8,7 +8,8 @@ from django.shortcuts import render_to_response
 from django.utils import timezone
 from django.views.decorators.cache import cache_page
 
-from ggchat.models import Donation, ChannelStats, User, Message, PremiumActivation, Follow, PremiumStatus, Channel
+from ggchat.models import Donation, ChannelStats, User, Message, PremiumActivation, Follow, PremiumStatus, \
+    Channel, Ban, Warning
 
 
 def index(request):
@@ -262,19 +263,66 @@ def users(request):
     return render_to_response('ggchat/users.html', content)
 
 
-# @cache_page(60 * 30)
+@cache_page(60 * 30)
 def chats(request):
-    # todo:
-    # последние удаленные сообщения
-    # ходящий по грани (больше всего предупреждений без банов?)
-    # наиболее популярные смайлы
-    # самые активные чаты
-    return render_to_response('ggchat/base.html', {})
+    week_ago = timezone.now() - datetime.timedelta(days=7)
+    deleted_messages = Message.objects.filter(removed=True).order_by('-timestamp')[:20]
+    popular_chats = Message.objects.filter(timestamp__gte=week_ago).values('channel_id', 'channel__streamer__username').annotate(count=Count('message_id')).order_by('-count')[:20]
 
-# @cache_page(60 * 30)
+    warns = Warning.objects.filter(timestamp__gte=week_ago).values('user_id', 'user__username').annotate(count=Count('timestamp')).order_by('-count')
+    bans = Ban.objects.filter(timestamp__gte=week_ago).values('user_id', 'user__username').annotate(count=Count('timestamp')).order_by('-count')
+
+    top_trols = []
+    for warn in warns:
+        for ban in bans:
+            if ban['user_id'] == warn['user_id']:
+                break
+        else:
+            top_trols.append(warn)
+            if len(top_trols) > 20:
+                break
+
+    # todo: наиболее популярные смайлы
+
+    content = {'deleted_messages': deleted_messages,
+               'popular_chats': popular_chats,
+               'top_trols': top_trols,
+               }
+    return render_to_response('ggchat/chats.html', content)
+
+@cache_page(60 * 30)
 def moderators(request):
-    # больше всех удаляет сообщения
-    # больше всего предов
-    # больше всего банов
-    # лояльный: отношения предов к банам
-    return render_to_response('ggchat/base.html', {})
+    week_ago = timezone.now() - datetime.timedelta(days=7)
+    warns = Warning.objects.filter(timestamp__gte=week_ago).values('moderator_id', 'moderator__username').annotate(count=Count('timestamp')).order_by('-count')
+    bans = Ban.objects.filter(timestamp__gte=week_ago).values('moderator_id', 'moderator__username').annotate(count=Count('timestamp')).order_by('-count')
+    removed_msgs = Message.objects.filter(timestamp__gte=week_ago, removed=True).values('removed_by_id', 'removed_by__username').annotate(count=Count('message_id')).order_by('-count')[:20]
+
+    loyal_moders = []
+    warns_dict = {}
+    for w in warns:
+        moderator_id = w['moderator_id']
+        warns_dict[moderator_id] = {'moderator_id': moderator_id,
+                                    'moderator__username': w['moderator__username'],
+                                    'score': w['count']}
+    for b in bans:
+        moderator_id = b['moderator_id']
+        count = b['count']
+        if moderator_id in warns_dict:
+            if count != 0:
+                warns_dict[moderator_id]['score'] /= count
+            else:
+                warns_dict[moderator_id]['score'] += 100000
+            loyal_moders.append(warns_dict[moderator_id])
+
+    loyal_moders.sort(key=lambda x: x['score'], reverse=True)
+
+    stupid_moders = Ban.objects.filter(timestamp__gte=week_ago, permanent=True).values('moderator_id', 'moderator__username').annotate(count=Count('timestamp')).order_by('-count')[:20]
+
+    content = {'warns': warns[:20],
+               'bans': bans[:20],
+               'removed_msgs': removed_msgs,
+               'loyal_moders': loyal_moders[:20],
+               'stupid_moders': stupid_moders,
+               }
+
+    return render_to_response('ggchat/moderators.html', content)
