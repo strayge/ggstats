@@ -64,7 +64,8 @@ def viewers(request):
 
     last_total_stats = TotalStats.objects.order_by('-timestamp').first()
     if last_total_stats:
-        latest_calced_timestamp = last_total_stats.timestamp
+        # latest_calced_timestamp = last_total_stats.timestamp
+        latest_calced_timestamp = last_total_stats.timestamp - datetime.timedelta(minutes=30)
     else:
         latest_calced_timestamp = week_ago
 
@@ -76,6 +77,7 @@ def viewers(request):
         calc_total_stats(from_timestamp, to_timestamp)
         from_timestamp = to_timestamp
         to_timestamp = min(now, from_timestamp + datetime.timedelta(hours=12))
+    calc_total_stats(from_timestamp, to_timestamp)
 
     full_data = TotalStats.objects.filter(timestamp__gte=week_ago).all()
     data_sum_users_list = []
