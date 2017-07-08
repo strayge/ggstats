@@ -15,8 +15,7 @@ from ggchat.models import Donation, ChannelStats, User, Message, PremiumActivati
 def index(request):
     # todo: краткое описание
     latest_payments = Donation.objects.order_by('-timestamp')[:10]
-    return render_to_response('ggchat/index.html', {'latest_payments': latest_payments,
-                                                    'title': 'Последние донаты'})
+    return render_to_response('ggchat/index.html', {'latest_payments': latest_payments})
 
 
 def stats(request):

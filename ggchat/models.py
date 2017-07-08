@@ -1,8 +1,9 @@
 import datetime
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.utils import timezone
-from django.core.exceptions import ObjectDoesNotExist
+
 
 class CommonMessage(models.Model):
     type = models.CharField(max_length=100)
@@ -67,6 +68,7 @@ class PremiumActivation(models.Model):
     resubs = models.PositiveSmallIntegerField()
     payment = models.PositiveSmallIntegerField()
 
+
 class PremiumStatus(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     channel = models.ForeignKey(Channel, on_delete=models.SET_NULL, null=True)
@@ -121,12 +123,14 @@ class Follow(models.Model):
     channel = models.ForeignKey(Channel, on_delete=models.SET_NULL, null=True)
     timestamp = models.DateTimeField(default=timezone.now)
 
+
 class CommonPremium(models.Model):
     date = models.DateField(default=datetime.date.today)
     per_year = models.PositiveIntegerField()
     per_180_days = models.PositiveIntegerField()
     per_90_days = models.PositiveIntegerField()
     per_30_days = models.PositiveIntegerField()
+
 
 class CommonPremiumPayments(models.Model):
     channel = models.ForeignKey(Channel, on_delete=models.SET_NULL, null=True)

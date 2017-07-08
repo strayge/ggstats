@@ -1,13 +1,29 @@
 {% extends "ggchat/base.html" %}
 
+{% block page_title %}
+Немного статистики
+{% endblock %}
+
 {% block main %}
-    {% if latest_payments %}
-        <ul>
-            {% for donation in latest_payments %}
-                <li><p>{{ donation.timestamp }}: {{ donation }}</p></li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>No donations =(</p>
-    {% endif %}
+
+    <h3>Зачем?</h3>
+    <p>Было интересно посчитать различные циферки и местами порадоваться, а местами подтвердиться в догадках.</p>
+    <p></p>
+
+    <h3>Откуда?</h3>
+    <p>Все данные получены из открытых источников сайта GG. Любой желающий может собрать (и возможно собирает) эти данные прямо сейчас.</p>
+
+    <h3>Не верю!</h3>
+    <p>Ваше право. Крестик справа (если вы маковод - <s>всё не как у людей</s>слева).</p>
+
+{#    <br /><br /><br />#}
+{#    {% if latest_payments %}#}
+{#        <ul>#}
+{#            {% for donation in latest_payments %}#}
+{#                <li><p>{{ donation.timestamp }}: {{ donation }}</p></li>#}
+{#            {% endfor %}#}
+{#        </ul>#}
+{#    {% else %}#}
+{#        <p>No donations =(</p>#}
+{#    {% endif %}#}
 {% endblock %}
