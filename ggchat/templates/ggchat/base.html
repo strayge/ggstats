@@ -38,17 +38,17 @@
             <span class="icon-bar"></span>
         </button>
         {# Title #}
-        <a class="navbar-brand" href="/">GG Stats</a>
+        <a class="navbar-brand" href="{% url "index" %}">GG Stats</a>
         {# Left nav bar #}
         <div class="collapse navbar-collapse navbar-ex1-collapse">
             <ul class="nav navbar-nav side-nav">
                 {# items #}
-                <li><a href="/"><i class="fa fa-fw fa-lg fa-square-o"></i> Главная</a></li>
-                <li><a href="/chats"><i class="fa fa-fw fa-lg fa-comments"></i> Чаты</a></li>
-                <li><a href="/moderators"><i class="fa fa-fw fa-lg fa-ban"></i> Модерация</a></li>
-                <li><a href="/users"><i class="fa fa-fw fa-lg fa-users"></i> Пользователи</a></li>
-                <li><a href="/money"><i class="fa fa-fw fa-lg fa-ruble"></i> Успешные стримеры</a></li>
-                <li><a href="/viewers"><i class="fa fa-fw fa-lg fa-line-chart"></i> Посещаемость</a></li>
+                <li><a href="{% url 'index' %}"><i class="fa fa-fw fa-lg fa-square-o"></i> Главная</a></li>
+                <li><a href="{% url 'chats' %}"><i class="fa fa-fw fa-lg fa-comments"></i> Чаты</a></li>
+                <li><a href="{% url 'moderators' %}"><i class="fa fa-fw fa-lg fa-ban"></i> Модерация</a></li>
+                <li><a href="{% url 'users' %}"><i class="fa fa-fw fa-lg fa-users"></i> Пользователи</a></li>
+                <li><a href="{% url 'money' %}"><i class="fa fa-fw fa-lg fa-ruble"></i> Успешные стримеры</a></li>
+                <li><a href="{% url 'viewers' %}"><i class="fa fa-fw fa-lg fa-line-chart"></i> Посещаемость</a></li>
             </ul>
         </div>
     </nav>

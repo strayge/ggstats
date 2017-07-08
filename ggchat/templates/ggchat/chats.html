@@ -30,9 +30,9 @@
                     {% for msg in deleted_messages %}
                         <tr>
                             <td>{{ msg.timestamp }}</td>
-                            <td><a href="/channel/{{ msg.channel_id }}"> {{ msg.channel.streamer.username }}</a></td>
-                            <td><a href="/user/{{ msg.user_id }}"> {{ msg.user.username }}</a></td>
-                            <td><a href="/user/{{ msg.removed_by.user_id }}"> {{ msg.removed_by.username }}</a></td>
+                            <td><a href="{% url 'channel' msg.channel_id %}"> {{ msg.channel.streamer.username }}</a></td>
+                            <td><a href="{% url 'user' msg.user_id %}"> {{ msg.user.username }}</a></td>
+                            <td><a href="{% url 'user' msg.removed_by.user_id %}"> {{ msg.removed_by.username }}</a></td>
                             <td>{{ msg.text }}</td>
                         </tr>
                     {% endfor %}
@@ -61,7 +61,7 @@
                     <tbody>
                     {% for chat in popular_chats %}
                         <tr>
-                            <td><a href="/channel/{{ chat.channel_id }}"> {{ chat.channel__streamer__username }}</a></td>
+                            <td><a href="{% url 'channel' chat.channel_id %}"> {{ chat.channel__streamer__username }}</a></td>
                             <td>{{ chat.count }}</td>
                         </tr>
                     {% endfor %}
@@ -84,7 +84,7 @@
                     <tbody>
                     {% for troll in top_trols %}
                         <tr>
-                            <td><a href="/user/{{ troll.user_id }}"> {{ troll.user__username }}</a></td>
+                            <td><a href="{% url 'user' troll.user_id %}"> {{ troll.user__username }}</a></td>
                             <td>{{ troll.count }}</td>
                         </tr>
                     {% endfor %}

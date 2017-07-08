@@ -25,7 +25,7 @@
                     <tbody>
                     {% for ban in bans %}
                         <tr>
-                            <td><a href="/user/{{ ban.moderator_id }}"> {{ ban.moderator__username }}</a></td>
+                            <td><a href="{% url 'user' ban.moderator_id %}"> {{ ban.moderator__username }}</a></td>
                             <td>{{ ban.count }}</td>
                         </tr>
                     {% endfor %}
@@ -47,7 +47,7 @@
                     <tbody>
                     {% for warn in warns %}
                         <tr>
-                            <td><a href="/user/{{ warn.moderator_id }}"> {{ warn.moderator__username }}</a></td>
+                            <td><a href="{% url 'user' warn.moderator_id %}"> {{ warn.moderator__username }}</a></td>
                             <td>{{ warn.count }}</td>
                         </tr>
                     {% endfor %}
@@ -72,7 +72,7 @@
                     <tbody>
                     {% for msg in removed_msgs %}
                         <tr>
-                            <td><a href="/user/{{ msg.removed_by_id }}"> {{ msg.removed_by__username }}</a></td>
+                            <td><a href="{% url 'user' msg.removed_by_id %}"> {{ msg.removed_by__username }}</a></td>
                             <td>{{ msg.count }}</td>
                         </tr>
                     {% endfor %}
@@ -94,7 +94,7 @@
                     <tbody>
                     {% for moder in loyal_moders %}
                         <tr>
-                            <td><a href="/user/{{ moder.moderator_id }}"> {{ moder.moderator__username }}</a></td>
+                            <td><a href="{% url 'user' moder.moderator_id %}"> {{ moder.moderator__username }}</a></td>
                             <td>
                                 {% if moder.score >= 100000 %}
                                     &#8734;
@@ -126,7 +126,7 @@
                     <tbody>
                     {% for moder in stupid_moders %}
                         <tr>
-                            <td><a href="/user/{{ moder.moderator_id }}"> {{ moder.moderator__username }}</a></td>
+                            <td><a href="{% url 'user' moder.moderator_id %}"> {{ moder.moderator__username }}</a></td>
                             <td>{{ moder.count }}</tr>
                     {% endfor %}
                     </tbody>

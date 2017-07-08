@@ -38,9 +38,9 @@
                             <td>{{ donation.timestamp }}</td>
                             <td>
                                 {% if donation.user.username %}
-                                    <a href="/user/{{ donation.user_id }}">{{ donation.user.username }}</a>
+                                    <a href="{% url 'user' donation.user_id %}">{{ donation.user.username }}</a>
                                 {% else %}
-                                    <a href="/user/{{  donation.user_id }}">{{ donation.user_id }}</a>
+                                    <a href="{% url 'user' donation.user_id %}">{{ donation.user_id }}</a>
                                 {% endif %}
                             </td>
                             <td>{{ donation.amount }}</td>
@@ -62,7 +62,7 @@
                         {% for premium in premiums %}
                             <tr>
                             <td>{{ premium.timestamp }}</td>
-                            <td><a href="/user/{{ premium.user_id }}">{{ premium.user.username }}</a></td>
+                            <td><a href="{% url 'user' premium.user_id %}">{{ premium.user.username }}</a></td>
                             <td>{{ premium.resubs }}</td>
                             </tr>
                         {% endfor %}
@@ -99,7 +99,7 @@
                         {% for message in messages %}
                             <tr>
                             <td>{{ message.timestamp }}</td>
-                                <td><a href="/user/{{ message.user_id }}">{{ message.user.username }}</a></td>
+                                <td><a href="{% url 'user' message.user_id %}">{{ message.user.username }}</a></td>
                             <td>{{ message.text }}</td>
                             </tr>
                         {% endfor %}
@@ -118,7 +118,7 @@
                         {% for follow in follows %}
                             <tr>
                             <td>{{ follow.timestamp }}</td>
-                                <td><a href="/user/{{ follow.user_id }}">{{ follow.user.username }}</a></td>
+                                <td><a href="{% url 'user' follow.user_id %}">{{ follow.user.username }}</a></td>
                             </tr>
                         {% endfor %}
                         </tbody>
@@ -141,11 +141,11 @@
 {#                            <tr>#}
 {#                            <td>{{ premium.started }}</td>#}
 {#                            <td>{% if premium.user.username %}#}
-{#                                    <a href="/user/{{ premium.user_id }}">{{ premium.user.username }}</a>#}
+{#                                    <a href="{% url 'user' premium.user_id %}">{{ premium.user.username }}</a>#}
 {#                                {% elif premium.channel_id == "0" %}#}
 {#                                    Общий премиум#}
 {#                                {% else %}#}
-{#                                    <a href="/user/{{ premium.user_id }}">{{ premium.user_id }}</a>#}
+{#                                    <a href="{% url 'user' premium.user_id %}">{{ premium.user_id }}</a>#}
 {#                                {% endif %}#}
 {#                            </td>#}
 {#                            <td>{{ premium.resubs }}</td>#}

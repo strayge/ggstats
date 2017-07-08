@@ -4,7 +4,7 @@
     {% if user_id %}
         Пользователь {% if name %} {{ name }} {% endif %} #{{ user_id }}
         {% if channel %}
-            <a href="/channel/{{ channel.channel_id }}">(Канал #{{ channel.channel_id }})</a>
+            <a href="{% url 'channel' channel.channel_id %}">(Канал #{{ channel.channel_id }})</a>
     {% endif %}
     {% else %}
         Неизвестный пользователь
@@ -28,7 +28,7 @@
                         {% for message in messages %}
                             <tr>
                             <td>{{ message.timestamp }}</td>
-                                <td><a href="/channel/{{ message.channel_id }}">{{ message.channel.streamer.username }}</a></td>
+                                <td><a href="{% url 'channel' message.channel_id %}">{{ message.channel.streamer.username }}</a></td>
                             <td>{{ message.text }}</td>
                             </tr>
                         {% endfor %}
@@ -48,11 +48,11 @@
                             <tr>
                             <td>{{ premium.started }}</td>
                             <td>{% if premium.channel.streamer.username %}
-                                    <a href="/channel/{{ premium.channel_id }}">{{ premium.channel.streamer.username }}</a>
+                                    <a href="{% url 'channel' premium.channel_id %}">{{ premium.channel.streamer.username }}</a>
                                 {% elif premium.channel_id == "0" %}
                                     Общий премиум
                                 {% else %}
-                                    <a href="/channel/{{ premium.channel_id }}">{{ premium.channel_id }}</a>
+                                    <a href="{% url 'channel' premium.channel_id %}">{{ premium.channel_id }}</a>
                                 {% endif %}
                             </td>
                             <td>{{ premium.resubs }}</td>
@@ -79,11 +79,11 @@
                             <td>{{ donation.timestamp }}</td>
                             <td>
                                 {% if donation.channel.streamer.username %}
-                                    <a href="/channel/{{ donation.channel_id }}">{{ donation.channel.streamer.username }}</a>
+                                    <a href="{% url 'channel' donation.channel_id %}">{{ donation.channel.streamer.username }}</a>
                                 {% elif donation.link %}
                                     <a href="{{ donation.link }}">{{ donation.link }}</a>
                                 {% else %}
-                                    <a href="/channel/{{ donation.channel_id }}">{{ donation.channel_id }}</a>
+                                    <a href="{% url 'channel' donation.channel_id %}">{{ donation.channel_id }}</a>
                                 {% endif %}
                             </td>
                             <td>{{ donation.amount }}</td>
@@ -105,7 +105,7 @@
                         {% for premium in premiums %}
                             <tr>
                             <td>{{ premium.timestamp }}</td>
-                            <td><a href="/channel/{{ premium.channel_id }}">{{ premium.channel.streamer.username }}</a></td>
+                            <td><a href="{% url 'channel' premium.channel_id %}">{{ premium.channel.streamer.username }}</a></td>
                             <td>{{ premium.resubs }}</td>
                             </tr>
                         {% endfor %}
@@ -128,7 +128,7 @@
                         {% for follow in follows %}
                             <tr>
                             <td>{{ follow.timestamp }}</td>
-                                <td><a href="/channel/{{ follow.channel_id }}">{{ follow.channel.streamer.username }}</a></td>
+                                <td><a href="{% url 'channel' follow.channel_id %}">{{ follow.channel.streamer.username }}</a></td>
                             </tr>
                         {% endfor %}
                         </tbody>
