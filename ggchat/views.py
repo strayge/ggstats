@@ -9,7 +9,7 @@ from django.utils import timezone
 from django.views.decorators.cache import cache_page
 
 from ggchat.models import Donation, ChannelStats, User, Message, PremiumActivation, Follow, PremiumStatus, \
-    Channel, Ban, Warning, TotalStats
+    Channel, Ban, Warning, TotalStats, CommonPremiumPayments
 
 
 @cache_page(60 * 10)
@@ -148,10 +148,11 @@ def money(request):
         grouped_by_channel_list.append({'channel_id': channel_id, 'amount': int(amount), 'username': streamer_name})
     grouped_by_channel_list.sort(key=lambda x: x['amount'], reverse=True)
 
-    # todo: Недополученная прибыль от общих премов за месяц
+    common_prems = CommonPremiumPayments.objects.filter(date__gte=week_ago).values('channel_id', 'channel__streamer__username').annotate(sum=Sum('amount')).order_by('-sum')[:20]
 
     content = {'chart_donate_total': chart_donate_total,
                'donate_top_per_channel': grouped_by_channel_list[:15],
+               'common_prems': common_prems,
                }
 
     return render_to_response('ggchat/money.html', content)

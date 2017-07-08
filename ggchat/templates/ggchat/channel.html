@@ -9,7 +9,7 @@
     {% if channel %}
         Канал #{{ channel.channel_id }}
         {% if channel.streamer %}
-            <a href="/user/{{ channel.streamer.user_id }}">
+            <a href="{% url 'user' channel.streamer.user_id %}">
             (Стример {{ channel.streamer.username }} #{{ channel.streamer.user_id }})
             </a>
          {% endif %}
@@ -43,7 +43,7 @@
                                     <a href="{% url 'user' donation.user_id %}">{{ donation.user_id }}</a>
                                 {% endif %}
                             </td>
-                            <td>{{ donation.amount }}</td>
+                            <td>{{ donation.amount|floatformat }}</td>
                             <td>{{ donation.text }}</td>
                             </tr>
                         {% endfor %}

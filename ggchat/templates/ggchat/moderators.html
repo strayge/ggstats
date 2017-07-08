@@ -99,7 +99,7 @@
                                 {% if moder.score >= 100000 %}
                                     &#8734;
                                 {% else %}
-                                    {{ moder.score }}
+                                    {{ moder.score|floatformat }}
                                 {% endif %}
                             </td>
                         </tr>
