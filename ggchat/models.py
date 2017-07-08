@@ -136,3 +136,9 @@ class CommonPremiumPayments(models.Model):
     channel = models.ForeignKey(Channel, on_delete=models.SET_NULL, null=True)
     date = models.DateField(default=datetime.date.today)
     amount = models.FloatField()
+
+
+class TotalStats(models.Model):
+    timestamp = models.DateTimeField(primary_key=True)
+    clients = models.IntegerField()
+    users = models.IntegerField()

@@ -78,30 +78,7 @@
                 </table>
             </div>
         </div>
-        {# pekas #}
-        <div class="col-md-6 col-sm-12">
-            <h4>Любители пеки (>10 сообщений)</h4>
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover table-striped">
-                    <thead>
-                    <tr>
-                        <th>Пользователь</th><th>Пек на сообщение</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for p in pekas %}
-                        <tr>
-                            <td><a href="/user/{{ p.user_id }}"> {{ p.user__username }}</a></td>
-                            <td>{{ p.count }}</td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
 
-    <div class="row">
         {# max_premiums #}
         <div class="col-md-6 col-sm-12">
             <h4>Максимум активных премов</h4>
@@ -123,6 +100,31 @@
                 </table>
             </div>
         </div>
+    </div>
+
+    <div class="row">
+
+        {# pekas #}
+{#        <div class="col-md-6 col-sm-12">#}
+{#            <h4>Любители пеки</h4>#}
+{#            <div class="table-responsive">#}
+{#                <table class="table table-bordered table-hover table-striped">#}
+{#                    <thead>#}
+{#                    <tr>#}
+{#                        <th>Пользователь</th><th>Пек на сообщение</th>#}
+{#                    </tr>#}
+{#                    </thead>#}
+{#                    <tbody>#}
+{#                    {% for p in pekas %}#}
+{#                        <tr>#}
+{#                            <td><a href="/user/{{ p.user_id }}"> {{ p.user__username }}</a></td>#}
+{#                            <td>{{ p.count }}</td>#}
+{#                        </tr>#}
+{#                    {% endfor %}#}
+{#                    </tbody>#}
+{#                </table>#}
+{#            </div>#}
+{#        </div>#}
 
         <div class="col-md-6 col-sm-12">
 

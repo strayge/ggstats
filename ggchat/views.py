@@ -9,9 +9,10 @@ from django.utils import timezone
 from django.views.decorators.cache import cache_page
 
 from ggchat.models import Donation, ChannelStats, User, Message, PremiumActivation, Follow, PremiumStatus, \
-    Channel, Ban, Warning
+    Channel, Ban, Warning, TotalStats
 
 
+@cache_page(60 * 10)
 def index(request):
     # todo: краткое описание
     latest_payments = Donation.objects.order_by('-timestamp')[:10]
@@ -26,37 +27,63 @@ def stats(request):
     return HttpResponse(output)
 
 
-@cache_page(60 * 60)
+@cache_page(60 * 10)
 def viewers(request):
+
+    def calc_total_stats(from_ts, to_ts):
+        full_data = ChannelStats.objects.filter(timestamp__gte=from_ts, timestamp__lte=to_ts).values('channel_id', 'timestamp', 'users', 'clients').all()
+        INTERVAL = 600
+        data = {}
+        for d in full_data:
+            channel_id = d['channel_id']
+            if channel_id not in data:
+                data[channel_id] = {}
+            timestamp = int(d['timestamp'].timestamp() // INTERVAL)
+            if timestamp not in data[channel_id]:
+                data[channel_id][timestamp] = (d['users'], d['clients'])
+
+        data_sum_users = {}
+        data_sum_clients = {}
+        for channel_id in data:
+            for timestamp in data[channel_id]:
+                users, clients = data[channel_id][timestamp]
+                data_sum_users[timestamp] = data_sum_users.get(timestamp, 0) + users
+                data_sum_clients[timestamp] = data_sum_clients.get(timestamp, 0) + clients
+
+        for timestamp, users in data_sum_users.items():
+            if timestamp in data_sum_clients:
+                clients = data_sum_clients[timestamp]
+            else:
+                continue
+            ts = timestamp * INTERVAL
+            restores_timestamp = timezone.make_aware(datetime.datetime.fromtimestamp(ts))
+            total_stats = TotalStats(timestamp=restores_timestamp, clients=clients, users=users)
+            total_stats.save()
+
     week_ago = timezone.now() - datetime.timedelta(days=7)
-    full_data = ChannelStats.objects.filter(timestamp__gte=week_ago).values('channel_id', 'timestamp', 'users', 'clients').all()
 
-    # todo: rewrite this part (OOM)
+    last_total_stats = TotalStats.objects.order_by('-timestamp').first()
+    if last_total_stats:
+        latest_calced_timestamp = last_total_stats.timestamp
+    else:
+        latest_calced_timestamp = week_ago
 
-    data = {}
-    for d in full_data:
-        channel_id = d['channel_id']
-        if channel_id not in data:
-            data[channel_id] = {}
-        timestamp = int(d['timestamp'].timestamp() // 600)
-        if timestamp not in data[channel_id]:
-            data[channel_id][timestamp] = (d['users'], d['clients'])
+    # calc new part of data
+    now = timezone.now()
+    from_timestamp = max(week_ago, latest_calced_timestamp)
+    to_timestamp = min(now, from_timestamp + datetime.timedelta(hours=12))
+    while to_timestamp != now:
+        calc_total_stats(from_timestamp, to_timestamp)
+        from_timestamp = to_timestamp
+        to_timestamp = min(now, from_timestamp + datetime.timedelta(hours=12))
 
-    data_sum_users = {}
-    data_sum_clients = {}
-    for channel_id in data:
-        for timestamp in data[channel_id]:
-            users, clients = data[channel_id][timestamp]
-            data_sum_users[timestamp] = data_sum_users.get(timestamp, 0) + users
-            data_sum_clients[timestamp] = data_sum_clients.get(timestamp, 0) + clients
-
+    full_data = TotalStats.objects.filter(timestamp__gte=week_ago).all()
     data_sum_users_list = []
-    for timestamp, value in data_sum_users.items():
-        data_sum_users_list.append({'timestamp': timestamp*600*1000, 'value': value})
-
     data_sum_clients_list = []
-    for timestamp, value in data_sum_clients.items():
-        data_sum_clients_list.append({'timestamp': timestamp*600*1000, 'value': value})
+    for total_stats in full_data:
+        timestamp_js = total_stats.timestamp.timestamp() * 1000
+        data_sum_users_list.append({'timestamp': timestamp_js, 'value': total_stats.users})
+        data_sum_clients_list.append({'timestamp': timestamp_js, 'value': total_stats.clients})
 
     data_sum_users_list.sort(key=lambda x: x['timestamp'])
     data_sum_clients_list.sort(key=lambda x: x['timestamp'])
@@ -82,7 +109,7 @@ def viewers(request):
                                                     'title': 'Общее число зрителей'})
 
 
-@cache_page(60 * 60)
+@cache_page(60 * 10)
 def money(request):
     week_ago = timezone.now() - datetime.timedelta(days=7)
     donates_data = Donation.objects.filter(timestamp__gte=week_ago).order_by('-timestamp').values('user_id', 'channel_id', 'amount', 'timestamp')
@@ -130,7 +157,7 @@ def money(request):
     return render_to_response('ggchat/money.html', content)
 
 
-@cache_page(60 * 30)
+@cache_page(60 * 10)
 def user(request, user_id):
     user_obj = User.objects.filter(user_id=user_id).first()
     if not user_obj:
@@ -157,7 +184,7 @@ def user(request, user_id):
     return render_to_response('ggchat/user.html', content)
 
 
-@cache_page(60 * 30)
+@cache_page(60 * 10)
 def channel(request, channel_id):
     channel_obj = Channel.objects.filter(channel_id=channel_id).first()
     if not channel_obj:
@@ -225,31 +252,30 @@ def channel(request, channel_id):
     return render_to_response('ggchat/channel.html', content)
 
 
-@cache_page(60 * 60)
+@cache_page(60 * 10)
 def users(request):
     week_ago = timezone.now() - datetime.timedelta(days=7)
     max_premiums = PremiumStatus.objects.filter(ended=None).values('user_id', 'user__username').annotate(count=Count('channel')).order_by('-count')[:20]
     max_sum_donations = Donation.objects.filter(timestamp__gte=week_ago).values('user_id', 'user__username').annotate(sum=Sum('amount')).order_by('-sum')[:20]
     max_count_donations = Donation.objects.filter(timestamp__gte=week_ago).values('user_id', 'user__username').annotate(count=Count('user')).order_by('-count')[:20]
 
-    max_messages = Message.objects.filter(timestamp__gte=week_ago).values('user_id', 'user__username').annotate(count=Count('user')).order_by('-count')
+    max_messages = Message.objects.filter(timestamp__gte=week_ago).values('user_id', 'user__username').annotate(count=Count('user')).order_by('-count')[:20]
 
-    peka_smiles = (':pekaclap:', ':insanepeka:', ':peka:', ':scarypeka:', ':ohmypeka:', ':pled:')
-
-    pekas = []
-
-    for user_and_count in max_messages:
-        user = user_and_count['user_id']
-        messages = Message.objects.filter(timestamp__gte=week_ago, user=user).values('timestamp', 'text', 'user_id', 'user__username').all()
-        if len(messages) < 10:
-            continue
-        peka_counter = 0
-        for msg in messages:
-            for smile in peka_smiles:
-                peka_counter += msg['text'].count(smile)
-        pekas_per_msg = '{:.2f}'.format(peka_counter / len(messages))
-        pekas.append({'user_id': user, 'user__username': user_and_count['user__username'], 'count': pekas_per_msg})
-    pekas.sort(key=lambda x: x['count'], reverse=True)
+    # peka_smiles = (':pekaclap:', ':insanepeka:', ':peka:', ':scarypeka:', ':ohmypeka:', ':pled:')
+    # pekas = []
+    #
+    # for user_and_count in max_messages:
+    #     user = user_and_count['user_id']
+    #     messages = Message.objects.filter(timestamp__gte=week_ago, user=user).values('timestamp', 'text', 'user_id', 'user__username').all()
+    #     if len(messages) < 10:
+    #         continue
+    #     peka_counter = 0
+    #     for msg in messages:
+    #         for smile in peka_smiles:
+    #             peka_counter += msg['text'].count(smile)
+    #     pekas_per_msg = '{:.2f}'.format(peka_counter / len(messages))
+    #     pekas.append({'user_id': user, 'user__username': user_and_count['user__username'], 'count': pekas_per_msg})
+    # pekas.sort(key=lambda x: x['count'], reverse=True)
 
     # todo: активный большую часть времени ???
 
@@ -257,12 +283,12 @@ def users(request):
                'max_sum_donations': max_sum_donations,
                'max_count_donations': max_count_donations,
                'max_messages': max_messages[:20],
-               'pekas': pekas[:20],
+               # 'pekas': pekas[:20],
                }
     return render_to_response('ggchat/users.html', content)
 
 
-@cache_page(60 * 30)
+@cache_page(60 * 10)
 def chats(request):
     week_ago = timezone.now() - datetime.timedelta(days=7)
     deleted_messages = Message.objects.filter(removed=True).order_by('-timestamp')[:20]
@@ -289,7 +315,7 @@ def chats(request):
                }
     return render_to_response('ggchat/chats.html', content)
 
-@cache_page(60 * 30)
+@cache_page(60 * 10)
 def moderators(request):
     week_ago = timezone.now() - datetime.timedelta(days=7)
     warns = Warning.objects.filter(timestamp__gte=week_ago).values('moderator_id', 'moderator__username').annotate(count=Count('timestamp')).order_by('-count')
