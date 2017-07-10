@@ -2,6 +2,7 @@ import asyncio
 import datetime
 import json
 import logging
+import logging.handlers
 import time
 
 import aiohttp
@@ -15,18 +16,29 @@ from ggchat.models import User, Channel, ChannelStatus, ChannelStats, Follow, Me
 GG_CHAT_API2_ENDPOINT = 'ws://chat.goodgame.ru:8081/chat/websocket'
 PERIODIC_PROCESSING_INTERVAL = 5 * 60
 
+class TooLowStatsReceivedException(Exception):
+    pass
 
-class WebsocketClient():
+
+class WebsocketClient:
     def __init__(self):
         self.reset()
         logging.basicConfig(format='%(asctime)-15s %(levelname)-8s %(message)s',
                             level=logging.INFO,
-                            datefmt="%Y-%m-%d %H:%M:%S")
+                            datefmt="%Y-%m-%d %H:%M:%S",
+                            handlers=[logging.StreamHandler(),
+                                      logging.handlers.RotatingFileHandler(filename='fetcher.log',
+                                                                           maxBytes=10 * 2**20,  # 10 MB
+                                                                           backupCount=2),
+                                      ])
         self.log = logging.getLogger()
         # self.log.setLevel(logging.INFO)
+        self.joined_channels = []
+        self.is_first_pediodic_check = True
 
     def reset(self):
         self.joined_channels = []
+        self.is_first_pediodic_check = True
 
     # def save_common_message(self, type, data):
     #     common_msg = CommonMessage(type=type, data=data)
@@ -40,6 +52,8 @@ class WebsocketClient():
         if msg['type'] not in ('welcome', 'error', 'success_join', 'channel_counters', 'channels_list', 'message',
                                'follower'):
             self.log.info('{}'.format(msg))
+        if msg['type'] not in ('error',):
+            self.log.warning('{}'.format(msg))
         # self.save_common_message(msg['type'], msg['data'])
         # else:
 
@@ -602,6 +616,22 @@ class WebsocketClient():
 
     async def periodic_processing(self, ws):
         self.log.info('periodic_processing start')
+
+        # skip in first check (right after start/restart)
+        if not self.is_first_pediodic_check:
+            self.is_first_pediodic_check = False
+            # check for stopped receiving new data
+            stats_in_last_period = ChannelStats.objects.filter(timestamp__gte=timezone.now() - datetime.timedelta(minutes=PERIODIC_PROCESSING_INTERVAL//60)).count()
+            # should be around 230 after first interval
+            self.log.info('%i stats saved in last pediod' % stats_in_last_period)
+            if stats_in_last_period < 50:
+                # something wrong, need reconnect
+                raise TooLowStatsReceivedException
+        else:
+            # enable next next
+            self.is_first_pediodic_check = False
+            self.log.info('count stats check skipped')
+
         for i in range(5):
             # overlapping by 5
             get_channels_query = {"type": "get_channels_list", "data": {"start": str(i * 45), "count": "50"}}
@@ -655,6 +685,7 @@ class WebsocketClient():
         while True:
             try:
                 self.reset()
+                self.log.info('(re)connecting...')
                 ws = await websockets.connect(GG_CHAT_API2_ENDPOINT)
                 last_periodic_processing = 0
                 while True:
@@ -670,6 +701,14 @@ class WebsocketClient():
                     websockets.exceptions.WebSocketProtocolError,
                     websockets.exceptions.PayloadTooBig):
                 self.log.error('WS error')
+                time.sleep(10)
+            except TooLowStatsReceivedException:
+                self.log.error('Too low stats for channels received in last period. Force reconnect.')
+                try:
+                    if ws:
+                        ws.close()
+                except:
+                    pass
                 time.sleep(10)
             except:
                 self.log.error('Unknown error')
