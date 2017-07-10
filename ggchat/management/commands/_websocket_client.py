@@ -19,9 +19,11 @@ PERIODIC_PROCESSING_INTERVAL = 5 * 60
 class WebsocketClient():
     def __init__(self):
         self.reset()
-        logging.basicConfig()
+        logging.basicConfig(format='%(asctime)-15s %(levelname)-8s %(message)s',
+                            level=logging.INFO,
+                            datefmt="%Y-%m-%d %H:%M:%S")
         self.log = logging.getLogger()
-        self.log.setLevel(logging.INFO)
+        # self.log.setLevel(logging.INFO)
 
     def reset(self):
         self.joined_channels = []
@@ -523,6 +525,9 @@ class WebsocketClient():
 
             message_text = msg['data']['text']
 
+            # if message_text.startswith('gif:'):
+            #     self.log.info(msg)
+
             user_premiums = msg['data']['premiums']
             user_resubs = msg['data']['resubs']
 
@@ -596,7 +601,7 @@ class WebsocketClient():
         return common_premiums_counter, common_premiums_payments
 
     async def periodic_processing(self, ws):
-        print('periodic_processing')
+        self.log.info('periodic_processing start')
         for i in range(5):
             # overlapping by 5
             get_channels_query = {"type": "get_channels_list", "data": {"start": str(i * 45), "count": "50"}}
@@ -644,6 +649,8 @@ class WebsocketClient():
                         payments = CommonPremiumPayments(channel=channel, amount=amount, date=yesterday)
                         payments.save()
 
+        self.log.info('periodic_processing end')
+
     async def run(self):
         while True:
             try:
@@ -662,10 +669,10 @@ class WebsocketClient():
                     websockets.exceptions.InvalidHandshake,
                     websockets.exceptions.WebSocketProtocolError,
                     websockets.exceptions.PayloadTooBig):
-                print('WS error')
+                self.log.error('WS error')
                 time.sleep(10)
             except:
-                print('Unknown error')
+                self.log.error('Unknown error')
                 import traceback
                 print(traceback.format_exc())
                 time.sleep(60)
