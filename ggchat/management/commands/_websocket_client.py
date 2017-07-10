@@ -52,8 +52,8 @@ class WebsocketClient:
         if msg['type'] not in ('welcome', 'error', 'success_join', 'channel_counters', 'channels_list', 'message',
                                'follower'):
             self.log.info('{}'.format(msg))
-        if msg['type'] not in ('error',):
-            self.log.warning('{}'.format(msg))
+        if msg['type'] == 'error' and 'You are already connected to the channel' not in str(msg):
+                self.log.warning('{}'.format(msg))
         # self.save_common_message(msg['type'], msg['data'])
         # else:
 
