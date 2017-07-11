@@ -8,12 +8,12 @@ from django.utils import timezone
 class CommonMessage(models.Model):
     type = models.CharField(max_length=100)
     data = models.CharField(max_length=2000)
-    timestamp = models.DateTimeField(default=timezone.now)
+    timestamp = models.DateTimeField(default=timezone.now, db_index=True)
 
 
 class User(models.Model):
     user_id = models.PositiveIntegerField(primary_key=True)
-    username = models.CharField(max_length=50)
+    username = models.CharField(max_length=50, db_index=True)
 
     def __str__(self):
         return '{}#{}'.format(self.username, self.user_id)
@@ -32,17 +32,17 @@ class Channel(models.Model):
 
 class ChannelStatus(models.Model):
     channel = models.ForeignKey(Channel, on_delete=models.SET_NULL, null=True)
-    timestamp = models.DateTimeField(default=timezone.now)
+    timestamp = models.DateTimeField(default=timezone.now, db_index=True)
     up = models.BooleanField(default=True)
 
 
 class Message(models.Model):
     message_id = models.IntegerField(primary_key=True)
-    channel = models.ForeignKey(Channel, on_delete=models.SET_NULL, null=True)
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-    timestamp = models.DateTimeField(default=timezone.now)
+    channel = models.ForeignKey(Channel, on_delete=models.SET_NULL, null=True, db_index=True)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, db_index=True)
+    timestamp = models.DateTimeField(default=timezone.now, db_index=True)
     text = models.CharField(max_length=2000)
-    removed = models.BooleanField(default=False)
+    removed = models.BooleanField(default=False, db_index=True)
     removed_by = models.ForeignKey(User, related_name='removed_by', on_delete=models.SET_NULL, null=True, default=None)
 
     def __str__(self):
@@ -55,7 +55,7 @@ class Donation(models.Model):
     amount = models.FloatField()
     text = models.CharField(max_length=500)
     link = models.CharField(max_length=500)
-    timestamp = models.DateTimeField(default=timezone.now)
+    timestamp = models.DateTimeField(default=timezone.now, db_index=True)
 
     def __str__(self):
         return '{} donated to {} {} rub. with text "{}"'.format(self.user, self.channel, self.amount, self.text)
@@ -64,7 +64,7 @@ class Donation(models.Model):
 class PremiumActivation(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     channel = models.ForeignKey(Channel, on_delete=models.SET_NULL, null=True)
-    timestamp = models.DateTimeField(default=timezone.now)
+    timestamp = models.DateTimeField(default=timezone.now, db_index=True)
     resubs = models.PositiveSmallIntegerField()
     payment = models.PositiveSmallIntegerField()
 
@@ -89,7 +89,7 @@ class Poll(models.Model):
     author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     text = models.CharField(max_length=200)
     answers = models.CharField(max_length=500)
-    timestamp = models.DateTimeField(default=timezone.now)
+    timestamp = models.DateTimeField(default=timezone.now, db_index=True)
 
 
 class Warning(models.Model):
@@ -97,13 +97,13 @@ class Warning(models.Model):
     channel = models.ForeignKey(Channel, on_delete=models.SET_NULL, null=True)
     moderator = models.ForeignKey(User, related_name='warning_by', on_delete=models.SET_NULL, null=True)
     reason = models.CharField(max_length=200)
-    timestamp = models.DateTimeField(default=timezone.now)
+    timestamp = models.DateTimeField(default=timezone.now, db_index=True)
 
 
 class Ban(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     channel = models.ForeignKey(Channel, on_delete=models.SET_NULL, null=True)
-    timestamp = models.DateTimeField(default=timezone.now)
+    timestamp = models.DateTimeField(default=timezone.now, db_index=True)
     moderator = models.ForeignKey(User, related_name='ban_by', on_delete=models.SET_NULL, null=True)
     duration = models.PositiveIntegerField()
     reason = models.CharField(max_length=200)
@@ -113,7 +113,7 @@ class Ban(models.Model):
 
 class ChannelStats(models.Model):
     channel = models.ForeignKey(Channel, on_delete=models.SET_NULL, null=True)
-    timestamp = models.DateTimeField(default=timezone.now)
+    timestamp = models.DateTimeField(default=timezone.now, db_index=True)
     clients = models.IntegerField()
     users = models.IntegerField()
 
@@ -121,11 +121,11 @@ class ChannelStats(models.Model):
 class Follow(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     channel = models.ForeignKey(Channel, on_delete=models.SET_NULL, null=True)
-    timestamp = models.DateTimeField(default=timezone.now)
+    timestamp = models.DateTimeField(default=timezone.now, db_index=True)
 
 
 class CommonPremium(models.Model):
-    date = models.DateField(default=datetime.date.today)
+    date = models.DateField(default=datetime.date.today, db_index=True)
     per_year = models.PositiveIntegerField()
     per_180_days = models.PositiveIntegerField()
     per_90_days = models.PositiveIntegerField()
@@ -134,7 +134,7 @@ class CommonPremium(models.Model):
 
 class CommonPremiumPayments(models.Model):
     channel = models.ForeignKey(Channel, on_delete=models.SET_NULL, null=True)
-    date = models.DateField(default=datetime.date.today)
+    date = models.DateField(default=datetime.date.today, db_index=True)
     amount = models.FloatField()
 
     def __str__(self):
