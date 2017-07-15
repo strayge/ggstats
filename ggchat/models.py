@@ -41,7 +41,8 @@ class Message(models.Model):
     channel = models.ForeignKey(Channel, on_delete=models.SET_NULL, null=True, db_index=True)
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, db_index=True)
     timestamp = models.DateTimeField(default=timezone.now, db_index=True)
-    text = models.CharField(max_length=2000)
+    text = models.TextField()
+    # text = models.CharField(max_length=2000)
     removed = models.BooleanField(default=False, db_index=True)
     removed_by = models.ForeignKey(User, related_name='removed_by', on_delete=models.SET_NULL, null=True, default=None)
 
