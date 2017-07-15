@@ -24,6 +24,8 @@ SECRET_KEY = '@zir3zi%ad+g3roix8#e1cx5c_rin3ow$h6e_8c9gz@f7n6n21'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
+if os.path.isfile('debug.txt'):
+    DEBUG = True
 
 ALLOWED_HOSTS = ['strayge.com', '127.0.0.1']
 
@@ -75,14 +77,27 @@ WSGI_APPLICATION = 'project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-        'CONN_MAX_AGE': 60,
-        'timeout': 20,
+if DEBUG:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+            'CONN_MAX_AGE': 60,
+            'timeout': 20,
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'OPTIONS': {
+                'database': 'ggsite',
+                'user': 'ggsite_user',
+                'password': '25dPoLW7hzqmcZdN1lYn',
+                'default-character-set': 'utf8',
+            }
+        }
+    }
 
 
 # Password validation
