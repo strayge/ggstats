@@ -711,9 +711,7 @@ class WebsocketClient:
                     pass
                 time.sleep(10)
             except:
-                self.log.error('Unknown error')
-                import traceback
-                print(traceback.format_exc())
+                self.log.exception('Unknown error')
                 time.sleep(60)
 
     def start_forever(self):
