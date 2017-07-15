@@ -6,21 +6,21 @@ from django.utils import timezone
 
 
 class CommonMessage(models.Model):
-    type = models.CharField(max_length=100)
-    data = models.CharField(max_length=2000)
+    type = models.CharField(max_length=400)
+    data = models.CharField(max_length=8000)
     timestamp = models.DateTimeField(default=timezone.now, db_index=True)
 
 
 class User(models.Model):
     user_id = models.PositiveIntegerField(primary_key=True)
-    username = models.CharField(max_length=50, db_index=True)
+    username = models.CharField(max_length=200, db_index=True)
 
     def __str__(self):
         return '{}#{}'.format(self.username, self.user_id)
 
 
 class Channel(models.Model):
-    channel_id = models.CharField(max_length=50, primary_key=True)
+    channel_id = models.CharField(max_length=200, primary_key=True)
     streamer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
@@ -41,8 +41,7 @@ class Message(models.Model):
     channel = models.ForeignKey(Channel, on_delete=models.SET_NULL, null=True, db_index=True)
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, db_index=True)
     timestamp = models.DateTimeField(default=timezone.now, db_index=True)
-    text = models.TextField()
-    # text = models.CharField(max_length=2000)
+    text = models.CharField(max_length=10000)
     removed = models.BooleanField(default=False, db_index=True)
     removed_by = models.ForeignKey(User, related_name='removed_by', on_delete=models.SET_NULL, null=True, default=None)
 
@@ -54,8 +53,8 @@ class Donation(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     channel = models.ForeignKey(Channel, on_delete=models.SET_NULL, null=True)
     amount = models.FloatField()
-    text = models.CharField(max_length=500)
-    link = models.CharField(max_length=500)
+    text = models.CharField(max_length=4000)
+    link = models.CharField(max_length=1000)
     timestamp = models.DateTimeField(default=timezone.now, db_index=True)
 
     def __str__(self):
@@ -88,8 +87,8 @@ class PremiumStatus(models.Model):
 class Poll(models.Model):
     channel = models.ForeignKey(Channel, on_delete=models.SET_NULL, null=True)
     author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-    text = models.CharField(max_length=200)
-    answers = models.CharField(max_length=500)
+    text = models.CharField(max_length=800)
+    answers = models.CharField(max_length=2000)
     timestamp = models.DateTimeField(default=timezone.now, db_index=True)
 
 
@@ -97,7 +96,7 @@ class Warning(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     channel = models.ForeignKey(Channel, on_delete=models.SET_NULL, null=True)
     moderator = models.ForeignKey(User, related_name='warning_by', on_delete=models.SET_NULL, null=True)
-    reason = models.CharField(max_length=200)
+    reason = models.CharField(max_length=800)
     timestamp = models.DateTimeField(default=timezone.now, db_index=True)
 
 
@@ -107,7 +106,7 @@ class Ban(models.Model):
     timestamp = models.DateTimeField(default=timezone.now, db_index=True)
     moderator = models.ForeignKey(User, related_name='ban_by', on_delete=models.SET_NULL, null=True)
     duration = models.PositiveIntegerField()
-    reason = models.CharField(max_length=200)
+    reason = models.CharField(max_length=800)
     show = models.BooleanField(default=True)
     permanent = models.BooleanField(default=False)
 
