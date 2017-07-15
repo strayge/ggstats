@@ -290,7 +290,8 @@ class WebsocketClient:
 
             user = User.objects.filter(username=username).first()
             if not user and username == 'Неизвестный':
-                user = User(user_id=None, username='Неизвестный')
+                user = User(user_id=0, username='Неизвестный')
+                user.save()
 
             # skip donations from not exists users
             if user:
@@ -304,6 +305,7 @@ class WebsocketClient:
                 else:
                     channel = Channel.objects.filter(channel_id=channel_id).first()
                     if channel:
+
                         donation = Donation(user=user, channel=channel, amount=amount, text=text, link=link)
                         donation.save()
 
