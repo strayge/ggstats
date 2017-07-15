@@ -94,7 +94,7 @@ else:
                 'database': 'ggsite',
                 'user': 'ggsite_user',
                 'password': '25dPoLW7hzqmcZdN1lYn',
-                'default-character-set': 'utf8',
+                'charset': 'utf8mb4',
             }
         }
     }
