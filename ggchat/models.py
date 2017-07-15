@@ -145,3 +145,13 @@ class TotalStats(models.Model):
     timestamp = models.DateTimeField(primary_key=True)
     clients = models.IntegerField()
     users = models.IntegerField()
+
+
+class PlayerChannelStats(models.Model):
+    channel = models.ForeignKey(Channel, on_delete=models.SET_NULL, null=True)
+    timestamp = models.DateTimeField(default=timezone.now, db_index=True)
+    chat = models.IntegerField()
+    viewers = models.IntegerField()
+    viewers_gg = models.IntegerField()
+    status = models.BooleanField()
+    status_gg = models.BooleanField()

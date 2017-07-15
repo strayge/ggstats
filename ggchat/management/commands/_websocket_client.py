@@ -11,7 +11,7 @@ import websockets
 from django.utils import timezone
 
 from ggchat.models import User, Channel, ChannelStatus, ChannelStats, Follow, Message, Donation, Ban, \
-    Warning, PremiumStatus, PremiumActivation, CommonPremium, CommonPremiumPayments
+    Warning, PremiumStatus, PremiumActivation, CommonPremium, CommonPremiumPayments, PlayerChannelStats
 
 GG_CHAT_API2_ENDPOINT = 'ws://chat.goodgame.ru:8081/chat/websocket'
 PERIODIC_PROCESSING_INTERVAL = 5 * 60
@@ -289,6 +289,9 @@ class WebsocketClient:
             link = msg['data']['link']
 
             user = User.objects.filter(username=username).first()
+            if not user and username == 'Неизвестный':
+                user = User(user_id=None, username='Неизвестный')
+
             # skip donations from not exists users
             if user:
                 # donations to cups, showed on all subscribed channels
@@ -642,26 +645,12 @@ class WebsocketClient:
         common_premiums_yesterday = CommonPremium.objects.filter(date=yesterday).first()
         # save current data all
         if not common_premiums_yesterday:
-            # two_days_ago = datetime.date.today() - datetime.timedelta(days=2)
-            # common_premiums_prev = CommonPremium.objects.filter(date=two_days_ago).first()
-
             common_premiums_counter, common_premiums_payments = await self.get_common_premiums()
 
             per_year = common_premiums_counter[0]
             per_180_days = common_premiums_counter[1]
             per_90_days = common_premiums_counter[2]
             per_30_days = common_premiums_counter[3]
-
-            # if common_premiums_prev:
-            #     # fix: wrong, if 1 day in month more donations than all previous month
-            #     if per_year >= common_premiums_prev.per_year:
-            #         per_year -= common_premiums_prev.per_year
-            #     if per_180_days >= common_premiums_prev.per_180_days:
-            #         per_180_days -= common_premiums_prev.per_180_days
-            #     if per_90_days >= common_premiums_prev.per_90_days:
-            #         per_90_days -= common_premiums_prev.per_90_days
-            #     if per_30_days >= common_premiums_prev.per_30_days:
-            #         per_30_days -= common_premiums_prev.per_30_days
 
             common_premiums = CommonPremium(date=yesterday, per_year=per_year, per_180_days=per_180_days,
                                             per_90_days=per_90_days, per_30_days=per_30_days)
@@ -672,13 +661,43 @@ class WebsocketClient:
                 if user:
                     channel = Channel.objects.filter(streamer=user).first()
                     if channel:
-                        # payments_previous = CommonPremiumPayments.objects.filter(channel=channel, date=two_days_ago).first()
-                        # fix: wrong, if 1 day in month more donations than all previous month
-                        # if payments_previous and amount >= payments_previous.amount:
-                        #     amount -= payments_previous.amount
                         payments = CommonPremiumPayments(channel=channel, amount=amount, date=yesterday)
                         payments.save()
 
+        # get stats from player for all joined channels
+        channels_ids_str = ','.join(self.joined_channels)
+        url_gg = 'https://goodgame.ru/api/getggchannelstatus?id={}&fmt=json'.format(channels_ids_str)
+        url_all = 'https://goodgame.ru/api/getchannelstatus?id={}&fmt=json'.format(channels_ids_str)
+        answer_gg = {}
+        answer_all = {}
+        async with aiohttp.ClientSession(read_timeout=20, conn_timeout=20) as session:
+            async with session.get(url_gg) as resp1:
+                if resp1.status == 200:
+                    answer_gg = await resp1.json()
+            async with session.get(url_all) as resp2:
+                if resp2.status == 200:
+                    answer_all = await resp2.json()
+        if answer_gg and answer_all:
+            for channel_id in answer_gg.keys():
+                player_in_chat = int(answer_gg[channel_id].get('usersinchat', 0))
+                player_viewers_gg = int(answer_gg[channel_id].get('viewers', 0))
+                player_viewers = 0
+                if channel_id in answer_all:
+                    player_viewers = int(answer_all[channel_id].get('viewers', 0))
+                if answer_gg[channel_id].get('status', 'Dead').lower() == 'live':
+                    player_status_gg = True
+                else:
+                    player_status_gg = False
+                player_status = False
+                if channel_id in answer_all and answer_all[channel_id].get('status', 'Dead').lower() == 'live':
+                    player_status = True
+                player_stats = PlayerChannelStats(channel_id=channel_id,
+                                                  chat=player_in_chat,
+                                                  viewers=player_viewers,
+                                                  viewers_gg=player_viewers_gg,
+                                                  status=player_status,
+                                                  status_gg=player_status_gg)
+                player_stats.save()
         self.log.info('periodic_processing end')
 
     async def run(self):
