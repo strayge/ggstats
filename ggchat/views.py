@@ -88,7 +88,7 @@ def viewers(request):
     last_total_stats = TotalStats.objects.order_by('-timestamp').first()
     if last_total_stats:
         # latest_calced_timestamp = last_total_stats.timestamp
-        latest_calced_timestamp = last_total_stats.timestamp - datetime.timedelta(minutes=30)
+        latest_calced_timestamp = last_total_stats.timestamp - datetime.timedelta(minutes=40)
     else:
         latest_calced_timestamp = week_ago
 

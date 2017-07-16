@@ -10,8 +10,7 @@ import parsel
 import websockets
 from django.utils import timezone
 
-from ggchat.models import User, Channel, ChannelStatus, ChannelStats, Follow, Message, Donation, Ban, \
-    Warning, PremiumStatus, PremiumActivation, CommonPremium, CommonPremiumPayments, PlayerChannelStats
+from ggchat.models import *
 
 GG_CHAT_API2_ENDPOINT = 'ws://chat.goodgame.ru:8081/chat/websocket'
 PERIODIC_PROCESSING_INTERVAL = 5 * 60
