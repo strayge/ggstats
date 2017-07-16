@@ -37,7 +37,7 @@ class ChannelStatus(models.Model):
 
 
 class Message(models.Model):
-    message_id = models.IntegerField(primary_key=True)
+    message_id = models.IntegerField()
     channel = models.ForeignKey(Channel, on_delete=models.SET_NULL, null=True, db_index=True)
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, db_index=True)
     timestamp = models.DateTimeField(default=timezone.now, db_index=True)
@@ -145,6 +145,8 @@ class TotalStats(models.Model):
     timestamp = models.DateTimeField(primary_key=True)
     clients = models.IntegerField()
     users = models.IntegerField()
+    viewers = models.IntegerField()
+    viewers_gg = models.IntegerField()
 
 
 class PlayerChannelStats(models.Model):

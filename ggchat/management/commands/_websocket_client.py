@@ -417,7 +417,7 @@ class WebsocketClient:
             message_id = msg['data']['message_id']
             moderator_username = msg['data']['adminName']
 
-            removed_message = Message.objects.filter(message_id=message_id).first()
+            removed_message = Message.objects.filter(message_id=message_id).order_by('-timestamp').first()
 
             if removed_message:
                 removed_message.removed = True
