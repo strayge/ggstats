@@ -626,7 +626,7 @@ class WebsocketClient:
         if not self.is_first_pediodic_check:
             self.is_first_pediodic_check = False
             # check for stopped receiving new data
-            stats_in_last_period = ChannelStats.objects.filter(timestamp__gte=timezone.now() - datetime.timedelta(minutes=PERIODIC_PROCESSING_INTERVAL//60)).count()
+            stats_in_last_period = ChannelStats.objects.filter(timestamp__gte=timezone.now() - datetime.timedelta(minutes=2*PERIODIC_PROCESSING_INTERVAL//60)).count()
             # should be around 230 after first interval
             self.log.info('%i stats saved in last pediod' % stats_in_last_period)
             if stats_in_last_period < 50:
