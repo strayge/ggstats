@@ -15,6 +15,7 @@ from ggchat.models import User, Channel, ChannelStatus, ChannelStats, Follow, Me
 
 GG_CHAT_API2_ENDPOINT = 'ws://chat.goodgame.ru:8081/chat/websocket'
 PERIODIC_PROCESSING_INTERVAL = 5 * 60
+SAVE_STATS_PERIOD = 10 * 60
 
 class TooLowStatsReceivedException(Exception):
     pass
@@ -214,8 +215,8 @@ class WebsocketClient:
             except ChannelStats.DoesNotExist:
                 last_timestamp = None
 
-            # one time per 5 minutes save counter for each channel
-            if not last_timestamp or timezone.now() > last_timestamp + timezone.timedelta(minutes=5):
+            # one time per SAVE_STATS_PERIOD//60 minutes save counter for each channel
+            if not last_timestamp or timezone.now() > last_timestamp + timezone.timedelta(minutes=SAVE_STATS_PERIOD // 60):
                 current_status = ChannelStats(channel_id=channel_id, users=users, clients=clients)
                 current_status.save()
 
@@ -667,39 +668,47 @@ class WebsocketClient:
                         payments.save()
 
         # get stats from player for all joined channels
-        channels_ids_str = ','.join(self.joined_channels)
-        url_gg = 'https://goodgame.ru/api/getggchannelstatus?id={}&fmt=json'.format(channels_ids_str)
-        url_all = 'https://goodgame.ru/api/getchannelstatus?id={}&fmt=json'.format(channels_ids_str)
-        answer_gg = {}
-        answer_all = {}
-        async with aiohttp.ClientSession(read_timeout=20, conn_timeout=20) as session:
-            async with session.get(url_gg) as resp1:
-                if resp1.status == 200:
-                    answer_gg = await resp1.json()
-            async with session.get(url_all) as resp2:
-                if resp2.status == 200:
-                    answer_all = await resp2.json()
-        if answer_gg and answer_all:
-            for channel_id in answer_gg.keys():
-                player_in_chat = int(answer_gg[channel_id].get('usersinchat', 0))
-                player_viewers_gg = int(answer_gg[channel_id].get('viewers', 0))
-                player_viewers = 0
-                if channel_id in answer_all:
-                    player_viewers = int(answer_all[channel_id].get('viewers', 0))
-                if answer_gg[channel_id].get('status', 'Dead').lower() == 'live':
-                    player_status_gg = True
-                else:
-                    player_status_gg = False
-                player_status = False
-                if channel_id in answer_all and answer_all[channel_id].get('status', 'Dead').lower() == 'live':
-                    player_status = True
-                player_stats = PlayerChannelStats(channel_id=channel_id,
-                                                  chat=player_in_chat,
-                                                  viewers=player_viewers,
-                                                  viewers_gg=player_viewers_gg,
-                                                  status=player_status,
-                                                  status_gg=player_status_gg)
-                player_stats.save()
+        try:
+            last_player_stats = PlayerChannelStats.objects.latest('timestamp')
+            last_time_save_player_stats = last_player_stats.timestamp
+        except PlayerChannelStats.DoesNotExist:
+            last_time_save_player_stats = None
+
+        # one time per SAVE_STATS_PERIOD//60 minutes save player's stats for all joined channels
+        if not last_time_save_player_stats or timezone.now() > last_time_save_player_stats + timezone.timedelta(minutes=SAVE_STATS_PERIOD // 60):
+            channels_ids_str = ','.join(self.joined_channels)
+            url_gg = 'https://goodgame.ru/api/getggchannelstatus?id={}&fmt=json'.format(channels_ids_str)
+            url_all = 'https://goodgame.ru/api/getchannelstatus?id={}&fmt=json'.format(channels_ids_str)
+            answer_gg = {}
+            answer_all = {}
+            async with aiohttp.ClientSession(read_timeout=20, conn_timeout=20) as session:
+                async with session.get(url_gg) as resp1:
+                    if resp1.status == 200:
+                        answer_gg = await resp1.json()
+                async with session.get(url_all) as resp2:
+                    if resp2.status == 200:
+                        answer_all = await resp2.json()
+            if answer_gg and answer_all:
+                for channel_id in answer_gg.keys():
+                    player_in_chat = int(answer_gg[channel_id].get('usersinchat', 0))
+                    player_viewers_gg = int(answer_gg[channel_id].get('viewers', 0))
+                    player_viewers = 0
+                    if channel_id in answer_all:
+                        player_viewers = int(answer_all[channel_id].get('viewers', 0))
+                    if answer_gg[channel_id].get('status', 'Dead').lower() == 'live':
+                        player_status_gg = True
+                    else:
+                        player_status_gg = False
+                    player_status = False
+                    if channel_id in answer_all and answer_all[channel_id].get('status', 'Dead').lower() == 'live':
+                        player_status = True
+                    player_stats = PlayerChannelStats(channel_id=channel_id,
+                                                      chat=player_in_chat,
+                                                      viewers=player_viewers,
+                                                      viewers_gg=player_viewers_gg,
+                                                      status=player_status,
+                                                      status_gg=player_status_gg)
+                    player_stats.save()
         self.log.info('periodic_processing end')
 
     async def run(self):
