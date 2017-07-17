@@ -285,17 +285,33 @@ def channel(request, channel_id):
     week_ago = timezone.now() - datetime.timedelta(days=7)
     chart_clients_data = ChannelStats.objects.filter(channel_id=channel_id, timestamp__gte=week_ago).values('timestamp', 'clients').all()
     chart_users_data = ChannelStats.objects.filter(channel_id=channel_id, timestamp__gte=week_ago).values('timestamp', 'users').all()
+    viewers_data = PlayerChannelStats.objects.filter(channel_id=channel_id, timestamp__gte=week_ago).values('timestamp', 'viewers').all()
+    viewers_gg_data = PlayerChannelStats.objects.filter(channel_id=channel_id, timestamp__gte=week_ago).values('timestamp', 'viewers_gg').all()
     chart_people = {'data': chart_clients_data,
                     'x_keyword': 'timestamp',
                     'y_keyword': 'clients',
                     'type': 'area',
-                    'name': 'Всего',
+                    'name': 'Всего в чате',
 
                     'data2': chart_users_data,
                     'x_keyword2': 'timestamp',
                     'y_keyword2': 'users',
                     'type2': 'area',
-                    'name2': 'Залогиненных',
+                    'name2': 'Залогиненных в чате',
+
+                    'data3': viewers_data,
+                    'x_keyword3': 'timestamp',
+                    'y_keyword3': 'viewers',
+                    'type3': 'line',
+                    'name3': 'Всего зрителей',
+                    'color3': '#cccccc',
+
+                    'data4': viewers_gg_data,
+                    'x_keyword4': 'timestamp',
+                    'y_keyword4': 'viewers_gg',
+                    'type4': 'line',
+                    'name4': 'Зрителей на GG плеере',
+                    'color4': '#ff0000',
 
                     'zoom': True,
                     'legend': True,
