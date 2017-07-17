@@ -285,8 +285,21 @@ def channel(request, channel_id):
     week_ago = timezone.now() - datetime.timedelta(days=7)
     chart_clients_data = ChannelStats.objects.filter(channel_id=channel_id, timestamp__gte=week_ago).order_by('-timestamp').values('timestamp', 'clients').all()
     chart_users_data = ChannelStats.objects.filter(channel_id=channel_id, timestamp__gte=week_ago).order_by('-timestamp').values('timestamp', 'users').all()
-    viewers_data = PlayerChannelStats.objects.filter(channel_id=channel_id, timestamp__gte=week_ago).order_by('-timestamp').values('timestamp', 'viewers').all()
-    viewers_gg_data = PlayerChannelStats.objects.filter(channel_id=channel_id, timestamp__gte=week_ago).order_by('-timestamp').values('timestamp', 'viewers_gg').all()
+    viewers_data_pre = PlayerChannelStats.objects.filter(channel_id=channel_id, timestamp__gte=week_ago).order_by('-timestamp').values('timestamp', 'viewers', 'status').all()
+    viewers_gg_data_pre = PlayerChannelStats.objects.filter(channel_id=channel_id, timestamp__gte=week_ago).order_by('-timestamp').values('timestamp', 'viewers_gg', 'status_gg').all()
+    viewers_data = []
+    for x in viewers_data_pre:
+        if not x['status']:
+            x['viewers'] = 0
+        del(x['status'])
+        viewers_data.append(x)
+    viewers_gg_data = []
+    for x in viewers_gg_data_pre:
+        if not x['status_gg']:
+            x['viewers_gg'] = 0
+        del(x['status_gg'])
+        viewers_gg_data.append(x)
+
     chart_people = {'data': chart_clients_data,
                     'x_keyword': 'timestamp',
                     'y_keyword': 'clients',
