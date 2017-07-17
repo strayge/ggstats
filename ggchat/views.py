@@ -283,10 +283,10 @@ def channel(request, channel_id):
     active_premiums = PremiumStatus.objects.filter(channel_id=channel_id, ended=None)
 
     week_ago = timezone.now() - datetime.timedelta(days=7)
-    chart_clients_data = ChannelStats.objects.filter(channel_id=channel_id, timestamp__gte=week_ago).values('timestamp', 'clients').all()
-    chart_users_data = ChannelStats.objects.filter(channel_id=channel_id, timestamp__gte=week_ago).values('timestamp', 'users').all()
-    viewers_data = PlayerChannelStats.objects.filter(channel_id=channel_id, timestamp__gte=week_ago).values('timestamp', 'viewers').all()
-    viewers_gg_data = PlayerChannelStats.objects.filter(channel_id=channel_id, timestamp__gte=week_ago).values('timestamp', 'viewers_gg').all()
+    chart_clients_data = ChannelStats.objects.filter(channel_id=channel_id, timestamp__gte=week_ago).order_by('-timestamp').values('timestamp', 'clients').all()
+    chart_users_data = ChannelStats.objects.filter(channel_id=channel_id, timestamp__gte=week_ago).order_by('-timestamp').values('timestamp', 'users').all()
+    viewers_data = PlayerChannelStats.objects.filter(channel_id=channel_id, timestamp__gte=week_ago).order_by('-timestamp').values('timestamp', 'viewers').all()
+    viewers_gg_data = PlayerChannelStats.objects.filter(channel_id=channel_id, timestamp__gte=week_ago).order_by('-timestamp').values('timestamp', 'viewers_gg').all()
     chart_people = {'data': chart_clients_data,
                     'x_keyword': 'timestamp',
                     'y_keyword': 'clients',
