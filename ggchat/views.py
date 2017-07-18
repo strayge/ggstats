@@ -131,12 +131,12 @@ def viewers(request):
                          'type2': 'area',
                          'name2': 'Залогиненных в чате',
 
-                         'data3': data_sum_viewers_list,
-                         'x_keyword3': 'timestamp',
-                         'y_keyword3': 'value',
-                         'type3': 'line',
-                         'name3': 'Всего зрителей',
-                         'color3': '#cccccc',
+                         # 'data3': data_sum_viewers_list,
+                         # 'x_keyword3': 'timestamp',
+                         # 'y_keyword3': 'value',
+                         # 'type3': 'line',
+                         # 'name3': 'Всего зрителей',
+                         # 'color3': '#cccccc',
 
                          'data4': data_sum_viewers_gg_list,
                          'x_keyword4': 'timestamp',
