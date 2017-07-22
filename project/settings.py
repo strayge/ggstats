@@ -95,7 +95,8 @@ else:
                 'user': 'ggsite_user',
                 'password': '25dPoLW7hzqmcZdN1lYn',
                 'charset': 'utf8mb4',
-            }
+            },
+            'CONN_MAX_AGE': 900,
         }
     }
 

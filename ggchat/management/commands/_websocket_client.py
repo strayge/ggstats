@@ -4,11 +4,15 @@ import json
 import logging
 import logging.handlers
 import time
-
+from django.db.utils import OperationalError
+import django.db
 import aiohttp
+import django
 import parsel
 import websockets
 from django.utils import timezone
+
+
 
 from ggchat.models import *
 
@@ -739,6 +743,10 @@ class WebsocketClient:
                 except:
                     pass
                 time.sleep(10)
+            except OperationalError:
+                self.log.exception('OperationalError trying reset db connection')
+                time.sleep(60)
+                django.db.close_old_connections()
             except:
                 self.log.exception('Unknown error')
                 time.sleep(60)
