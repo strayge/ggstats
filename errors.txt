@@ -1,0 +1,30 @@
+2017-08-11 07:41:25 INFO     {'data': {'channel_id': '115576', 'started': 1502437197, 'premium_only': 0}, 'type': 'update_channel_info'}
+2017-08-11 07:41:41 INFO     periodic_processing start
+2017-08-11 07:41:41 INFO     284 stats saved in last pediod
+2017-08-11 07:42:07 ERROR    Unknown error
+Traceback (most recent call last):
+  File "/var/www/ggsite/ggchat/management/commands/_websocket_client.py", line 727, in run
+    await self.periodic_processing(ws)
+  File "/var/www/ggsite/ggchat/management/commands/_websocket_client.py", line 691, in periodic_processing
+    async with session.get(url_all) as resp2:
+  File "/var/www/venv/lib/python3.5/site-packages/aiohttp/client.py", line 637, in __aenter__
+    self._resp = yield from self._coro
+  File "/var/www/venv/lib/python3.5/site-packages/aiohttp/client.py", line 241, in _request
+    yield from resp.start(conn, read_until_eof)
+  File "/var/www/venv/lib/python3.5/site-packages/aiohttp/client_reqrep.py", line 572, in start
+    self._continue = None
+  File "/var/www/venv/lib/python3.5/site-packages/aiohttp/helpers.py", line 676, in __exit__
+    raise asyncio.TimeoutError from None
+concurrent.futures._base.TimeoutError
+2017-08-11 07:43:07 INFO     (re)connecting...
+2017-08-11 07:43:08 INFO     periodic_processing start
+2017-08-11 07:43:08 INFO     count stats check skipped
+2017-08-11 07:43:10 INFO     periodic_processing end
+2017-08-11 07:59:11 ERROR    Fatal read error on socket transport
+protocol: <asyncio.sslproto.SSLProtocol object at 0x7fee1dd17780>
+transport: <_SelectorSocketTransport fd=8 read=polling write=<idle, bufsize=0>>
+Traceback (most recent call last):
+  File "/usr/lib/python3.5/asyncio/selector_events.py", line 662, in _read_ready
+    data = self._sock.recv(self.max_size)
+TimeoutError: [Errno 110] Connection timed out
+
