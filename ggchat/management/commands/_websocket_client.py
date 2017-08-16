@@ -715,19 +715,24 @@ class WebsocketClient:
         self.log.info('periodic_processing end')
 
     async def run(self):
+        self.reset()
+        self.log.info('(re)connecting...')
+        async with websockets.connect(GG_CHAT_API2_ENDPOINT) as ws:
+            last_periodic_processing = 0
+            while True:
+                if time.time() > last_periodic_processing + PERIODIC_PROCESSING_INTERVAL:
+                    last_periodic_processing = time.time()
+                    await self.periodic_processing(ws)
+                received = await ws.recv()
+                await self.parse_received(ws, received)
+
+    def start_forever(self):
         while True:
             try:
-                self.reset()
-                self.log.info('(re)connecting...')
-                ws = await websockets.connect(GG_CHAT_API2_ENDPOINT)
-                last_periodic_processing = 0
-                while True:
-                    if time.time() > last_periodic_processing + PERIODIC_PROCESSING_INTERVAL:
-                        last_periodic_processing = time.time()
-                        await self.periodic_processing(ws)
-                    received = await ws.recv()
-                    await self.parse_received(ws, received)
+                asyncio.get_event_loop().run_until_complete(self.run())
+                self.log.info('coroutine ended')
             except (KeyboardInterrupt, SystemExit):
+                self.log.info('KeyboardInterrupt')
                 break
             except (websockets.exceptions.ConnectionClosed,
                     websockets.exceptions.InvalidHandshake,
@@ -737,11 +742,6 @@ class WebsocketClient:
                 time.sleep(10)
             except TooLowStatsReceivedException:
                 self.log.error('Too low stats for channels received in last period. Force reconnect.')
-                try:
-                    if ws:
-                        ws.close()
-                except:
-                    pass
                 time.sleep(10)
             except OperationalError:
                 self.log.exception('OperationalError trying reset db connection')
@@ -750,6 +750,3 @@ class WebsocketClient:
             except:
                 self.log.exception('Unknown error')
                 time.sleep(60)
-
-    def start_forever(self):
-        asyncio.get_event_loop().run_until_complete(self.run())
