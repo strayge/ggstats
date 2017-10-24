@@ -12,7 +12,7 @@ from ggchat.models import Donation, ChannelStats, User, Message, PremiumActivati
     Channel, Ban, Warning, TotalStats, CommonPremiumPayments, PlayerChannelStats
 
 
-@cache_page(60 * 10)
+@cache_page(30 * 60)
 def index(request):
     # todo: краткое описание
     latest_payments = Donation.objects.order_by('-timestamp')[:10]
@@ -27,7 +27,7 @@ def stats(request):
     return HttpResponse(output)
 
 
-@cache_page(60 * 10)
+@cache_page(30 * 60)
 def viewers(request):
 
     def calc_total_stats(from_ts, to_ts):
@@ -154,7 +154,7 @@ def viewers(request):
                                                     'title': 'Общее число зрителей'})
 
 
-@cache_page(60 * 10)
+@cache_page(30 * 60)
 def money(request):
     week_ago = timezone.now() - datetime.timedelta(days=7)
     donates_data = Donation.objects.filter(timestamp__gte=week_ago).order_by('-timestamp').values('user_id', 'channel_id', 'amount', 'timestamp')
@@ -243,7 +243,7 @@ def money(request):
     return render_to_response('ggchat/money.html', content)
 
 
-@cache_page(60 * 1)
+@cache_page(10 * 60)
 def user(request, user_id):
     user_obj = User.objects.filter(user_id=user_id).first()
     if not user_obj:
@@ -270,7 +270,7 @@ def user(request, user_id):
     return render_to_response('ggchat/user.html', content)
 
 
-@cache_page(60 * 10)
+@cache_page(15 * 60)
 def channel(request, channel_id):
     channel_obj = Channel.objects.filter(channel_id=channel_id).first()
     if not channel_obj:
@@ -367,7 +367,7 @@ def channel(request, channel_id):
     return render_to_response('ggchat/channel.html', content)
 
 
-@cache_page(60 * 10)
+@cache_page(1 * 60 * 60)
 def users(request):
     week_ago = timezone.now() - datetime.timedelta(days=7)
     max_premiums = PremiumStatus.objects.filter(ended=None).values('user_id', 'user__username').annotate(count=Count('channel')).order_by('-count')[:20]
@@ -403,7 +403,7 @@ def users(request):
     return render_to_response('ggchat/users.html', content)
 
 
-@cache_page(60 * 10)
+@cache_page(1 * 60 * 60)
 def chats(request):
     week_ago = timezone.now() - datetime.timedelta(days=7)
     deleted_messages = Message.objects.filter(removed=True).order_by('-timestamp')[:20]
@@ -430,7 +430,7 @@ def chats(request):
                }
     return render_to_response('ggchat/chats.html', content)
 
-@cache_page(60 * 10)
+@cache_page(1 * 60 * 60)
 def moderators(request):
     week_ago = timezone.now() - datetime.timedelta(days=7)
     warns = Warning.objects.filter(timestamp__gte=week_ago).values('moderator_id', 'moderator__username').annotate(count=Count('timestamp')).order_by('-count')
