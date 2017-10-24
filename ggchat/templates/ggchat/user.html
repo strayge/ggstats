@@ -2,7 +2,7 @@
 
 {% block page_title %}
     {% if user_id %}
-        Пользователь {% if name %} {{ name }} {% endif %} #{{ user_id }}
+        Пользователь {% if name %} <a href="https://goodgame.ru/user/{{ user_id }}/">{{ name }}</a> {% endif %} #{{ user_id }}
         {% if channel %}
             <a href="{% url 'channel' channel.channel_id %}">(Канал #{{ channel.channel_id }})</a>
     {% endif %}
