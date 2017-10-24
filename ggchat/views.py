@@ -269,6 +269,33 @@ def user(request, user_id):
 
     return render_to_response('ggchat/user.html', content)
 
+@cache_page(10 * 60)
+def user_by_name(request, username):
+    user_obj = User.objects.filter(username=username).first()
+    if not user_obj:
+        return render_to_response('ggchat/user.html', {'title': 'Пользователь {}'.format(username)})
+
+    user_id = user_obj.user_id
+    # username = user_obj.username
+    last_messages = Message.objects.filter(user_id=user_id).order_by('-timestamp')[:10]
+    last_donations = Donation.objects.filter(user_id=user_id).order_by('-timestamp')[:10]
+    last_premiums = PremiumActivation.objects.filter(user_id=user_id).order_by('-timestamp')[:10]
+    last_follows = Follow.objects.filter(user_id=user_id).order_by('-timestamp')[:10]
+    active_premiums = PremiumStatus.objects.filter(user_id=user_id, ended=None)
+    channel = Channel.objects.filter(streamer_id=user_id).first()
+
+    content = {'name': username,
+               'messages': last_messages,
+               'donations': last_donations,
+               'premiums': last_premiums,
+               'follows': last_follows,
+               'active_premiums': active_premiums,
+               'user_id': user_id,
+               'channel': channel
+               }
+
+    return render_to_response('ggchat/user.html', content)
+
 
 @cache_page(15 * 60)
 def channel(request, channel_id):
@@ -401,7 +428,6 @@ def users(request):
                # 'pekas': pekas[:20],
                }
     return render_to_response('ggchat/users.html', content)
-
 
 @cache_page(1 * 60 * 60)
 def chats(request):
