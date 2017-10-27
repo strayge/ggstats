@@ -16,7 +16,7 @@ from django.utils import timezone
 
 from ggchat.models import *
 
-GG_CHAT_API2_ENDPOINT = 'ws://chat.goodgame.ru:8081/chat/websocket'
+GG_CHAT_API2_ENDPOINT = 'ws://chat.goodgame.ru/chat/websocket'
 PERIODIC_PROCESSING_INTERVAL = 5 * 60
 SAVE_STATS_PERIOD = 10 * 60
 
