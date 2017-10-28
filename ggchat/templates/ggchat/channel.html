@@ -45,7 +45,7 @@
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover table-striped">
                         <thead>
-                        <tr><th>Дата</th><th>Пользователь</th><th>Сумма</th><th>Сообщение</th></tr>
+                        <tr><th>Дата</th><th>Пользователь</th><th>Сумма</th><th>Голос</th><th><th>Сообщение</th></tr>
                         </thead>
                         <tbody>
                         {% for donation in donations %}
@@ -59,6 +59,11 @@
                                 {% endif %}
                             </td>
                             <td>{{ donation.amount|floatformat }}</td>
+                            <td>
+                                {% if donation.voice %}
+                                    <a href="{{ donation.voice }}">Запись</a>
+                                {% endif %}
+                            </td>
                             <td>{{ donation.text }}</td>
                             </tr>
                         {% endfor %}
