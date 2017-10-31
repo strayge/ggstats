@@ -56,6 +56,7 @@ class Donation(models.Model):
     text = models.CharField(max_length=4000)
     link = models.CharField(max_length=1000)
     timestamp = models.DateTimeField(default=timezone.now, db_index=True)
+    voice = models.CharField(max_length=200, null=True)
 
     def __str__(self):
         return '{} donated to {} {} rub. with text "{}"'.format(self.user, self.channel, self.amount, self.text)

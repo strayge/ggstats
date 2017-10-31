@@ -292,6 +292,11 @@ class WebsocketClient:
             text = msg['data']['message']
             link = msg['data']['link']
 
+            if 'voice' in msg['data']:
+                voice = msg['data']['voice']
+            else:
+                voice = None
+
             user = User.objects.filter(username=username).first()
             if not user and username == 'Неизвестный':
                 user = User(user_id=0, username='Неизвестный')
@@ -304,14 +309,15 @@ class WebsocketClient:
                     latest_donation_with_this_url = Donation.objects.filter(link=link, user=user,
                         amount=amount, timestamp__gte=timezone.now() - timezone.timedelta(seconds=15)).first()
                     if not latest_donation_with_this_url:
-                        donation = Donation(user=user, channel=None, amount=amount, text=text, link=link)
+                        donation = Donation(user=user, channel=None, amount=amount, text=text, link=link, voice=voice)
                         donation.save()
                 else:
                     channel = Channel.objects.filter(channel_id=channel_id).first()
                     if channel:
-
-                        donation = Donation(user=user, channel=channel, amount=amount, text=text, link=link)
+                        donation = Donation(user=user, channel=channel, amount=amount, text=text, link=link, voice=voice)
                         donation.save()
+            else:
+                self.log.info('Donation from non-existence user: {}'.format(msg))
 
         elif msg['type'] == 'user_ban':
             # {'type': 'user_ban',
