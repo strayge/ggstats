@@ -492,3 +492,7 @@ def moderators(request):
                }
 
     return render_to_response('ggchat/moderators.html', content)
+
+@cache_page(1 * 60 * 60)
+def voice_player(request, url):
+    return render_to_response('ggchat/voice_player.html', {'url': url})
