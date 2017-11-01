@@ -5,7 +5,11 @@
 </head>
 <body>
     <audio controls autoplay>
-        <source src="{{ url }}" type="audio/aac">
+        {% if url|slice:":4" == 'http' %}
+            <source src="{{ url }}" type="audio/aac">
+        {% else %}
+            <source src="https://{{ url }}" type="audio/aac">
+        {% endif %}
         Your browser does not support the audio tag.
     </audio>
 </body>

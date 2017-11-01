@@ -60,7 +60,7 @@
                                 {% if donation.voice %}
                                     <audio id="audio_{{ donation.voice|slice:"34:47"|cut:"`~!@#$%^&*()_+-=[]{}|;':\/?,.<>"}}" src="{{ donation.voice }}"></audio>
                                     <a id="a_{{ donation.voice|slice:"34:47"|cut:"`~!@#$%^&*()_+-=[]{}|;':\/?,.<>"}}" class="fa fa-play fa-lg" onClick="togglePlay_{{ donation.voice|slice:"34:47"|cut:"`~!@#$%^&*()_+-=[]{}|;':\/?,.<>"}}()"></a>
-                                    | <a href="{{ donation.voice }}">Скачать</a> | <a href="{% url 'voice_player' donation.voice %}">Плеер</a>
+                                    | <a href="{{ donation.voice }}">Скачать</a> | <a href="{% url 'voice_player' donation.voice|slice:"8:" %}">Плеер</a>
                                     <script>
                                         var audio_{{ donation.voice|slice:"34:47"|cut:"`~!@#$%^&*()_+-=[]{}|;':\/?,.<>"}} = document.getElementById("audio_{{ donation.voice|slice:"34:47"|cut:"`~!@#$%^&*()_+-=[]{}|;':\/?,.<>"}}");
                                         var a_{{ donation.voice|slice:"34:47"|cut:"`~!@#$%^&*()_+-=[]{}|;':\/?,.<>"}} = document.getElementById("a_{{ donation.voice|slice:"34:47"|cut:"`~!@#$%^&*()_+-=[]{}|;':\/?,.<>"}}");
