@@ -28,5 +28,5 @@ urlpatterns = [
     url(r'^user/(?P<user_id>\d+)$', views.user, name='user'),
     url(r'^user/(?P<username>[a-zA-Z0-9_]+)$', views.user_by_name, name='user_by_name'),
     url(r'^channel/(?P<channel_id>\w+)$', views.channel, name='channel'),
-    url(r'^voice/(?P<url>.+)$', views.voice_player, name='voice_player'),
+    url(r'^voice/(?P<url>[a-zA-Z0-9_\.\/:]+)$', views.voice_player, name='voice_player'),
 ]
