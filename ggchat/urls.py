@@ -21,6 +21,7 @@ urlpatterns = [
     url(r'^$', views.index, name='index'),
     url(r'^stats$', views.stats, name='stats'),
     url(r'^viewers$', views.viewers, name='viewers'),
+    url(r'^viewers_month$', views.viewers_month, name='viewers_month'),
     url(r'^users$', views.users, name='users'),
     url(r'^chats', views.chats, name='chats'),
     url(r'^moderators', views.moderators, name='moderators'),

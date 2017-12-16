@@ -496,3 +496,130 @@ def moderators(request):
 @cache_page(1 * 60 * 60)
 def voice_player(request, url):
     return render_to_response('ggchat/voice_player.html', {'url': url})
+
+
+@cache_page(5 * 60)
+def viewers_month(request):
+
+    def calc_total_stats(from_ts, to_ts):
+        full_data = ChannelStats.objects.filter(timestamp__gte=from_ts, timestamp__lte=to_ts).values('channel_id', 'timestamp', 'users', 'clients').all()
+        full_data_player = PlayerChannelStats.objects.filter(timestamp__gte=from_ts, timestamp__lte=to_ts).values('channel_id', 'timestamp', 'viewers', 'viewers_gg', 'status', 'status_gg').all()
+        INTERVAL = 20*60
+        data = {}
+        for d in full_data:
+            channel_id = d['channel_id']
+            if channel_id not in data:
+                data[channel_id] = {}
+            timestamp = int(d['timestamp'].timestamp() // INTERVAL)
+            if timestamp not in data[channel_id]:
+                data[channel_id][timestamp] = (d['users'], d['clients'], 0, 0)
+        for d in full_data_player:
+            channel_id = d['channel_id']
+            if channel_id not in data:
+                data[channel_id] = {}
+            timestamp = int(d['timestamp'].timestamp() // INTERVAL)
+
+            new_item = ()
+            viewers = d['viewers'] if d['status'] else 0
+            viewers_gg = d['viewers_gg'] if d['status_gg'] else 0
+            if timestamp not in data[channel_id]:
+                data[channel_id][timestamp] = (0, 0, viewers, viewers_gg)
+            else:
+                users, clients, v, vgg = data[channel_id][timestamp]
+                if v == 0 or vgg == 0:
+                    data[channel_id][timestamp] = (users, clients, viewers, viewers_gg)
+
+        data_sum_users = {}
+        data_sum_clients = {}
+        data_sum_viewers = {}
+        data_sum_viewers_gg = {}
+        for channel_id in data:
+            for timestamp in data[channel_id]:
+                users, clients, viewers, viewers_gg = data[channel_id][timestamp]
+                data_sum_users[timestamp] = data_sum_users.get(timestamp, 0) + users
+                data_sum_clients[timestamp] = data_sum_clients.get(timestamp, 0) + clients
+                data_sum_viewers[timestamp] = data_sum_viewers.get(timestamp, 0) + viewers
+                data_sum_viewers_gg[timestamp] = data_sum_viewers_gg.get(timestamp, 0) + viewers_gg
+
+        for timestamp, users in data_sum_users.items():
+            if timestamp in data_sum_clients and timestamp in data_sum_viewers and timestamp in data_sum_viewers_gg:
+                clients = data_sum_clients[timestamp]
+                viewers = data_sum_viewers[timestamp]
+                viewers_gg = data_sum_viewers_gg[timestamp]
+            else:
+                continue
+            ts = timestamp * INTERVAL
+            restores_timestamp = timezone.make_aware(datetime.datetime.fromtimestamp(ts))
+            total_stats = TotalStats(timestamp=restores_timestamp, clients=clients,
+                                     users=users, viewers=viewers, viewers_gg=viewers_gg)
+            total_stats.save()
+
+    week_ago = timezone.now() - datetime.timedelta(days=30)
+
+    last_total_stats = TotalStats.objects.order_by('-timestamp').first()
+    if last_total_stats:
+        # latest_calced_timestamp = last_total_stats.timestamp
+        latest_calced_timestamp = last_total_stats.timestamp - datetime.timedelta(minutes=40)
+    else:
+        latest_calced_timestamp = week_ago
+
+    # calc new part of data
+    now = timezone.now()
+    from_timestamp = max(week_ago, latest_calced_timestamp)
+    to_timestamp = min(now, from_timestamp + datetime.timedelta(hours=12))
+    while to_timestamp != now:
+        calc_total_stats(from_timestamp, to_timestamp)
+        from_timestamp = to_timestamp
+        to_timestamp = min(now, from_timestamp + datetime.timedelta(hours=12))
+    calc_total_stats(from_timestamp, to_timestamp)
+
+    full_data = TotalStats.objects.filter(timestamp__gte=week_ago).all()
+    data_sum_users_list = []
+    data_sum_clients_list = []
+    data_sum_viewers_list = []
+    data_sum_viewers_gg_list = []
+    for total_stats in full_data:
+        timestamp_js = total_stats.timestamp.timestamp() * 1000
+        data_sum_users_list.append({'timestamp': timestamp_js, 'value': total_stats.users})
+        data_sum_clients_list.append({'timestamp': timestamp_js, 'value': total_stats.clients})
+        data_sum_viewers_list.append({'timestamp': timestamp_js, 'value': total_stats.viewers})
+        data_sum_viewers_gg_list.append({'timestamp': timestamp_js, 'value': total_stats.viewers_gg})
+
+    data_sum_users_list.sort(key=lambda x: x['timestamp'])
+    data_sum_clients_list.sort(key=lambda x: x['timestamp'])
+    data_sum_viewers_list.sort(key=lambda x: x['timestamp'])
+    data_sum_viewers_gg_list.sort(key=lambda x: x['timestamp'])
+
+    chart_users_total = {'data': data_sum_clients_list,
+                         'x_keyword': 'timestamp',
+                         'y_keyword': 'value',
+                         'type': 'area',
+                         'name': 'Всего в чате',
+
+                         'data2': data_sum_users_list,
+                         'x_keyword2': 'timestamp',
+                         'y_keyword2': 'value',
+                         'type2': 'area',
+                         'name2': 'Залогиненных в чате',
+
+                         # 'data3': data_sum_viewers_list,
+                         # 'x_keyword3': 'timestamp',
+                         # 'y_keyword3': 'value',
+                         # 'type3': 'line',
+                         # 'name3': 'Всего зрителей',
+                         # 'color3': '#cccccc',
+
+                         'data4': data_sum_viewers_gg_list,
+                         'x_keyword4': 'timestamp',
+                         'y_keyword4': 'value',
+                         'type4': 'line',
+                         'name4': 'Зрителей на GG плеере',
+                         'color4': '#ff0000',
+
+                         'zoom': True,
+                         'legend': True,
+                         # 'title': 'Зрители',
+                         'y_title': 'Количество',
+                         }
+    return render_to_response('ggchat/chart.html', {'chart1': chart_users_total,
+                                                    'title': 'Общее число зрителей'})
