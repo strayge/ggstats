@@ -50,31 +50,31 @@
 
     </div>
 
-    <div class="row">
+{#    <div class="row">#}
         {# common_prems #}
-        <div class="col-md-6 col-sm-12">
-            <h4>Недополученная прибыль от общих премов</h4>
-
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover table-striped">
-                    <thead>
-                    <tr>
-                        <th>Канал</th><th>Сумма за неделю, руб.</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for common in common_prems %}
-                        <tr>
-                            <td><a href="{% url 'channel' common.channel_id %}"> {{ common.channel__streamer__username }}</a></td>
-                            <td>{{ common.amount|floatformat:0 }}</td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-    </div>
+{#        <div class="col-md-6 col-sm-12">#}
+{#            <h4>Недополученная прибыль от общих премов</h4>#}
+{##}
+{#            <div class="table-responsive">#}
+{#                <table class="table table-bordered table-hover table-striped">#}
+{#                    <thead>#}
+{#                    <tr>#}
+{#                        <th>Канал</th><th>Сумма за неделю, руб.</th>#}
+{#                    </tr>#}
+{#                    </thead>#}
+{#                    <tbody>#}
+{#                    {% for common in common_prems %}#}
+{#                        <tr>#}
+{#                            <td><a href="{% url 'channel' common.channel_id %}"> {{ common.channel__streamer__username }}</a></td>#}
+{#                            <td>{{ common.amount|floatformat:0 }}</td>#}
+{#                        </tr>#}
+{#                    {% endfor %}#}
+{#                    </tbody>#}
+{#                </table>#}
+{#            </div>#}
+{#        </div>#}
+{##}
+{#    </div>#}
 
 
 {% endblock %}

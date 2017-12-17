@@ -1,5 +1,7 @@
 {% extends "ggchat/base.html" %}
 
+{% load simplefilters %}
+
 {% block page_title %}
     {% if user_id %}
         Пользователь {% if name %} <a href="https://goodgame.ru/user/{{ user_id }}/">{{ name }}</a> {% endif %} #{{ user_id }}
@@ -18,6 +20,8 @@
         {# row 1 #}
         <div class="row">
             <div class="col-md-8 col-sm-12">
+
+                {% if messages|length %}
                 <h4>Последние сообщения</h4>
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover table-striped">
@@ -29,13 +33,25 @@
                             <tr>
                             <td>{{ message.timestamp }}</td>
                                 <td><a href="{% url 'channel' message.channel_id %}">{{ message.channel.streamer.username }}</a></td>
-                            <td>{{ message.text }}</td>
+                            <td>
+                                {% if message.removed %}
+                                    <strike>
+                                    {{ message.text }}
+                                    </strike>
+                                    &ensp;&ndash;
+                                    удалил <a href="{% url 'user' message.removed_by.user_id %}">{{ message.removed_by.username }}</a>
+                                {% else %}
+                                    {{ message.text }}
+                                {% endif %}
+                            </td>
                             </tr>
                         {% endfor %}
                         </tbody>
                     </table>
                 </div>
+                {% endif %}
 
+                {% if donations|length %}
                 <h4>Последние донаты</h4>
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover table-striped">
@@ -88,9 +104,99 @@
                         </tbody>
                     </table>
                 </div>
+                {% endif %}
+
+                {% if bans|length %}
+                <h4>Выданные баны</h4>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover table-striped">
+                        <thead>
+                        <tr> <th>Дата</th> <th>Канал</th> <th>Пользователь</th> <th>Длительность</th> <th>Причина</th> </tr>
+                        </thead>
+                        <tbody>
+                        {% for ban in bans %}
+                            <tr>
+                            <td>{{ ban.timestamp }}</td>
+                            <td><a href="{% url 'channel' ban.channel_id %}">{{ ban.channel.streamer.username }}</a></td>
+                            <td><a href="{% url 'user' ban.user_id %}">{{ ban.user.username }}</a></td>
+                            <td>
+                                {% if ban.permanent %}
+                                    Перманентно
+                                {% elif ban.duration == 0 %}
+                                    Разбанен
+                                {% elif ban.duration < 172800 %}
+                                    {{ ban.duration|div_int:60 }} минут
+                                {% else %}
+                                    {{ ban.duration|div_int:86400 }} дней
+                                {% endif %}
+                            </td>
+                            <td>{{ ban.reason }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+
+                {% if received_bans|length %}
+                <h4>Полученные баны</h4>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover table-striped">
+                        <thead>
+                        <tr> <th>Дата</th> <th>Канал</th> <th>Модератор</th> <th>Длительность</th> <th>Причина</th> </tr>
+                        </thead>
+                        <tbody>
+                        {% for ban in received_bans %}
+                            <tr>
+                            <td>{{ ban.timestamp }}</td>
+                            <td><a href="{% url 'channel' ban.channel_id %}">{{ ban.channel.streamer.username }}</a></td>
+                            <td><a href="{% url 'user' ban.moderator_id %}">{{ ban.moderator.username }}</a></td>
+                            <td>
+                                {% if ban.permanent %}
+                                    Перманентно
+                                {% elif ban.duration == 0 %}
+                                    Разбанен
+                                {% elif ban.duration < 172800 %}
+                                    {{ ban.duration|div_int:60 }} минут
+                                {% else %}
+                                    {{ ban.duration|div_int:86400 }} дней
+                                {% endif %}
+                            </td>
+                            <td>{{ ban.reason }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+
+                {% if removed_messages|length %}
+                <h4>Удаленные сообщения</h4>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover table-striped">
+                        <thead>
+                        <tr><th>Дата</th><th>Канал</th><th>Сообщение</th><th>Кто удалил</th></tr>
+                        </thead>
+                        <tbody>
+                        {% for message in removed_messages %}
+                            <tr>
+                                <td>{{ message.timestamp }}</td>
+                                <td><a href="{% url 'channel' message.channel_id %}">{{ message.channel.streamer.username }}</a></td>
+                                <td>{{ message.text }}</td>
+                                <td>
+                                    <a href="{% url 'user' message.removed_by.user_id %}">{{ message.removed_by.username }}</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
 
             </div>
             <div class="col-md-4 col-sm-12">
+
+                {% if active_premiums|length %}
                 <h4>Активные премиумы</h4>
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover table-striped">
@@ -131,7 +237,9 @@
                         </tbody>
                     </table>
                 </div>
+                {% endif %}
 
+                {% if premiums|length %}
                 <h4>Последние активированные премиумы</h4>
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover table-striped">
@@ -149,7 +257,9 @@
                         </tbody>
                     </table>
                 </div>
+                {% endif %}
 
+                {% if follows|length %}
                 <h4>Последние подписки на каналы</h4>
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover table-striped">
@@ -166,6 +276,7 @@
                         </tbody>
                     </table>
                 </div>
+                {% endif %}
 
             </div>
         </div>

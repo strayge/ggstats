@@ -194,42 +194,42 @@ def money(request):
     grouped_by_channel_list.sort(key=lambda x: x['amount'], reverse=True)
 
     # common prems stats
-    latest_date = CommonPremiumPayments.objects.order_by('-date').first().date
-    current_month_prems = CommonPremiumPayments.objects.filter(date=latest_date).values('channel_id', 'channel__streamer__username', 'amount').order_by('-amount').all()
-    current_month_days = min(latest_date.day, 7)
-
-    prev_month_days = 7 - current_month_days
-    prev_month_last_day = latest_date - datetime.timedelta(days=latest_date.day)
-    prev_month_day = CommonPremiumPayments.objects.filter(date__year=prev_month_last_day.year, date__month=prev_month_last_day.month).order_by('-date').first().date
-    prev_month_prems = CommonPremiumPayments.objects.filter(date=prev_month_day).values('channel_id', 'channel__streamer__username', 'amount').order_by('-amount').all()
-
-    # union dicts
-    common_prems_dict = {}
-    for prem in current_month_prems:
-        channel_id = prem['channel_id']
-        # if channel_id == '5':
-        #     print('cur', prem['amount'], latest_date.day, current_month_days, prem['amount'] / latest_date.day * current_month_days)
-        prem['amount'] = prem['amount'] / latest_date.day * current_month_days
-        common_prems_dict[channel_id] = prem
-
-    if prev_month_days:
-        for prem in prev_month_prems:
-            channel_id = prem['channel_id']
-            # if channel_id == '5':
-            #     print('prev', prem['amount'], prev_month_day.day, prev_month_days, prem['amount'] / prev_month_day.day * prev_month_days)
-            prem['amount'] = prem['amount'] / prev_month_day.day * prev_month_days
-            if channel_id in common_prems_dict:
-                # if channel_id == '5':
-                #     print('exists', common_prems_dict[channel_id]['amount'], prem['amount'])
-                common_prems_dict[channel_id]['amount'] += prem['amount']
-            else:
-                # if channel_id == '5':
-                #     print('not exists', prem['amount'])
-                common_prems_dict[channel_id] = prem
-
-    # convert resulted dict to list
-    common_prems = list(common_prems_dict.values())
-    common_prems.sort(key=lambda x: x['amount'], reverse=True)
+    # latest_date = CommonPremiumPayments.objects.order_by('-date').first().date
+    # current_month_prems = CommonPremiumPayments.objects.filter(date=latest_date).values('channel_id', 'channel__streamer__username', 'amount').order_by('-amount').all()
+    # current_month_days = min(latest_date.day, 7)
+    #
+    # prev_month_days = 7 - current_month_days
+    # prev_month_last_day = latest_date - datetime.timedelta(days=latest_date.day)
+    # prev_month_day = CommonPremiumPayments.objects.filter(date__year=prev_month_last_day.year, date__month=prev_month_last_day.month).order_by('-date').first().date
+    # prev_month_prems = CommonPremiumPayments.objects.filter(date=prev_month_day).values('channel_id', 'channel__streamer__username', 'amount').order_by('-amount').all()
+    #
+    # # union dicts
+    # common_prems_dict = {}
+    # for prem in current_month_prems:
+    #     channel_id = prem['channel_id']
+    #     # if channel_id == '5':
+    #     #     print('cur', prem['amount'], latest_date.day, current_month_days, prem['amount'] / latest_date.day * current_month_days)
+    #     prem['amount'] = prem['amount'] / latest_date.day * current_month_days
+    #     common_prems_dict[channel_id] = prem
+    #
+    # if prev_month_days:
+    #     for prem in prev_month_prems:
+    #         channel_id = prem['channel_id']
+    #         # if channel_id == '5':
+    #         #     print('prev', prem['amount'], prev_month_day.day, prev_month_days, prem['amount'] / prev_month_day.day * prev_month_days)
+    #         prem['amount'] = prem['amount'] / prev_month_day.day * prev_month_days
+    #         if channel_id in common_prems_dict:
+    #             # if channel_id == '5':
+    #             #     print('exists', common_prems_dict[channel_id]['amount'], prem['amount'])
+    #             common_prems_dict[channel_id]['amount'] += prem['amount']
+    #         else:
+    #             # if channel_id == '5':
+    #             #     print('not exists', prem['amount'])
+    #             common_prems_dict[channel_id] = prem
+    #
+    # # convert resulted dict to list
+    # common_prems = list(common_prems_dict.values())
+    # common_prems.sort(key=lambda x: x['amount'], reverse=True)
 
     # common_prems = CommonPremiumPayments.objects.filter(date__gte=week_ago).values('channel_id', 'channel__streamer__username').annotate(sum=Sum('amount')).order_by('-sum')[:20]
     # for i in range(len(common_prems)):
@@ -237,7 +237,7 @@ def money(request):
 
     content = {'chart_donate_total': chart_donate_total,
                'donate_top_per_channel': grouped_by_channel_list[:15],
-               'common_prems': common_prems[:20],
+               # 'common_prems': common_prems[:20],
                }
 
     return render_to_response('ggchat/money.html', content)
@@ -256,6 +256,9 @@ def user(request, user_id):
     last_follows = Follow.objects.filter(user_id=user_id).order_by('-timestamp')[:10]
     active_premiums = PremiumStatus.objects.filter(user_id=user_id, ended=None)
     channel = Channel.objects.filter(streamer_id=user_id).first()
+    bans = Ban.objects.filter(moderator_id=user_id).order_by('-timestamp')[:10]
+    received_bans = Ban.objects.filter(user_id=user_id).order_by('-timestamp')[:10]
+    removed_messages = Message.objects.filter(user_id=user_id, removed=True).order_by('-timestamp')[:10]
 
     content = {'name': username,
                'messages': last_messages,
@@ -264,7 +267,10 @@ def user(request, user_id):
                'follows': last_follows,
                'active_premiums': active_premiums,
                'user_id': user_id,
-               'channel': channel
+               'channel': channel,
+               'received_bans': received_bans,
+               'bans': bans,
+               'removed_messages': removed_messages,
                }
 
     return render_to_response('ggchat/user.html', content)
@@ -274,28 +280,8 @@ def user_by_name(request, username):
     user_obj = User.objects.filter(username=username).first()
     if not user_obj:
         return render_to_response('ggchat/user.html', {'title': 'Пользователь {}'.format(username)})
-
     user_id = user_obj.user_id
-    # username = user_obj.username
-    last_messages = Message.objects.filter(user_id=user_id).order_by('-timestamp')[:10]
-    last_donations = Donation.objects.filter(user_id=user_id).order_by('-timestamp')[:10]
-    last_premiums = PremiumActivation.objects.filter(user_id=user_id).order_by('-timestamp')[:10]
-    last_follows = Follow.objects.filter(user_id=user_id).order_by('-timestamp')[:10]
-    active_premiums = PremiumStatus.objects.filter(user_id=user_id, ended=None)
-    channel = Channel.objects.filter(streamer_id=user_id).first()
-
-    content = {'name': username,
-               'messages': last_messages,
-               'donations': last_donations,
-               'premiums': last_premiums,
-               'follows': last_follows,
-               'active_premiums': active_premiums,
-               'user_id': user_id,
-               'channel': channel
-               }
-
-    return render_to_response('ggchat/user.html', content)
-
+    return user(request, user_id)
 
 @cache_page(15 * 60)
 def channel(request, channel_id):
