@@ -11,6 +11,12 @@ from django.views.decorators.cache import cache_page
 from ggchat.models import Donation, ChannelStats, User, Message, PremiumActivation, Follow, PremiumStatus, \
     Channel, Ban, Warning, TotalStats, CommonPremiumPayments, PlayerChannelStats
 
+def is_admin(request):
+    if request.GET.get("chat", "") == "18":
+        show_chat_links = True
+    else:
+        show_chat_links = False
+    return show_chat_links
 
 @cache_page(30 * 60)
 def index(request):
@@ -260,11 +266,6 @@ def user(request, user_id):
     received_bans = Ban.objects.filter(user_id=user_id).order_by('-timestamp')[:10]
     removed_messages = Message.objects.filter(user_id=user_id, removed=True).order_by('-timestamp')[:10]
 
-    if request.GET.get("chat", "") == "1":
-        show_chat_links = True
-    else:
-        show_chat_links = False
-
     content = {'name': username,
                'messages': last_messages,
                'donations': last_donations,
@@ -276,7 +277,7 @@ def user(request, user_id):
                'received_bans': received_bans,
                'bans': bans,
                'removed_messages': removed_messages,
-               'show_chat_links': show_chat_links,
+               'show_chat_links': is_admin(request),
                }
 
     return render_to_response('ggchat/user.html', content)
@@ -373,11 +374,6 @@ def channel(request, channel_id):
                     'y_title': 'Рублей',
                     }
 
-    if request.GET.get("chat", "") == "1":
-        show_chat_links = True
-    else:
-        show_chat_links = False
-
     content = {'channel': channel_obj,
                'messages': last_messages,
                'donations': last_donations,
@@ -386,7 +382,7 @@ def channel(request, channel_id):
                'active_premiums': active_premiums,
                'chart_people': chart_people,
                'chart_income': chart_income,
-               'show_chat_links': show_chat_links,
+               'show_chat_links': is_admin(request),
     }
 
     return render_to_response('ggchat/channel.html', content)
@@ -644,14 +640,9 @@ def chathistory(request, message_id, hash):
     timestamp_to = timestamp + datetime.timedelta(minutes=TIME_RANGE_IN_MINUTES)
     messages = Message.objects.filter(channel_id=channel_id, timestamp__gte=timestamp_from, timestamp__lte=timestamp_to).order_by('-timestamp')[:1000]
 
-    if request.GET.get("chat", "") == "1":
-        show_chat_links = True
-    else:
-        show_chat_links = False
-
     content = {'channel': message.channel,
                'messages': messages,
                'selected_message_id': message.id,
-               'show_chat_links': show_chat_links,
+               'show_chat_links': is_admin(request),
                }
     return render_to_response('ggchat/chathistory.html', content)

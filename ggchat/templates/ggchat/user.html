@@ -186,7 +186,13 @@
                         <tbody>
                         {% for message in removed_messages %}
                             <tr>
-                                <td>{{ message.timestamp }}</td>
+                                <td>
+                                    {% if show_chat_links %}
+                                        <a href="{% url 'chathistory' message.id message.id|chat_hash %}">{{ message.timestamp }}</a>
+                                    {% else %}
+                                        {{ message.timestamp }}
+                                    {% endif %}
+                                </td>
                                 <td><a href="{% url 'channel' message.channel_id %}">{{ message.channel.streamer.username }}</a></td>
                                 <td>{{ message.text }}</td>
                                 <td>

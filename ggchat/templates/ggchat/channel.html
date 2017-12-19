@@ -111,7 +111,17 @@
                                 {% endif %}
                             </td>
                                 <td><a href="{% url 'user' message.user_id %}">{{ message.user.username }}</a></td>
-                            <td>{{ message.text }}</td>
+                            <td>
+                                {% if message.removed %}
+                                    <strike>
+                                    {{ message.text }}
+                                    </strike>
+                                    &ensp;&ndash;
+                                    удалил <a href="{% url 'user' message.removed_by.user_id %}">{{ message.removed_by.username }}</a>
+                                {% else %}
+                                    {{ message.text }}
+                                {% endif %}
+                            </td>
                             </tr>
                         {% endfor %}
                         </tbody>
