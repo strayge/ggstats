@@ -1,5 +1,7 @@
 {% extends "ggchat/base.html" %}
 
+{% load simplefilters %}
+
 {% block head %}
     {% load chart %}
     {% chart_load_js %}
@@ -101,7 +103,13 @@
                         <tbody>
                         {% for message in messages %}
                             <tr>
-                            <td>{{ message.timestamp }}</td>
+                            <td>
+                                {% if show_chat_links %}
+                                    <a href="{% url 'chathistory' message.id message.id|chat_hash %}">{{ message.timestamp }}</a>
+                                {% else %}
+                                    {{ message.timestamp }}
+                                {% endif %}
+                            </td>
                                 <td><a href="{% url 'user' message.user_id %}">{{ message.user.username }}</a></td>
                             <td>{{ message.text }}</td>
                             </tr>

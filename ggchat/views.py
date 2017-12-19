@@ -260,6 +260,11 @@ def user(request, user_id):
     received_bans = Ban.objects.filter(user_id=user_id).order_by('-timestamp')[:10]
     removed_messages = Message.objects.filter(user_id=user_id, removed=True).order_by('-timestamp')[:10]
 
+    if request.GET.get("chat", "") == "1":
+        show_chat_links = True
+    else:
+        show_chat_links = False
+
     content = {'name': username,
                'messages': last_messages,
                'donations': last_donations,
@@ -271,6 +276,7 @@ def user(request, user_id):
                'received_bans': received_bans,
                'bans': bans,
                'removed_messages': removed_messages,
+               'show_chat_links': show_chat_links,
                }
 
     return render_to_response('ggchat/user.html', content)
@@ -367,6 +373,11 @@ def channel(request, channel_id):
                     'y_title': 'Рублей',
                     }
 
+    if request.GET.get("chat", "") == "1":
+        show_chat_links = True
+    else:
+        show_chat_links = False
+
     content = {'channel': channel_obj,
                'messages': last_messages,
                'donations': last_donations,
@@ -375,6 +386,7 @@ def channel(request, channel_id):
                'active_premiums': active_premiums,
                'chart_people': chart_people,
                'chart_income': chart_income,
+               'show_chat_links': show_chat_links,
     }
 
     return render_to_response('ggchat/channel.html', content)
@@ -609,3 +621,37 @@ def viewers_month(request):
                          }
     return render_to_response('ggchat/chart.html', {'chart1': chart_users_total,
                                                     'title': 'Общее число зрителей'})
+
+
+@cache_page(10 * 60)
+def chathistory(request, message_id, hash):
+    from ggchat.templatetags.simplefilters import chat_hash
+    message_id = int(message_id)
+    TIME_RANGE_IN_MINUTES = 5
+
+    correct_hash = chat_hash(message_id)
+    if correct_hash != hash:
+        return render_to_response('ggchat/chathistory.html', {})
+
+    message = Message.objects.filter(id=message_id).first()
+    if not message:
+        return render_to_response('ggchat/chathistory.html', {})
+
+    channel_id = message.channel.channel_id
+    timestamp = message.timestamp
+    # timestamp = datetime.datetime.utcfromtimestamp(timestamp)
+    timestamp_from = timestamp - datetime.timedelta(minutes=TIME_RANGE_IN_MINUTES)
+    timestamp_to = timestamp + datetime.timedelta(minutes=TIME_RANGE_IN_MINUTES)
+    messages = Message.objects.filter(channel_id=channel_id, timestamp__gte=timestamp_from, timestamp__lte=timestamp_to).order_by('-timestamp')[:1000]
+
+    if request.GET.get("chat", "") == "1":
+        show_chat_links = True
+    else:
+        show_chat_links = False
+
+    content = {'channel': message.channel,
+               'messages': messages,
+               'selected_message_id': message.id,
+               'show_chat_links': show_chat_links,
+               }
+    return render_to_response('ggchat/chathistory.html', content)

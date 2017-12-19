@@ -1,0 +1,62 @@
+{% extends "ggchat/base.html" %}
+
+{% load simplefilters %}
+
+{% block head %}
+{% endblock %}
+
+{% block page_title %}
+    {% if channel %}
+        История чата канала <a href="{% url 'channel' channel.channel_id %}">#{{ channel.channel_id }}</a>
+        {% if channel.streamer %}
+            <a href="{% url 'user' channel.streamer.user_id %}">
+            (Стример {{ channel.streamer.username }} #{{ channel.streamer.user_id }})
+            </a>
+         {% endif %}
+    {% else %}
+        История чата неизвестного канала
+    {% endif %}
+{% endblock %}
+
+{% block main %}
+    {% if channel == None %}
+        <p>Не знаю такого канала =(</p>
+    {% else %}
+        {# row 1 #}
+        <div class="row">
+            {# column 1 #}
+            <div class="col-md-8 col-sm-12">
+                <h4>Сообщения</h4>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover table-striped">
+                        <thead>
+                        <tr><th>Дата</th><th>Пользователь</th><th>Сообщение</th></tr>
+                        </thead>
+                        <tbody>
+                        {% for message in messages %}
+                            <tr
+                                    {% if message.id == selected_message_id %}
+                                        style="background-color: #fda;"
+                                    {% endif %}
+                            >
+                                <td>
+                                    {% if show_chat_links %}
+                                        <a href="{% url 'chathistory' message.id message.id|chat_hash %}">{{ message.timestamp }}</a>
+                                    {% else %}
+                                        {{ message.timestamp }}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'user' message.user_id %}">{{ message.user.username }}</a>
+                                </td>
+                                <td>{{ message.text }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}

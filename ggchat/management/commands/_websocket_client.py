@@ -33,7 +33,7 @@ class WebsocketClient:
                             handlers=[logging.StreamHandler(),
                                       logging.handlers.RotatingFileHandler(filename='fetcher.log',
                                                                            maxBytes=10 * 2**20,  # 10 MB
-                                                                           backupCount=2),
+                                                                           backupCount=10),
                                       ])
         self.log = logging.getLogger()
         # self.log.setLevel(logging.INFO)
