@@ -255,16 +255,20 @@ def user(request, user_id):
     if not user_obj:
         return render_to_response('ggchat/user.html', {'title': 'Пользователь #{}'.format(user_id)})
 
+    count_per_section = 10
+    if "more" in request.GET:
+        count_per_section = 50
+
     username = user_obj.username
-    last_messages = Message.objects.filter(user_id=user_id).order_by('-timestamp')[:10]
-    last_donations = Donation.objects.filter(user_id=user_id).order_by('-timestamp')[:10]
-    last_premiums = PremiumActivation.objects.filter(user_id=user_id).order_by('-timestamp')[:10]
+    last_messages = Message.objects.filter(user_id=user_id).order_by('-timestamp')[:count_per_section]
+    last_donations = Donation.objects.filter(user_id=user_id).order_by('-timestamp')[:count_per_section]
+    last_premiums = PremiumActivation.objects.filter(user_id=user_id).order_by('-timestamp')[:count_per_section]
     last_follows = Follow.objects.filter(user_id=user_id).order_by('-timestamp')[:10]
     active_premiums = PremiumStatus.objects.filter(user_id=user_id, ended=None)
     channel = Channel.objects.filter(streamer_id=user_id).first()
-    bans = Ban.objects.filter(moderator_id=user_id).order_by('-timestamp')[:10]
-    received_bans = Ban.objects.filter(user_id=user_id).order_by('-timestamp')[:10]
-    removed_messages = Message.objects.filter(user_id=user_id, removed=True).order_by('-timestamp')[:10]
+    bans = Ban.objects.filter(moderator_id=user_id).order_by('-timestamp')[:count_per_section]
+    received_bans = Ban.objects.filter(user_id=user_id).order_by('-timestamp')[:count_per_section]
+    removed_messages = Message.objects.filter(user_id=user_id, removed=True).order_by('-timestamp')[:count_per_section]
 
     content = {'name': username,
                'messages': last_messages,
@@ -296,10 +300,14 @@ def channel(request, channel_id):
     if not channel_obj:
         return render_to_response('ggchat/channel.html', {'title': 'Канал #{}'.format(channel_id)})
 
-    last_messages = Message.objects.filter(channel_id=channel_id).order_by('-timestamp')[:10]
-    last_donations = Donation.objects.filter(channel_id=channel_id).order_by('-timestamp')[:10]
-    last_premiums = PremiumActivation.objects.filter(channel_id=channel_id).order_by('-timestamp')[:10]
-    last_follows = Follow.objects.filter(channel_id=channel_id).order_by('-timestamp')[:10]
+    count_per_section = 10
+    if "more" in request.GET:
+        count_per_section = 50
+
+    last_messages = Message.objects.filter(channel_id=channel_id).order_by('-timestamp')[:count_per_section]
+    last_donations = Donation.objects.filter(channel_id=channel_id).order_by('-timestamp')[:count_per_section]
+    last_premiums = PremiumActivation.objects.filter(channel_id=channel_id).order_by('-timestamp')[:count_per_section]
+    last_follows = Follow.objects.filter(channel_id=channel_id).order_by('-timestamp')[:count_per_section]
     active_premiums = PremiumStatus.objects.filter(channel_id=channel_id, ended=None)
 
     week_ago = timezone.now() - datetime.timedelta(days=7)
