@@ -124,7 +124,7 @@ def chart_datetime(container, chart_data):
         y = row['users']
         data += '[%s, %s],' % (x, y)
     data = '[' + data + ']'
-    return render_to_response('ggchat/chart.html', {'data': data})
+    return render_to_response('ggchat/viewers.html', {'data': data})
 
 <script>
     Highcharts.chart('container', {
