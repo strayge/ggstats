@@ -93,9 +93,11 @@ class WebsocketClient:
             #                        ]
             #          }
             # }
+            self.log.debug('channels_list answer ({} streams)'.format(len(msg['data']['channels'])))
             for channel in msg['data']['channels']:
                 channel_id = channel['channel_id']
                 if channel_id not in self.joined_channels:
+                    self.log.debug('founded new channel: {}'.format(channel_id))
                     # print('"{}" not in {}'.format(channel_id, self.joined_channels))
                     join_channel_query = {"type": "join", "data": {"channel_id": str(channel_id), "hidden": False}}
                     await ws.send(json.dumps(join_channel_query))
@@ -169,6 +171,8 @@ class WebsocketClient:
             # keep joined channels to avoid retrying connections to it
             channel_id = str(msg['data']['channel_id'])
             self.joined_channels.append(channel_id)
+
+            self.log.debug('joined new channel: {} (total {})'.format(channel_id, len(self.joined_channels)))
 
             # save all changes in streamer (as user)
             if 'id' in msg['data']['channel_streamer']:
@@ -649,8 +653,10 @@ class WebsocketClient:
 
         for i in range(5):
             # overlapping by 5
+            self.log.debug('requesting list of streams ({} - {})'.format(i*45, i*45+50))
             get_channels_query = {"type": "get_channels_list", "data": {"start": str(i * 45), "count": "50"}}
             await ws.send(json.dumps(get_channels_query))
+            await asyncio.sleep(0.2)
 
         # get common premium statistics
         yesterday = datetime.date.today() - datetime.timedelta(days=1)
