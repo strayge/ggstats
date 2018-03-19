@@ -37,7 +37,7 @@ class ChannelStatus(models.Model):
 
 
 class Message(models.Model):
-    message_id = models.IntegerField()
+    message_id = models.BigIntegerField()
     channel = models.ForeignKey(Channel, on_delete=models.SET_NULL, null=True, db_index=True)
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, db_index=True)
     timestamp = models.DateTimeField(default=timezone.now, db_index=True)
