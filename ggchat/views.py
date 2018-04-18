@@ -131,6 +131,7 @@ def viewers(request):
                          'y_keyword': 'value',
                          'type': 'area',
                          'name': 'Всего в чате',
+                         'visible': False,
 
                          'data2': data_sum_users_list,
                          'x_keyword2': 'timestamp',

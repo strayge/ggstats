@@ -63,6 +63,7 @@ def chart_datetime(container, chart_data):
             y_keyword = conditional_escape(chart_data.get('y_keyword{}'.format(i)))
             chart_type = conditional_escape(chart_data.get('type{}'.format(i), 'line'))
             name = conditional_escape(chart_data.get('name{}'.format(i), ''))
+            visible = bool(chart_data.get('visible{}'.format(i), True))
             color = conditional_escape(chart_data.get('color{}'.format(i), ''))
 
             js_data = ''
@@ -82,6 +83,10 @@ def chart_datetime(container, chart_data):
             js_series += "data: %s," % js_data
             if name:
                 js_series += "name: '%s'," % name
+
+            # true by default
+            if visible == False:
+                js_series += "visible: false,"
 
             if color:
                 js_series += "color: '%s'," % color
