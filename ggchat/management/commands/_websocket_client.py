@@ -369,7 +369,7 @@ class WebsocketClient:
             moderator_id = msg['data']['moder_id']
             moderator_username = msg['data']['moder_name']
             reason = msg['data']['reason']
-            duration = int(msg['data']['duration'])
+            duration = 0 if msg['data']['duration'] == '' else int(msg['data']['duration'])
             show = bool(msg['data']['show'])
             if 'permanent' in msg['data']:
                 permanent = bool(msg['data']['permanent'])
