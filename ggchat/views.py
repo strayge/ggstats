@@ -688,3 +688,18 @@ def chathistory(request, message_id, hash):
                'show_chat_links': is_admin(request),
                }
     return render_to_response('ggchat/chathistory.html', content)
+
+
+@cache_page(24 * 60 * 60)
+def removed(request):
+    # count_per_section = 10
+    # if "more" in request.GET:
+    #     count_per_section = 50
+
+    removed_messages = Message.objects.filter(removed=True).order_by('-timestamp')[:1000]
+
+    content = {'removed_messages': removed_messages,
+               'show_chat_links': is_admin(request),
+               }
+
+    return render_to_response('ggchat/removed.html', content)
