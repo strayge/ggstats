@@ -428,6 +428,11 @@ class WebsocketClient:
             #           'adminName': 'iLame_ru'}}
 
             channel_id = msg['data']['channel_id']
+
+            if 'message_id' not in msg['data']:
+                self.log.info('remove_message without message_id, skipping...')
+                return
+
             message_id = msg['data']['message_id']
             moderator_username = msg['data']['adminName']
 
@@ -557,6 +562,10 @@ class WebsocketClient:
             username = msg['data']['user_name']
 
             message_text = msg['data']['text']
+            if len(message_text) > 10000:
+                self.log.info('{}'.format(msg))
+                self.log.warning('message too long ({})'.format(len(message_text)))
+                message_text = message_text[:10000]
 
             # if message_text.startswith('gif:'):
             #     self.log.info(msg)
