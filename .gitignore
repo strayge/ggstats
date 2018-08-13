@@ -13,3 +13,13 @@ venv/
 
 # idea
 .idea/
+
+# test server
+*.sqlite3
+
+# logs
+fetcher.log
+fetcher.log.*
+
+# prod
+static/
