@@ -35,3 +35,9 @@ db backup
 
 db restore  
 `./db_restore.sh "backups/db_20180813_183443.sql.gz"`
+
+startup in backrgound  
+`docker-compose up -d`
+
+logs in realtime  
+`docker-compose logs --tail=50 -f`
