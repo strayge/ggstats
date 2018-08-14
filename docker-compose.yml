@@ -6,7 +6,7 @@ services:
     build: web
     container_name: ggstats_fetcher
     hostname: ggstats_fetcher
-    restart: on-failure
+    restart: always
     command: python3 manage.py fetcher
     volumes:
       - ./web/src:/src
@@ -26,7 +26,7 @@ services:
     build: web
     container_name: ggstats_web
     hostname: ggstats_web
-    restart: on-failure
+    restart: always
     command: ./start.sh
     logging: *default_logging
     volumes:
@@ -45,7 +45,7 @@ services:
     image: mysql:5.7
     container_name: ggstats_db
     hostname: ggstats_db
-    restart: on-failure
+    restart: always
     ports:
       - "3306:3306"
     logging: *default_logging
@@ -62,7 +62,7 @@ services:
     build: nginx
     container_name: nginx
     hostname: nginx
-    restart: on-failure
+    restart: always
     logging: *default_logging
     volumes:
       - ./nginx/ssl:/etc/nginx/ssl
