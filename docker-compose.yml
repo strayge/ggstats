@@ -67,6 +67,7 @@ services:
     volumes:
       - ./nginx/ssl:/etc/nginx/ssl
       - ./nginx/service.conf:/etc/nginx/service.conf
+      - ./nginx/www:/www
       - ./web/static:/static
     depends_on:
       - web
