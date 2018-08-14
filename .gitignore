@@ -20,6 +20,3 @@ venv/
 # logs
 fetcher.log
 fetcher.log.*
-
-# prod
-static/

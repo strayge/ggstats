@@ -1,0 +1,80 @@
+version: '3'
+
+services:
+
+  fetcher:
+    build: web
+    container_name: ggstats_fetcher
+    hostname: ggstats_fetcher
+    restart: on-failure
+    command: python3 manage.py fetcher
+    volumes:
+      - ./web/src:/src
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    depends_on:
+      - db
+    logging: &default_logging
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  web:
+    build: web
+    container_name: ggstats_web
+    hostname: ggstats_web
+    restart: on-failure
+    command: ./start.sh
+    logging: *default_logging
+    volumes:
+      - ./web/src:/src
+      - ./web/static:/static
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+
+  db:
+    image: mysql:5.7
+    container_name: ggstats_db
+    hostname: ggstats_db
+    restart: on-failure
+    ports:
+      - "3306:3306"
+    logging: *default_logging
+    volumes:
+      - ./mysql_data:/var/lib/mysql
+      - ./mysql/mysql.cnf:/etc/mysql/conf.d/mysql.cnf
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+
+  nginx:
+    build: nginx
+    container_name: nginx
+    hostname: nginx
+    restart: on-failure
+    logging: *default_logging
+    volumes:
+      - ./nginx/ssl:/etc/nginx/ssl
+      - ./nginx/service.conf:/etc/nginx/service.conf
+      - ./web/static:/static
+    depends_on:
+      - web
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - TZ=UTC
+      - LETSENCRYPT=${LETSENCRYPT}
+      - LE_EMAIL=${LE_EMAIL}
+      - LE_FQDN=${LE_FQDN}

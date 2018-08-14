@@ -24,10 +24,10 @@ SECRET_KEY = '@zir3zi%ad+g3roix8#e1cx5c_rin3ow$h6e_8c9gz@f7n6n21'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
-if os.path.isfile('debug.txt'):
+if os.path.isfile('.debug'):
     DEBUG = True
 
-ALLOWED_HOSTS = ['strayge.com', '127.0.0.1']
+ALLOWED_HOSTS = ['strayge.com', '127.0.0.1', '*']
 
 
 # Application definition
@@ -77,28 +77,30 @@ WSGI_APPLICATION = 'project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
-if DEBUG:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-            'CONN_MAX_AGE': 60,
-            'timeout': 20,
-        }
+# if DEBUG:
+#     DATABASES = {
+#         'default': {
+#             'ENGINE': 'django.db.backends.sqlite3',
+#             'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+#             'CONN_MAX_AGE': 60,
+#             'timeout': 20,
+#         }
+#     }
+# else:
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'OPTIONS': {
+            'database': os.environ['MYSQL_DATABASE'],
+            'user': os.environ['MYSQL_USER'],
+            'password': os.environ['MYSQL_PASSWORD'],
+            'charset': 'utf8mb4',
+            'host': 'ggstats_db',
+            'port': 3306,
+        },
+        'CONN_MAX_AGE': 900,
     }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.mysql',
-            'OPTIONS': {
-                'database': 'ggsite',
-                'user': 'ggsite_user',
-                'password': '25dPoLW7hzqmcZdN1lYn',
-                'charset': 'utf8mb4',
-            },
-            'CONN_MAX_AGE': 900,
-        }
-    }
+}
 
 
 # Password validation
@@ -139,7 +141,7 @@ USE_TZ = True
 
 STATIC_URL = '/gg/static/'
 
-STATIC_ROOT = '/var/www/ggsite/static/'
+STATIC_ROOT = '../static/'
 
 CACHES = {
     'default': {

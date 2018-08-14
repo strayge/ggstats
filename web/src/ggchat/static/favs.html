@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" /> 
+<title>Избранное GG</title>
+</head>
+<body>
+<script>
+function doit() {
+  var userid = document.getElementById("userid").value;
+  loadJSON(function(response) {
+    json = JSON.parse(response);
+    if (json["success"] == true) {
+        //console.log("success");
+        channels = json["channels"]
+        s = "<table><tr><td>id стрима &nbsp;&nbsp;&nbsp;&nbsp; </td><td>Стрим</td></tr>";
+        for (i=0; i<channels.length; i++) {
+            c = channels[i]
+            if (c["favourite"] == "1") {
+                s += "<tr><td>"+c["stream_id"]+"</td><td>"+c["streamer"]+"</td></tr>";
+                console.log(c["stream_id"] + "\t" + c["streamer"]);
+            }
+        }
+        s+="</table>";
+        document.getElementById("output").innerHTML = s;
+    }
+  }, userid)
+}
+
+function loadJSON(callback, userid) {
+    console.log(userid);
+    var xobj = new XMLHttpRequest();
+    xobj.overrideMimeType("application/json");
+    xobj.open('GET', 'https://goodgame.ru/api/getggchannels?user=' + userid, true);
+    xobj.onreadystatechange = function() {
+        if (xobj.readyState == 4 && xobj.status == 200) {
+            callback(xobj.responseText);
+        }
+    }
+    xobj.send(null);
+}
+</script>
+<form id="jsonFile" name="jsonFile" enctype="multipart/form-data" method="post">
+  <fieldset>
+    <h2>Получить онлайн из избранного</h2>
+     <p>Ид пользователя:</p>
+     <input type='text' id='userid' value='666'>
+     <input type='button' id='btnLoad' value='Получить' onclick='doit();'>
+  </fieldset>
+</form>
+<p id="output"></p>
+</body>
+</html>
