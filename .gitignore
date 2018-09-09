@@ -16,7 +16,21 @@ venv/
 
 # test server
 *.sqlite3
+skipped/
 
 # logs
-fetcher.log
 fetcher.log.*
+
+# settings
+.env
+
+# data
+mysql_data
+nginx/ssl/
+
+# flags
+.build
+.debug
+
+# compiled static
+web/static/
