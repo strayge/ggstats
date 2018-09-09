@@ -208,6 +208,36 @@
             </div>
             <div class="col-md-4 col-sm-12">
 
+                {% if donations_by_channel|length %}
+                <h4>Суммарно донатов</h4>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover table-striped">
+                        <thead>
+                        <tr><th>Канал</th><th>Сумма</th></tr>
+                        </thead>
+                        <tbody>
+                        {% for d in donations_by_channel %}
+                            <tr>
+                            <td>{% if d.channel_id == None %}
+                                    Турниры
+                                {% elif d.channel__streamer__username %}
+                                    <a href="{% url 'channel' d.channel_id %}">{{ d.channel__streamer__username }}</a>
+                                {% else %}
+                                    <a href="{% url 'channel' d.channel_id %}">{{ d.channel_id }}</a>
+                                {% endif %}
+                            </td>
+                            <td>{{ d.sum }}</td>
+                            </tr>
+                        {% endfor %}
+                        <tr>
+                            <td><b>Итого:</b></td>
+                            <td>{{ donations_total }}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+
                 {% if active_premiums|length %}
                 <h4>Активные премиумы</h4>
                 <div class="table-responsive">

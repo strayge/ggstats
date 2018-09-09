@@ -304,6 +304,9 @@ def user(request, user_id):
     received_bans = Ban.objects.filter(user_id=user_id).order_by('-timestamp')[:count_per_section]
     removed_messages = Message.objects.filter(user_id=user_id, removed=True).order_by('-timestamp')[:count_per_section]
 
+    donations_by_channel = Donation.objects.filter(user_id=user_id).values('channel_id', 'channel__streamer__username').annotate(sum=Sum('amount')).filter(sum__gt=0).order_by('-sum')
+    donations_total = sum(d['sum'] for d in donations_by_channel)
+
     content = {'name': username,
                'messages': last_messages,
                'donations': last_donations,
@@ -316,6 +319,8 @@ def user(request, user_id):
                'bans': bans,
                'removed_messages': removed_messages,
                'show_chat_links': is_admin(request),
+               'donations_by_channel': donations_by_channel,
+               'donations_total': donations_total,
                }
 
     return render_to_response('ggchat/user.html', content)
