@@ -372,6 +372,7 @@ def channel(request, channel_id):
                     'y_keyword': 'clients',
                     'type': 'area',
                     'name': 'Всего в чате',
+                    'visible': False,
 
                     'data2': chart_users_data,
                     'x_keyword2': 'timestamp',
