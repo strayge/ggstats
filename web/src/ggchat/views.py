@@ -671,7 +671,12 @@ def viewers_month(request):
 def chathistory(request, message_id, hash):
     from ggchat.templatetags.simplefilters import chat_hash
     message_id = int(message_id)
+
     time_range_in_minutes = 5
+    if request.GET.get("long", ""):
+        time_range_in_minutes = 60
+    elif request.GET.get("verylong", ""):
+        time_range_in_minutes = 7*24*60
 
     correct_hash = chat_hash(message_id)
     if correct_hash != hash:
