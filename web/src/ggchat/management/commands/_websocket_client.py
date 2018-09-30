@@ -601,6 +601,48 @@ class WebsocketClient:
                         last_premium.resubs = resubs
                         last_premium.save()
 
+        elif msg['type'] == 'channel_history':
+            # {"type": "channel_history",
+            #  "data": {"channel_id": 5,
+            #           "messages": [{"channel_id": 5,
+            #                         "user_id": 48951,
+            #                         "user_name": "taviel",
+            #                         "user_rights": 0,
+            #                         "premium": 0,
+            #                         "premiums": [],
+            #                         "resubs": {},
+            #                         "staff": 0,
+            #                         "color": "simple",
+            #                         "icon": "none",
+            #                         "mobile": 0,
+            #                         "payments": 0,
+            #                         "paymentsAll": {"86096": 1},
+            #                         "isStatus": 0,
+            #                         "message_id": 1538342308904,
+            #                         "timestamp": 1538342308,
+            #                         "text": ":gg:"},
+            #                        {"channel_id": 5,
+            #                         "user_id": 58798,
+            #                         "user_name": "t-griff",
+            #                         "user_rights": 0,
+            #                         "premium": 0,
+            #                         "premiums": [],
+            #                         "resubs": {},
+            #                         "staff": 0,
+            #                         "color": "simple",
+            #                         "icon": "none",
+            #                         "mobile": 0,
+            #                         "payments": 0,
+            #                         "paymentsAll": {},
+            #                         "isStatus": 0,
+            #                         "message_id": 1538342319270,
+            #                         "timestamp": 1538342319,
+            #                         "text": "Miker, :gg:"}
+            #                       ]
+            #          }
+            # }
+            pass
+
         else:
             # unknown type
             self.log.warning('Unknown type: {}'.format(msg))
