@@ -31,26 +31,29 @@ class WsBaseClient:
                     try:
                         msg = await asyncio.wait_for(self.ws.recv(), timeout=5)
                     except asyncio.TimeoutError:
-                        pong = await self.ws.ping()
                         try:
+                            pong = await self.ws.ping()
                             await asyncio.wait_for(pong, timeout=10)
                         except asyncio.TimeoutError:
                             self.log.warning('ping timeout')
                             break
+                        except:
+                            self.log.exception('unknown error during ping')
+                            break
                         self.log.debug('ping ok')
                         continue
                     await self.ws_received(msg)
-            # except (KeyboardInterrupt, SystemExit):
-            #     self.log.info('KeyboardInterrupt')
-            #     break
             except (websockets.exceptions.ConnectionClosed,
                     websockets.exceptions.InvalidHandshake,
                     websockets.exceptions.WebSocketProtocolError,
                     websockets.exceptions.PayloadTooBig):
                 self.log.error('WS error')
-                await asyncio.sleep(10)
             except:
                 self.log.exception('Unknown error')
+            finally:
+                if self.ws and not self.ws.closed:
+                    await self.ws.close()
+                    self.ws = None
                 await asyncio.sleep(10)
 
     async def ws_connected(self):

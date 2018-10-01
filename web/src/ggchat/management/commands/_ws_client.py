@@ -25,6 +25,7 @@ class ChatWsClient(WsBaseClient):
 
     async def ws_connected(self):
         self.joined_channels = set()
+        self.last_channels_list_check = 0
         for channel_id in PREDEFINED_CHANNELS:
             await self.join_channel(channel_id)
 
@@ -47,7 +48,7 @@ class ChatWsClient(WsBaseClient):
         # sync channels
         self.queue_old_cmd.put({'type': 'channels', 'data': self.joined_channels})
 
-        get_channels_query = {"type": "get_channels_list", "data": {"start": 0, "count": 10}}
+        get_channels_query = {"type": "get_channels_list", "data": {"start": 0, "count": 200}}
         await self.send(get_channels_query)
 
     async def send(self, data):

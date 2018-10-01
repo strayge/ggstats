@@ -36,7 +36,7 @@ class ChatMsgParser:
                 msg = self.queue.get(block=True, timeout=1)
                 self.parse(msg)
             except queue.Empty:
-                self.log.info('queue empty')
+                self.log.debug('queue empty')
                 pass
             except (KeyboardInterrupt, SystemExit):
                 self.log.info('parser interrupted')
@@ -230,9 +230,7 @@ class ChatMsgParser:
         username = msg['data']['user_name']
 
         if is_history:
-            now = time.time()
-            old_message = Message.objects.filter(channel_id=channel_id, timestamp__gte=timezone.now() - timezone.timedelta(days=1)).order_by('-timestamp').filter(message_id=message_id, user_id=user_id).first()
-            print('old msg filter: {}'.format(time.time() - now))
+            old_message = Message.objects.filter(channel_id=channel_id, message_id=message_id).first()
             if old_message:
                 return
 

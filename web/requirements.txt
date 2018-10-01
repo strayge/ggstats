@@ -12,7 +12,7 @@ six==1.10.0
 urllib3==1.21.1
 uWSGI==2.0.15
 w3lib==1.17.0
-websockets==3.3
+websockets==6.0
 wheel==0.30.0a0
 yarl==0.10.3
 gunicorn==19.9.0
