@@ -10,7 +10,7 @@ from django.utils import timezone
 from django.views.decorators.cache import cache_page
 
 from ggchat.models import Donation, ChannelStats, User, Message, PremiumActivation, Follow, PremiumStatus, \
-    Channel, Ban, Warning, TotalStats, CommonPremiumPayments, PlayerChannelStats
+    Channel, Ban, Warning, TotalStats, CommonPremiumPayments, PlayerChannelStats, UserInChat
 
 def is_admin(request):
     if request.GET.get("chat", "") == "18":
@@ -307,6 +307,8 @@ def user(request, user_id):
     donations_by_channel = Donation.objects.filter(user_id=user_id).values('channel_id', 'channel__streamer__username').annotate(sum=Sum('amount')).filter(sum__gt=0).order_by('-sum')
     donations_total = sum(d['sum'] for d in donations_by_channel)
 
+    timeinchat = UserInChat.objects.filter(user_id=user_id).order_by('-end')[:count_per_section]
+
     content = {'name': username,
                'messages': last_messages,
                'donations': last_donations,
@@ -321,6 +323,7 @@ def user(request, user_id):
                'show_chat_links': is_admin(request),
                'donations_by_channel': donations_by_channel,
                'donations_total': donations_total,
+               'timeinchat': timeinchat,
                }
 
     return render_to_response('ggchat/user.html', content)
