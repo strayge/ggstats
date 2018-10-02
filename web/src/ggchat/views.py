@@ -298,8 +298,11 @@ def user(request, user_id):
     last_donations = Donation.objects.filter(user_id=user_id).order_by('-timestamp')[:count_per_section]
     last_premiums = PremiumActivation.objects.filter(user_id=user_id).order_by('-timestamp')[:count_per_section]
     last_follows = Follow.objects.filter(user_id=user_id).order_by('-timestamp')[:10]
-    active_premiums = PremiumStatus.objects.filter(user_id=user_id, ended=None)
     channel = Channel.objects.filter(streamer_id=user_id).first()
+    if channel:
+        active_premiums = PremiumStatus.objects.filter(user_id=user_id, ended=None).exclude(channel=channel)
+    else:
+        active_premiums = PremiumStatus.objects.filter(user_id=user_id, ended=None)
     bans = Ban.objects.filter(moderator_id=user_id).order_by('-timestamp')[:count_per_section]
     received_bans = Ban.objects.filter(user_id=user_id).order_by('-timestamp')[:count_per_section]
     removed_messages = Message.objects.filter(user_id=user_id, removed=True).order_by('-timestamp')[:count_per_section]
