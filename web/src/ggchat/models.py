@@ -158,3 +158,12 @@ class PlayerChannelStats(models.Model):
     viewers_gg = models.IntegerField()
     status = models.BooleanField()
     status_gg = models.BooleanField()
+
+class UserInChat(models.Model):
+    channel = models.ForeignKey(Channel, on_delete=models.SET_NULL, null=True)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    start = models.DateTimeField(default=timezone.now, db_index=True)
+    end = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        index_together = [("channel", "user")]

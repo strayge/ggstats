@@ -52,7 +52,8 @@ class ChatMsgParser:
             self.get_player_counters()
 
     def log_msg(self, msg_type, msg):
-        if msg_type not in ['welcome', 'success_join', 'channel_counters', 'channels_list', 'error', 'message', 'channel_history']:
+        if msg_type not in ['welcome', 'success_join', 'channel_counters', 'channels_list', 'error', 'message',
+                            'channel_history', 'users_list', 'update_channel_info']:
             try:
                 encoding = locale.getpreferredencoding()
                 s = msg.__repr__().encode(encoding, 'ignore').decode(encoding)
@@ -119,6 +120,9 @@ class ChatMsgParser:
         elif msg_type == 'message':
             self.parse_message(msg)
 
+        elif msg_type == 'users_list':
+            self.parse_users_list(msg)
+
         else:
             self.log.warning('Unknown type: {}'.format(msg))
 
@@ -142,12 +146,15 @@ class ChatMsgParser:
             answer_gg = {}
             answer_all = {}
             with requests.Session() as session:
-                with session.get(url_gg) as resp:
-                    if resp.status_code == 200:
-                        answer_gg = resp.json()
-                with session.get(url_all) as resp:
-                    if resp.status_code == 200:
-                        answer_all = resp.json()
+                try:
+                    with session.get(url_gg, timeout=10) as resp:
+                        if resp.status_code == 200:
+                            answer_gg = resp.json()
+                    with session.get(url_all, timeout=10) as resp:
+                        if resp.status_code == 200:
+                            answer_all = resp.json()
+                except requests.exceptions.SSLError:
+                    self.log.error('SSLError during fetch player counters')
             if answer_gg and answer_all:
                 for channel_id in answer_gg.keys():
                     player_in_chat = int(answer_gg[channel_id].get('usersinchat', 0))
@@ -220,6 +227,33 @@ class ChatMsgParser:
 
         warning = Warning(user=user, channel=channel, moderator=moderator, reason=reason)
         warning.save()
+
+    def parse_users_list(self, msg):
+        channel_id = msg['data']['channel_id']
+        users = msg['data']['users']
+        for user_data in users:
+            user_id = user_data['id']
+            username = user_data['name']
+
+            channel = Channel.objects.filter(channel_id=channel_id).first()
+            if not channel:
+                channel = Channel(channel_id=channel_id, streamer=None)
+                channel.save()
+
+            user = User.objects.filter(user_id=user_id).first()
+            if not user:
+                user = User(user_id=user_id, username=username)
+                user.save()
+
+            now = timezone.now()
+            active_record = UserInChat.objects.filter(channel_id=channel_id, user_id=user_id,
+                                                      end__gte=now - timezone.timedelta(minutes=35)).first()
+            if active_record:
+                active_record.end = now
+                active_record.save()
+            else:
+                record = UserInChat(user_id=user_id, channel_id=channel_id, start=now, end=now)
+                record.save()
 
     def parse_message(self, msg):
         is_history = msg.get('history', False)

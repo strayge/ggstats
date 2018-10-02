@@ -21,6 +21,9 @@ class ChatWsClient(WsBaseClient):
         self.joined_channels = set()
         self.last_channels_list_check = 0
         self.CHECK_CHANNELS_PERIOD = 5 * 60
+
+        self.CHECK_USERS_PERIOD = 15 * 60
+        self.last_users_check = time.time() - (self.CHECK_USERS_PERIOD - 60)  # start in 1 min after start
         super().__init__(log_level=log_level, endpoint=WS_ENDPOINT)
 
     async def ws_connected(self):
@@ -33,6 +36,12 @@ class ChatWsClient(WsBaseClient):
         while not self.queue_old_cmd_resp.empty():
             received = self.queue_old_cmd_resp.get()
             await self.ws_received(received)
+        if time.time() > self.last_users_check + self.CHECK_USERS_PERIOD:
+            self.log.info('users check')
+            self.last_users_check = time.time()
+            for channel_id in self.joined_channels:
+                query = {"type": "get_users_list2", "data": {"channel_id": str(channel_id)}}
+                await self.send(query)
 
         now = time.time()
         if now > self.last_channels_list_check + self.CHECK_CHANNELS_PERIOD:
