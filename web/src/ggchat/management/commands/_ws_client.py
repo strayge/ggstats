@@ -29,8 +29,8 @@ class ChatWsClient(WsBaseClient):
     async def ws_connected(self):
         self.joined_channels = set()
         self.last_channels_list_check = 0
-        for channel_id in PREDEFINED_CHANNELS:
-            await self.join_channel(channel_id)
+        # for channel_id in PREDEFINED_CHANNELS:
+        #     await self.join_channel(channel_id)
 
     async def ws_periodic_tasks(self):
         while not self.queue_old_cmd_resp.empty():
@@ -74,11 +74,18 @@ class ChatWsClient(WsBaseClient):
             pass
         elif msg_type == 'channels_list':
             self.log.info('channels_list answer ({} streams)'.format(len(msg['data']['channels'])))
+            channels = set()
             for channel in msg['data']['channels']:
                 channel_id = channel['channel_id']
                 if channel_id not in self.joined_channels:
-                    self.log.debug('founded new channel: {}'.format(channel_id))
-                    await self.join_channel(channel_id)
+                    channels.add(str(channel_id))
+            for channel_id in PREDEFINED_CHANNELS:
+                if channel_id not in self.joined_channels:
+                    channels.add(str(channel_id))
+            for channel_id in channels:
+                self.log.debug('founded new channel: {}'.format(channel_id))
+                await self.join_channel(channel_id)
+
         elif msg_type == 'success_join':
             channel_id = str(msg['data']['channel_id'])
             self.joined_channels.add(channel_id)

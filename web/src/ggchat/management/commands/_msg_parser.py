@@ -115,10 +115,10 @@ class ChatMsgParser:
         elif msg_type == 'channel_history':
             messages = msg['data']['messages']
             for msg in messages:
-                self.parse_message({'data': msg, 'history': True})
+                self.parse_message({'data': msg}, is_history=True)
 
         elif msg_type == 'message':
-            self.parse_message(msg)
+            self.parse_message(msg, is_history=False)
 
         elif msg_type == 'users_list':
             self.parse_users_list(msg)
@@ -188,9 +188,7 @@ class ChatMsgParser:
             username = user_data['name']
             self.mark_user_online(channel_id, user_id, username)
 
-    def parse_message(self, msg):
-        is_history = msg.get('history', False)
-
+    def parse_message(self, msg, is_history=False):
         channel_id = msg['data']['channel_id']
         user_id = msg['data']['user_id']
         message_id = msg['data']['message_id']
@@ -227,14 +225,15 @@ class ChatMsgParser:
 
     # current_prems: list of channel_id
     # resubs: dict: channel_id -> resub level
-    def process_active_premiums(self, user_id, current_prems, current_resubs):
-        # end old prems
+    def process_active_premiums(self, user_id, current_prems, current_resubs, only_new=False):
         prev_active_prems = PremiumStatus.objects.filter(user_id=user_id, ended=None)
-        for prem in prev_active_prems:
-            # channel_id saved as str, so needed convert types in current_prems
-            if prem.channel_id not in map(str, current_prems):
-                prem.ended = timezone.now()
-                prem.save()
+        # end old prems
+        if not only_new:
+            for prem in prev_active_prems:
+                # channel_id saved as str, so needed convert types in current_prems
+                if prem.channel_id not in map(str, current_prems):
+                    prem.ended = timezone.now()
+                    prem.save()
 
         # add new prems
         for channel_id in current_prems:
@@ -311,7 +310,9 @@ class ChatMsgParser:
 
         user = User.objects.filter(username=username).first()
         if user:
-            self.process_active_premiums(user.user_id, [channel_id], {channel_id: user_resubs})
+            self.process_active_premiums(user.user_id, [channel_id], {channel_id: user_resubs}, only_new=True)
+            activation = PremiumActivation(channel=channel, user=user, resubs=user_resubs, payment=payment)
+            activation.save()
 
     def parse_follower(self, msg):
         channel_id = msg['data']['channel_id']
