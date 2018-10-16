@@ -10,101 +10,101 @@
     <div id="container"></div>
     {% chart_datetime "container" chart1 %}
 
-    <h4>За полгода</h4>
-    <table class="table table-bordered table-hover table-striped" align="center">
-        <thead>
-            <tr>
-                <th rowspan=2 style="text-align: center; vertical-align: middle;">Месяц</th>
-                <th colspan=24 style="text-align: center; vertical-align: middle;">Зрители (медиана за каждый час, время UTC)</th>
-            </tr>
-            <tr>
-                <th style="text-align: center; vertical-align: middle;">0</th>
-                <th style="text-align: center; vertical-align: middle;">1</th>
-                <th style="text-align: center; vertical-align: middle;">2</th>
-                <th style="text-align: center; vertical-align: middle;">3</th>
-                <th style="text-align: center; vertical-align: middle;">4</th>
-                <th style="text-align: center; vertical-align: middle;">5</th>
-                <th style="text-align: center; vertical-align: middle;">6</th>
-                <th style="text-align: center; vertical-align: middle;">7</th>
-                <th style="text-align: center; vertical-align: middle;">8</th>
-                <th style="text-align: center; vertical-align: middle;">9</th>
-                <th style="text-align: center; vertical-align: middle;">10</th>
-                <th style="text-align: center; vertical-align: middle;">11</th>
-                <th style="text-align: center; vertical-align: middle;">12</th>
-                <th style="text-align: center; vertical-align: middle;">13</th>
-                <th style="text-align: center; vertical-align: middle;">14</th>
-                <th style="text-align: center; vertical-align: middle;">15</th>
-                <th style="text-align: center; vertical-align: middle;">16</th>
-                <th style="text-align: center; vertical-align: middle;">17</th>
-                <th style="text-align: center; vertical-align: middle;">18</th>
-                <th style="text-align: center; vertical-align: middle;">19</th>
-                <th style="text-align: center; vertical-align: middle;">20</th>
-                <th style="text-align: center; vertical-align: middle;">21</th>
-                <th style="text-align: center; vertical-align: middle;">22</th>
-                <th style="text-align: center; vertical-align: middle;">23</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for row in month_table %}
-                <tr>
-                {% if row.month == 11 %}
-                    <td style="text-align: center;">{{ row.month }}*</td>
-                {% else %}
-                    <td style="text-align: center;">{{ row.month }}</td>
-                {% endif %}
-                {% for viewers_hour in row.viewers_average %}
-                    <td style="text-align: center;">{{ viewers_hour|floatformat:"0" }}</td>
-                {% endfor %}
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <p>* - 9 ноября 2017 года изменен алгоритм подсчета числа зрителей</p>
-
-    <table class="table table-bordered table-hover table-striped" align="center">
-        <thead>
-            <tr>
-                <th rowspan=2 style="text-align: center; vertical-align: middle;">Месяц</th>
-                <th colspan=24 style="text-align: center; vertical-align: middle;">Чат (медиана за каждый час, время UTC)</th>
-            </tr>
-            <tr>
-                <th style="text-align: center; vertical-align: middle;">0</th>
-                <th style="text-align: center; vertical-align: middle;">1</th>
-                <th style="text-align: center; vertical-align: middle;">2</th>
-                <th style="text-align: center; vertical-align: middle;">3</th>
-                <th style="text-align: center; vertical-align: middle;">4</th>
-                <th style="text-align: center; vertical-align: middle;">5</th>
-                <th style="text-align: center; vertical-align: middle;">6</th>
-                <th style="text-align: center; vertical-align: middle;">7</th>
-                <th style="text-align: center; vertical-align: middle;">8</th>
-                <th style="text-align: center; vertical-align: middle;">9</th>
-                <th style="text-align: center; vertical-align: middle;">10</th>
-                <th style="text-align: center; vertical-align: middle;">11</th>
-                <th style="text-align: center; vertical-align: middle;">12</th>
-                <th style="text-align: center; vertical-align: middle;">13</th>
-                <th style="text-align: center; vertical-align: middle;">14</th>
-                <th style="text-align: center; vertical-align: middle;">15</th>
-                <th style="text-align: center; vertical-align: middle;">16</th>
-                <th style="text-align: center; vertical-align: middle;">17</th>
-                <th style="text-align: center; vertical-align: middle;">18</th>
-                <th style="text-align: center; vertical-align: middle;">19</th>
-                <th style="text-align: center; vertical-align: middle;">20</th>
-                <th style="text-align: center; vertical-align: middle;">21</th>
-                <th style="text-align: center; vertical-align: middle;">22</th>
-                <th style="text-align: center; vertical-align: middle;">23</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for row in month_table %}
-                <tr>
-                <td style="text-align: center;">{{ row.month }}</td>
-                {% for chat_hour in row.chat_average %}
-                    <td style="text-align: center;">{{ chat_hour|floatformat:"0" }}</td>
-                {% endfor %}
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+{#    <h4>За полгода</h4>#}
+{#    <table class="table table-bordered table-hover table-striped" align="center">#}
+{#        <thead>#}
+{#            <tr>#}
+{#                <th rowspan=2 style="text-align: center; vertical-align: middle;">Месяц</th>#}
+{#                <th colspan=24 style="text-align: center; vertical-align: middle;">Зрители (медиана за каждый час, время UTC)</th>#}
+{#            </tr>#}
+{#            <tr>#}
+{#                <th style="text-align: center; vertical-align: middle;">0</th>#}
+{#                <th style="text-align: center; vertical-align: middle;">1</th>#}
+{#                <th style="text-align: center; vertical-align: middle;">2</th>#}
+{#                <th style="text-align: center; vertical-align: middle;">3</th>#}
+{#                <th style="text-align: center; vertical-align: middle;">4</th>#}
+{#                <th style="text-align: center; vertical-align: middle;">5</th>#}
+{#                <th style="text-align: center; vertical-align: middle;">6</th>#}
+{#                <th style="text-align: center; vertical-align: middle;">7</th>#}
+{#                <th style="text-align: center; vertical-align: middle;">8</th>#}
+{#                <th style="text-align: center; vertical-align: middle;">9</th>#}
+{#                <th style="text-align: center; vertical-align: middle;">10</th>#}
+{#                <th style="text-align: center; vertical-align: middle;">11</th>#}
+{#                <th style="text-align: center; vertical-align: middle;">12</th>#}
+{#                <th style="text-align: center; vertical-align: middle;">13</th>#}
+{#                <th style="text-align: center; vertical-align: middle;">14</th>#}
+{#                <th style="text-align: center; vertical-align: middle;">15</th>#}
+{#                <th style="text-align: center; vertical-align: middle;">16</th>#}
+{#                <th style="text-align: center; vertical-align: middle;">17</th>#}
+{#                <th style="text-align: center; vertical-align: middle;">18</th>#}
+{#                <th style="text-align: center; vertical-align: middle;">19</th>#}
+{#                <th style="text-align: center; vertical-align: middle;">20</th>#}
+{#                <th style="text-align: center; vertical-align: middle;">21</th>#}
+{#                <th style="text-align: center; vertical-align: middle;">22</th>#}
+{#                <th style="text-align: center; vertical-align: middle;">23</th>#}
+{#            </tr>#}
+{#        </thead>#}
+{#        <tbody>#}
+{#            {% for row in month_table %}#}
+{#                <tr>#}
+{#                {% if row.month == 11 %}#}
+{#                    <td style="text-align: center;">{{ row.month }}*</td>#}
+{#                {% else %}#}
+{#                    <td style="text-align: center;">{{ row.month }}</td>#}
+{#                {% endif %}#}
+{#                {% for viewers_hour in row.viewers_average %}#}
+{#                    <td style="text-align: center;">{{ viewers_hour|floatformat:"0" }}</td>#}
+{#                {% endfor %}#}
+{#                </tr>#}
+{#            {% endfor %}#}
+{#        </tbody>#}
+{#    </table>#}
+{#    <p>* - 9 ноября 2017 года изменен алгоритм подсчета числа зрителей</p>#}
+{##}
+{#    <table class="table table-bordered table-hover table-striped" align="center">#}
+{#        <thead>#}
+{#            <tr>#}
+{#                <th rowspan=2 style="text-align: center; vertical-align: middle;">Месяц</th>#}
+{#                <th colspan=24 style="text-align: center; vertical-align: middle;">Чат (медиана за каждый час, время UTC)</th>#}
+{#            </tr>#}
+{#            <tr>#}
+{#                <th style="text-align: center; vertical-align: middle;">0</th>#}
+{#                <th style="text-align: center; vertical-align: middle;">1</th>#}
+{#                <th style="text-align: center; vertical-align: middle;">2</th>#}
+{#                <th style="text-align: center; vertical-align: middle;">3</th>#}
+{#                <th style="text-align: center; vertical-align: middle;">4</th>#}
+{#                <th style="text-align: center; vertical-align: middle;">5</th>#}
+{#                <th style="text-align: center; vertical-align: middle;">6</th>#}
+{#                <th style="text-align: center; vertical-align: middle;">7</th>#}
+{#                <th style="text-align: center; vertical-align: middle;">8</th>#}
+{#                <th style="text-align: center; vertical-align: middle;">9</th>#}
+{#                <th style="text-align: center; vertical-align: middle;">10</th>#}
+{#                <th style="text-align: center; vertical-align: middle;">11</th>#}
+{#                <th style="text-align: center; vertical-align: middle;">12</th>#}
+{#                <th style="text-align: center; vertical-align: middle;">13</th>#}
+{#                <th style="text-align: center; vertical-align: middle;">14</th>#}
+{#                <th style="text-align: center; vertical-align: middle;">15</th>#}
+{#                <th style="text-align: center; vertical-align: middle;">16</th>#}
+{#                <th style="text-align: center; vertical-align: middle;">17</th>#}
+{#                <th style="text-align: center; vertical-align: middle;">18</th>#}
+{#                <th style="text-align: center; vertical-align: middle;">19</th>#}
+{#                <th style="text-align: center; vertical-align: middle;">20</th>#}
+{#                <th style="text-align: center; vertical-align: middle;">21</th>#}
+{#                <th style="text-align: center; vertical-align: middle;">22</th>#}
+{#                <th style="text-align: center; vertical-align: middle;">23</th>#}
+{#            </tr>#}
+{#        </thead>#}
+{#        <tbody>#}
+{#            {% for row in month_table %}#}
+{#                <tr>#}
+{#                <td style="text-align: center;">{{ row.month }}</td>#}
+{#                {% for chat_hour in row.chat_average %}#}
+{#                    <td style="text-align: center;">{{ chat_hour|floatformat:"0" }}</td>#}
+{#                {% endfor %}#}
+{#                </tr>#}
+{#            {% endfor %}#}
+{#        </tbody>#}
+{#    </table>#}
 
 
 {% endblock %}
