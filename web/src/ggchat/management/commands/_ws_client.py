@@ -10,7 +10,7 @@ from ggchat.management.commands._ws_base import WsBaseClient
 
 WS_ENDPOINT = 'wss://chat-1.goodgame.ru/chat2/'
 
-PREDEFINED_CHANNELS = ['5', '94546', 'r128', '13214']
+PREDEFINED_CHANNELS = [] #'5', '94546', 'r128', '13214']
 
 class ChatWsClient(WsBaseClient):
     def __init__(self, log_level, queue_msg_parse, queue_old_cmd, queue_old_cmd_resp):
