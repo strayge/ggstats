@@ -79,3 +79,13 @@ services:
       - LETSENCRYPT=${LETSENCRYPT}
       - LE_EMAIL=${LE_EMAIL}
       - LE_FQDN=${LE_FQDN}
+
+  rss:
+    build: rss
+    container_name: ggstats_rss
+    hostname: ggstats_rss
+    command: python3 main.py
+    volumes:
+      - ./rss/src:/src
+      - ./web/static:/static
+      - ./rss/data:/data

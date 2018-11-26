@@ -13,4 +13,4 @@ fi
 # because compose merging stdout & stderr => warning in dump => invalid dump
 # https://github.com/dockerwest/compose-pimcore/issues/16
 
-docker exec -i $(docker-compose ps -q db) sh -c "exec mysqldump --all-databases -u${MYSQL_USER} -p${MYSQL_PASSWORD}" | gzip > "$DIR/db_$DATESTAMP.sql.gz"
+docker exec -i $(docker-compose ps -q db) sh -c "exec mysqldump --all-databases -u${MYSQL_USER} -p${MYSQL_PASSWORD} --single-transaction --quick --lock-tables=false" | gzip > "$DIR/db_$DATESTAMP.sql.gz"

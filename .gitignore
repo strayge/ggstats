@@ -4,8 +4,8 @@ __pycache__/
 *$py.class
 
 # Django stuff:
-*.log
 local_settings.py
+migrations/
 
 # virtualenv
 .venv
@@ -19,14 +19,18 @@ venv/
 skipped/
 
 # logs
+*.log
 fetcher.log.*
+ws_client.log.*
 
 # settings
 .env
 
 # data
 mysql_data
+mysql_data1
 nginx/ssl/
+*.pickle
 
 # flags
 .build
@@ -34,3 +38,8 @@ nginx/ssl/
 
 # compiled static
 web/static/
+
+
+# backups
+*.bak
+*.backup
