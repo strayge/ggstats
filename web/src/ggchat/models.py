@@ -158,6 +158,7 @@ class PlayerChannelStats(models.Model):
     viewers_gg = models.IntegerField()
     status = models.BooleanField()
     status_gg = models.BooleanField()
+    hidden = models.NullBooleanField()
 
 class UserInChat(models.Model):
     channel = models.ForeignKey(Channel, on_delete=models.SET_NULL, null=True)

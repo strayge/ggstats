@@ -39,7 +39,7 @@ def viewers(request):
 
     def calc_total_stats(from_ts, to_ts):
         full_data = ChannelStats.objects.filter(timestamp__gte=from_ts, timestamp__lte=to_ts).values('channel_id', 'timestamp', 'users', 'clients').all()
-        full_data_player = PlayerChannelStats.objects.filter(timestamp__gte=from_ts, timestamp__lte=to_ts).values('channel_id', 'timestamp', 'viewers', 'viewers_gg', 'status', 'status_gg').all()
+        full_data_player = PlayerChannelStats.objects.filter(timestamp__gte=from_ts, timestamp__lte=to_ts).exclude(hidden=True).values('channel_id', 'timestamp', 'viewers', 'viewers_gg', 'status', 'status_gg').all()
         INTERVAL = 20*60
         data = {}
         for d in full_data:

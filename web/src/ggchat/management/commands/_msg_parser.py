@@ -427,6 +427,7 @@ class ChatMsgParser:
             url_all = 'https://goodgame.ru/api/getchannelstatus?id={}&fmt=json'.format(channels_ids_str)
             answer_gg = {}
             answer_all = {}
+            streams = {}
             with requests.Session() as session:
                 try:
                     with session.get(url_gg, timeout=10) as resp:
@@ -435,8 +436,25 @@ class ChatMsgParser:
                     with session.get(url_all, timeout=10) as resp:
                         if resp.status_code == 200:
                             answer_all = resp.json()
+
+                    stream_url = 'https://goodgame.ru/api/4/stream?page={}'
+                    # 1st page
+                    with session.get(stream_url.format(1), timeout=10) as resp:
+                        page = resp.json()
+                        total_pages = page['queryInfo']['qty'] // page['queryInfo']['onPage'] + 1
+                        # adding 1 page
+                        for s in page['streams']:
+                            streams[str(s['id'])] = s
+                    # other pages
+                    for pagenum in range(2, total_pages+1):
+                        with session.get(stream_url.format(pagenum), timeout=10) as resp:
+                            page = resp.json()
+                            for s in page['streams']:
+                                streams[str(s['id'])] = s
+
                 except requests.exceptions.SSLError:
                     self.log.error('SSLError during fetch player counters')
+
             if answer_gg and answer_all:
                 for channel_id in answer_gg.keys():
                     player_in_chat = int(answer_gg[channel_id].get('usersinchat', 0))
@@ -451,11 +469,22 @@ class ChatMsgParser:
                     player_status = False
                     if channel_id in answer_all and answer_all[channel_id].get('status', 'Dead').lower() == 'live':
                         player_status = True
+
+                    if player_status_gg and streams:
+                        if channel_id in streams and streams[channel_id]['hidden'] not in ['1', 1]:
+                            hidden = False
+                        else:
+                            hidden = True
+                    else:
+                        hidden = None
+
                     player_stats = PlayerChannelStats(channel_id=channel_id,
                                                       chat=player_in_chat,
                                                       viewers=player_viewers,
                                                       viewers_gg=player_viewers_gg,
                                                       status=player_status,
-                                                      status_gg=player_status_gg)
+                                                      status_gg=player_status_gg,
+                                                      hidden=hidden,
+                                                      )
                     player_stats.save()
         self.log.info('periodic_processing end')
