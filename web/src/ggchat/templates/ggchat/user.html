@@ -320,6 +320,25 @@
                 </div>
                 {% endif %}
 
+                {% if timeinchat_weekly|length %}
+                <h4>Чаще всего бывает тут</h4>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover table-striped">
+                        <thead>
+                        <tr><th>Канал</th><th>Минут за неделю</th></tr>
+                        </thead>
+                        <tbody>
+                        {% for channel, time in timeinchat_weekly %}
+                            <tr>
+                            <td>{% channel_link channel %}</td>
+                            <td>{{ time|div_int:60 }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+
                 {% if timeinchat|length %}
                 <h4>Был в чате</h4>
                 <div class="table-responsive">

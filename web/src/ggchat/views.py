@@ -3,7 +3,7 @@ import datetime
 import itertools
 from statistics import mean, median
 
-from django.db.models import Count, Min, Sum, Avg
+from django.db.models import Count, Min, Sum, Avg, Q
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from django.utils import timezone
@@ -312,6 +312,22 @@ def user(request, user_id):
 
     timeinchat = UserInChat.objects.filter(user_id=user_id).order_by('-end')[:count_per_section]
 
+    week_ago = timezone.now() - datetime.timedelta(days=7)
+
+
+    timeinchat_weekly_raw = UserInChat.objects.filter(user_id=user_id).filter(Q(start__gte=week_ago) | Q(end__gte=week_ago)).all()
+    chat_time_per_channel = {}
+    chat_channels = {}
+    for rec in timeinchat_weekly_raw:
+        chat_channels[rec.channel_id] = rec.channel
+        time = (rec.end - max(week_ago, rec.start)).total_seconds()
+        chat_time_per_channel[rec.channel_id] = chat_time_per_channel.get(rec.channel_id, 0) + time
+    chat_top_time = []
+    for chat_channel_id in chat_time_per_channel:
+        chat_top_time.append((chat_channels[chat_channel_id], chat_time_per_channel[chat_channel_id]))
+    chat_top_time.sort(key=lambda x: x[1], reverse=True)
+    chat_top_time = chat_top_time[:count_per_section]
+
     content = {'name': username,
                'messages': last_messages,
                'donations': last_donations,
@@ -327,6 +343,7 @@ def user(request, user_id):
                'donations_by_channel': donations_by_channel,
                'donations_total': donations_total,
                'timeinchat': timeinchat,
+               'timeinchat_weekly': chat_top_time,
                }
 
     return render_to_response('ggchat/user.html', content)
