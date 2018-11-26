@@ -225,14 +225,15 @@ class ChatMsgParser:
 
     # current_prems: list of channel_id
     # resubs: dict: channel_id -> resub level
-    def process_active_premiums(self, user_id, current_prems, current_resubs):
-        # end old prems
+    def process_active_premiums(self, user_id, current_prems, current_resubs, only_new=False):
         prev_active_prems = PremiumStatus.objects.filter(user_id=user_id, ended=None)
-        for prem in prev_active_prems:
-            # channel_id saved as str, so needed convert types in current_prems
-            if prem.channel_id not in map(str, current_prems):
-                prem.ended = timezone.now()
-                prem.save()
+        # end old prems
+        if not only_new:
+            for prem in prev_active_prems:
+                # channel_id saved as str, so needed convert types in current_prems
+                if prem.channel_id not in map(str, current_prems):
+                    prem.ended = timezone.now()
+                    prem.save()
 
         # add new prems
         for channel_id in current_prems:
@@ -266,50 +267,53 @@ class ChatMsgParser:
         amount = msg['data']['amount']
         text = msg['data']['message']
         link = msg['data']['link']
+        user_id = msg['data']['userId']
 
         if 'voice' in msg['data']:
             voice = msg['data']['voice']
         else:
             voice = None
 
-        user = User.objects.filter(username=username).first()
-        if not user and username == 'Неизвестный':
+        user = User(user_id=user_id, username=username)
+        if user_id == 0:
             user = User(user_id=0, username='Неизвестный')
-            user.save()
+        user.save()
 
-        # skip donations from not exists users
-        if user:
-            # donations to cups, showed on all subscribed channels
-            if link:
-                latest_donation_with_this_url = Donation.objects.filter(link=link, user=user,
-                                                                        amount=amount,
-                                                                        timestamp__gte=timezone.now() - timezone.timedelta(
-                                                                            seconds=15)).first()
-                if not latest_donation_with_this_url:
-                    donation = Donation(user=user, channel=None, amount=amount, text=text, link=link, voice=voice)
-                    donation.save()
-            else:
-                channel = Channel.objects.filter(channel_id=channel_id).first()
-                if channel:
-                    donation = Donation(user=user, channel=channel, amount=amount, text=text, link=link, voice=voice)
-                    donation.save()
+        # donations to cups, showed on all subscribed channels
+        if link:
+            latest_donation_with_this_url = Donation.objects.filter(link=link, user=user,
+                                                                    amount=amount,
+                                                                    timestamp__gte=timezone.now() - timezone.timedelta(
+                                                                        seconds=15)).first()
+            if not latest_donation_with_this_url:
+                donation = Donation(user=user, channel=None, amount=amount, text=text, link=link, voice=voice)
+                donation.save()
         else:
-            self.log.info('Donation from non-existence user: {}'.format(msg))
+            channel = Channel.objects.filter(channel_id=channel_id).first()
+            if channel:
+                donation = Donation(user=user, channel=channel, amount=amount, text=text, link=link, voice=voice)
+                donation.save()
 
     def parse_premium(self, msg):
         channel_id = msg['data']['channel_id']
         username = msg['data']['userName']
         user_resubs = msg['data']['resub']
         payment = msg['data']['payment']
+        user_id = msg['data']['userId']
 
         channel = Channel.objects.filter(channel_id=channel_id).first()
         if not channel:
             channel = Channel(channel_id=channel_id, streamer=None)
             channel.save()
 
-        user = User.objects.filter(username=username).first()
-        if user:
-            self.process_active_premiums(user.user_id, [channel_id], {channel_id: user_resubs})
+        user = User(user_id=user_id, username=username)
+        if user_id != 0:
+            user.save()
+            self.process_active_premiums(user.user_id, [channel_id], {channel_id: user_resubs}, only_new=True)
+            activation = PremiumActivation(channel=channel, user=user, resubs=user_resubs, payment=payment)
+            activation.save()
+        else:
+            self.log.warning('Premium activated by anonymous')
 
     def parse_follower(self, msg):
         channel_id = msg['data']['channel_id']
