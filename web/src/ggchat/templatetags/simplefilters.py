@@ -26,6 +26,8 @@ def channel_link(value):
     try:
         if value.streamer and value.streamer.username:
             text = value.streamer.username
+        elif value.channel_id == 'r128':
+            text = 'Флудилка'
         else:
             text = '#{}'.format(value.channel_id)
         url = reverse('channel', args=[value.channel_id])
