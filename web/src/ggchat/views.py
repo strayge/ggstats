@@ -160,37 +160,37 @@ def viewers(request):
                          }
 
     # month_table = [{'month': 'month1', 'viewers_average': 1, 'viewers_median': 2, 'chat_average': 3, 'chat_median': 4}]
-    month_start = now - datetime.timedelta(days=now.day-1, hours=now.hour, minutes=now.minute, seconds=now.second, microseconds=now.microsecond+1)
-    half_year_ago = month_start - datetime.timedelta(days=6*30)
-    half_year_ago = half_year_ago - datetime.timedelta(days=half_year_ago.day-1, hours=half_year_ago.hour, minutes=half_year_ago.minute, seconds=half_year_ago.second, microseconds=half_year_ago.microsecond)
-    full_data = TotalStats.objects.filter(timestamp__gte=half_year_ago, timestamp__lte=month_start).order_by('timestamp').all()
-    current_viewers = [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []]
-    current_chat = [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []]
-    current_month = -1
-    month_table = []
-    month = current_month
-    for total_stats in full_data:
-        month = total_stats.timestamp.month
-        if month != current_month:
-            if current_month != -1:
-                viewers_average = [median(x) for x in current_viewers if len(x)]
-                chat_average = [median(x) for x in current_chat if len(x)]
-                month_table.append({'month': current_month, 'viewers_average': viewers_average, 'chat_average': chat_average})
-            current_viewers = [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []]
-            current_chat = [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []]
-            current_month = month
-        hour = total_stats.timestamp.hour
-        if total_stats.viewers_gg != 0:
-            current_viewers[hour].append(total_stats.viewers_gg)
-        if total_stats.users != 0:
-            current_chat[hour].append(total_stats.users)
-    viewers_average = [mean(x) for x in current_viewers if len(x)]
-    chat_average = [mean(x) for x in current_chat if len(x)]
-    month_table.append({'month': month, 'viewers_average': viewers_average, 'chat_average': chat_average})
+    # month_start = now - datetime.timedelta(days=now.day-1, hours=now.hour, minutes=now.minute, seconds=now.second, microseconds=now.microsecond+1)
+    # half_year_ago = month_start - datetime.timedelta(days=6*30)
+    # half_year_ago = half_year_ago - datetime.timedelta(days=half_year_ago.day-1, hours=half_year_ago.hour, minutes=half_year_ago.minute, seconds=half_year_ago.second, microseconds=half_year_ago.microsecond)
+    # full_data = TotalStats.objects.filter(timestamp__gte=half_year_ago, timestamp__lte=month_start).order_by('timestamp').all()
+    # current_viewers = [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []]
+    # current_chat = [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []]
+    # current_month = -1
+    # month_table = []
+    # month = current_month
+    # for total_stats in full_data:
+    #     month = total_stats.timestamp.month
+    #     if month != current_month:
+    #         if current_month != -1:
+    #             viewers_average = [median(x) for x in current_viewers if len(x)]
+    #             chat_average = [median(x) for x in current_chat if len(x)]
+    #             month_table.append({'month': current_month, 'viewers_average': viewers_average, 'chat_average': chat_average})
+    #         current_viewers = [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []]
+    #         current_chat = [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []]
+    #         current_month = month
+    #     hour = total_stats.timestamp.hour
+    #     if total_stats.viewers_gg != 0:
+    #         current_viewers[hour].append(total_stats.viewers_gg)
+    #     if total_stats.users != 0:
+    #         current_chat[hour].append(total_stats.users)
+    # viewers_average = [mean(x) for x in current_viewers if len(x)]
+    # chat_average = [mean(x) for x in current_chat if len(x)]
+    # month_table.append({'month': month, 'viewers_average': viewers_average, 'chat_average': chat_average})
 
     return render_to_response('ggchat/viewers.html', {'title': 'Статистика по зрителям',
                                                       'chart1': chart_users_total,
-                                                      'month_table': month_table,
+                                                      # 'month_table': month_table,
                                                       })
 
 
