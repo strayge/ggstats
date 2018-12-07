@@ -137,7 +137,7 @@ def viewers(request):
                          'x_keyword2': 'timestamp',
                          'y_keyword2': 'value',
                          'type2': 'area',
-                         'name2': 'Залогиненных в чате',
+                         'name2': 'Залогиненных в чате (все каналы)',
 
                          # 'data3': data_sum_viewers_list,
                          # 'x_keyword3': 'timestamp',
@@ -150,7 +150,7 @@ def viewers(request):
                          'x_keyword4': 'timestamp',
                          'y_keyword4': 'value',
                          'type4': 'line',
-                         'name4': 'Зрителей на GG плеере',
+                         'name4': 'Зрителей (без каналов под галкой)',
                          'color4': '#ff0000',
 
                          'zoom': True,
