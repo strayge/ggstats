@@ -123,6 +123,14 @@ class ChatMsgParser:
         elif msg_type == 'users_list':
             self.parse_users_list(msg)
 
+        elif msg_type == 'new_job':
+            # {'type': 'new_job', 'data': {'channel_id': 5, 'job': {'id': 303, 'creator': {'obj_key': '9:429281', 'id': '429281', 'nickname': 'overmind88_', 'avatar': '/files/avatars/av_429281_9DZQ.png', 'title': 'overmind88_'}, 'created': '2018-12-07T18:01:02+03:00', 'status': 1, 'user': {'obj_key': '9:1', 'id': '1', 'nickname': 'Miker', 'avatar': '/files/avatars/av_1_mtmA.png', 'title': 'Miker'}, 'title': 'Сказать, что фибо не очень', 'description': 'Громко и чётко в прямом эфире произнести "фибо не очень"', 'updated': '2018-12-07T18:01:02+03:00', 'started': '2018-12-07T18:01:02+03:00', 'amount': 322, 'paid': False}}}
+            pass
+
+        elif msg_type == 'job_prize_increased':
+            # {'type': 'job_prize_increased', 'data': {'channel_id': 5, 'job': {'id': 299, 'creator': {'obj_key': '9:666', 'id': '666', 'nickname': 'lokki7', 'avatar': '/files/avatars/av_666_PG1Z.jpg', 'title': 'lokki7'}, 'created': '2018-12-07T17:59:53+03:00', 'status': 2, 'user': {'obj_key': '9:1', 'id': '1', 'nickname': 'Miker', 'avatar': '/files/avatars/av_1_mtmA.png', 'title': 'Miker'}, 'title': 'Нормально потестить журнал заданий', 'description': 'ну нормально чтобы было все', 'updated': '2018-12-07T18:00:03+03:00', 'started': '2018-12-07T18:00:03+03:00', 'amount': 325, 'paid': False}, 'user': {'obj_key': '9:222799', 'id': '222799', 'nickname': 'Speller_', 'avatar': '/files/avatars/av_222799_DBaM.jpg', 'title': 'Speller_'}, 'amount': '2.00'}}
+            pass
+
         else:
             self.log.warning('Unknown type: {}'.format(msg))
 
