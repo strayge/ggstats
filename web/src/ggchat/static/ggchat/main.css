@@ -66,3 +66,11 @@ a {
 .navbar-inverse .navbar-nav > li > a {
     color: #ddd !important;
 }
+
+/* save tables width */
+table {
+	table-layout: fixed;
+}
+td {
+	word-wrap: break-word;
+}

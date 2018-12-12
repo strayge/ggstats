@@ -9,7 +9,7 @@
 {% block main %}
         {# row 1 #}
         <div class="row">
-            <div class="col-md-8 col-sm-12">
+            <div class="col-md-12 col-sm-12">
 
                 {% if removed_messages|length %}
                 <h4>Удаленные сообщения</h4>
@@ -18,6 +18,12 @@
                         <thead>
                         <tr><th>Дата</th><th>Канал</th><th>Сообщение</th><th>Кто удалил</th></tr>
                         </thead>
+                        <colgroup>
+                        	<col class="col-md-1">
+                        	<col class="col-md-1">
+                        	<col class="col-md-6">
+                        	<col class="col-md-1">
+                        </colgroup>
                         <tbody>
                         {% for message in removed_messages %}
                             <tr>
