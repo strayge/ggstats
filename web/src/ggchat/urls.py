@@ -32,4 +32,5 @@ urlpatterns = [
     url(r'^voice/(?P<url>[a-zA-Z0-9_\.\/:]+)$', views.voice_player, name='voice_player'),
     url(r'^chathistory/(?P<message_id>\d+)_(?P<hash>\w+)$', views.chathistory, name='chathistory'),
     url(r'^removed$', views.removed, name='removed'),
+    url(r'^search/(?P<channel_id>r?\d+)/(?P<text>.+)$', views.search, name='search'),
 ]
