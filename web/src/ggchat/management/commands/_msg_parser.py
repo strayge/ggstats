@@ -131,6 +131,10 @@ class ChatMsgParser:
             # {'type': 'job_prize_increased', 'data': {'channel_id': 5, 'job': {'id': 299, 'creator': {'obj_key': '9:666', 'id': '666', 'nickname': 'lokki7', 'avatar': '/files/avatars/av_666_PG1Z.jpg', 'title': 'lokki7'}, 'created': '2018-12-07T17:59:53+03:00', 'status': 2, 'user': {'obj_key': '9:1', 'id': '1', 'nickname': 'Miker', 'avatar': '/files/avatars/av_1_mtmA.png', 'title': 'Miker'}, 'title': 'Нормально потестить журнал заданий', 'description': 'ну нормально чтобы было все', 'updated': '2018-12-07T18:00:03+03:00', 'started': '2018-12-07T18:00:03+03:00', 'amount': 325, 'paid': False}, 'user': {'obj_key': '9:222799', 'id': '222799', 'nickname': 'Speller_', 'avatar': '/files/avatars/av_222799_DBaM.jpg', 'title': 'Speller_'}, 'amount': '2.00'}}
             pass
 
+        elif msg_type == 'update_job':
+            # {'type': 'update_job', 'data': {'channel_id': 5, 'job': {'id': 557, 'creator': {'obj_key': '9:45989', 'id': '45989', 'nickname': 'kodo_day', 'avatar': '/files/avatars/avatar.png', 'title': 'kodo_day'}, 'created': '2018-12-10T23:02:02+03:00', 'status': 5, 'user': {'obj_key': '9:1', 'id': '1', 'nickname': 'Miker', 'avatar': '/files/avatars/av_1_mtmA.png', 'title': 'Miker'}, 'title': '3х без ранений', 'description': 'Три миссии подряд без ранений', 'updated': '2018-12-13T12:38:53+03:00', 'started': '2018-12-13T12:38:53+03:00', 'amount': 0, 'paid': False}}}
+            pass
+
         else:
             self.log.warning('Unknown type: {}'.format(msg))
 
