@@ -28,6 +28,11 @@
                         <thead>
                         <tr><th>Дата</th><th>Канал</th><th>Сообщение</th></tr>
                         </thead>
+                        <colgroup>
+							<col class="col-md-2">
+							<col class="col-md-1">
+							<col class="col-md-5">
+                        </colgroup>
                         <tbody>
                         {% for message in messages %}
                             <tr>
@@ -64,6 +69,12 @@
                         <thead>
                         <tr><th>Дата</th><th>Канал</th><th>Сумма</th><th>Сообщение</th></tr>
                         </thead>
+                        <colgroup>
+                        	<col class="col-md-2">
+                        	<col class="col-md-1">
+                        	<col class="col-md-1">
+                        	<col class="col-md-4">
+                        </colgroup>
                         <tbody>
                         {% for donation in donations %}
                             <tr>
@@ -183,6 +194,12 @@
                         <thead>
                         <tr><th>Дата</th><th>Канал</th><th>Сообщение</th><th>Кто удалил</th></tr>
                         </thead>
+                        <colgroup>
+                        	<col class="col-md-2">
+                        	<col class="col-md-1">
+                        	<col class="col-md-5">
+                        	<col class="col-md-1">
+                        </colgroup>
                         <tbody>
                         {% for message in removed_messages %}
                             <tr>
@@ -288,6 +305,11 @@
                         <thead>
                         <tr><th>Дата</th><th>Канал</th><th>Стрик (месяцев)</th></tr>
                         </thead>
+                        <colgroup>
+                        	<col class="col-md-2">
+                        	<col class="col-md-1">
+                        	<col class="col-md-1">
+                        </colgroup>
                         <tbody>
                         {% for premium in premiums %}
                             <tr>

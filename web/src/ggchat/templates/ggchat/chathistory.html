@@ -25,13 +25,18 @@
         {# row 1 #}
         <div class="row">
             {# column 1 #}
-            <div class="col-md-8 col-sm-12">
+            <div class="col-md-12 col-sm-12">
                 <h4>Сообщения</h4>
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover table-striped">
                         <thead>
                         <tr><th>Дата</th><th>Пользователь</th><th>Сообщение</th></tr>
                         </thead>
+                        <colgroup>
+                        	<col class="col-md-1">
+                        	<col class="col-md-1">
+                        	<col class="col-md-5">
+                        </colgroup>
                         <tbody>
                         {% for message in messages %}
                             <tr

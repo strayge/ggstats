@@ -49,6 +49,12 @@
                         <thead>
                         <tr><th>Дата</th><th>Пользователь</th><th>Сумма</th><th>Сообщение</th></tr>
                         </thead>
+                        <colgroup>
+                         	<col class="col-md-2">
+                         	<col class="col-md-1">
+                            <col class="col-md-1">
+                          	<col class="col-md-4">
+                        </colgroup>
                         <tbody>
                         {% for donation in donations %}
                             <tr>
@@ -100,6 +106,11 @@
                         <thead>
                         <tr><th>Дата</th><th>Пользователь</th><th>Сообщение</th></tr>
                         </thead>
+                        <colgroup>
+                        	<col class="col-md-2">
+                        	<col class="col-md-2">
+                        	<col class="col-md-5">
+                        </colgroup>
                         <tbody>
                         {% for message in messages %}
                             <tr>
@@ -137,6 +148,11 @@
                         <thead>
                         <tr><th>Дата</th><th>Пользователь</th><th>Стрик (месяцев)</th></tr>
                         </thead>
+                        <colgroup>
+							<col class="col-md-3">
+							<col class="col-md-3">
+							<col class="col-md-2">
+                        </colgroup>
                         <tbody>
                         {% for premium in premiums %}
                             <tr>
