@@ -11,17 +11,15 @@
 <base href="/">
 
 <body>
-
-<h1>GGГалка</h1>
-<div class="loading" ng-if="isLoading"></div>
-<a ng-if="stream.id" class="back" href="" ui-sref="list">Назад к списку</a>
-
+<div class="title">
+  <h1>GGГалка</h1>
+  <div class="loading" ng-if="isLoading"></div>
+  <a ng-if="stream.id" class="back" href="" ui-sref="list">Назад к списку</a>
+</div>
 
 <div ui-view=""></div>
 
 <script src="main.js"></script>
 </body>
 
-
 </html>
-
