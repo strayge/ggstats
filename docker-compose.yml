@@ -71,6 +71,7 @@ services:
       - ./nginx/service.conf:/etc/nginx/service.conf
       - ./nginx/www:/www
       - ./web/static:/static
+      - ./gggalka:/gggalka
     depends_on:
       - web
     ports:

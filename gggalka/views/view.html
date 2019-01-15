@@ -1,0 +1,14 @@
+<div class="view" ng-if="stream">
+
+    <div class="player">
+        <!--div ng-bind-html="stream.channel.embed"></div-->
+        <iframe frameborder="0" width="100%" height="100%" ng-src="{{ 'https://goodgame.ru/nocache/ggplayer/ggplayer.html?' + stream.channel.gg_player_src }}"></iframe>
+
+    </div>
+    <div class="chat">
+        <iframe frameborder="0" width="100%" height="100%" ng-src="{{ 'https://goodgame.ru/chat/' + stream.key }}">
+
+        </iframe>
+    </div>
+
+</div>

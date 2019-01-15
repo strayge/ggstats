@@ -1,0 +1,11 @@
+<div class="list">
+
+    <a class="channel-block" ui-sref="view({streamId:stream.id})" ng-repeat="stream in streams | orderBy:'-viewers'">
+        <div class="preview"><img src="{{ stream.channel.thumb }}"></div>
+        <div class="title">{{ stream.key }}</div>
+        <div class="viewers">{{ stream.viewers }}</div>
+    </a>
+
+
+</div>
+
