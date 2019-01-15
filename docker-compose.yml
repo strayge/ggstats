@@ -68,10 +68,12 @@ services:
     logging: *default_logging
     volumes:
       - ./nginx/ssl:/etc/nginx/ssl
+      - ./web/nginx.conf:/etc/nginx/service-ggstats.conf
+      - ./gggalka/nginx.conf:/etc/nginx/service-gggalka.conf
       - ./nginx/service.conf:/etc/nginx/service.conf
       - ./nginx/www:/www
       - ./web/static:/static
-      - ./gggalka:/gggalka
+      - ./gggalka/www:/gggalka
     depends_on:
       - web
     ports:

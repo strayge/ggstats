@@ -19,5 +19,5 @@ from django.contrib import admin
 
 urlpatterns = [
     # url(r'^admin/', admin.site.urls),
-    url(r'^gg/', include('ggchat.urls')),
+    url(r'', include('ggchat.urls')),
 ]
