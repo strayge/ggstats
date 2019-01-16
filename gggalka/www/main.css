@@ -1,9 +1,22 @@
+.chat-header {
+    border: solid;
+    border-color: #382457;
+    border-width: 2px 0px 0px 0px;
+    border-radius: 1px;
+}
+
+.title {
+    height: 44px;
+}
+
 .list {
     text-align: center;
 }
+
 h1 {
     text-align: center;
     margin-bottom: 2px;
+    color: #dbecfe;
 }
 
 body {
@@ -14,9 +27,16 @@ body {
 }
 
 a.back {
-    color:#fff;
     position: absolute;
     top: 20px;
+    color: #dbecfe;
+    background-color: #161925;
+    padding: 1px 8px 1px 7px;
+    text-decoration: none;
+}
+
+a.back:hover {
+    background-color: #2f354f;
 }
 
 .loading {
@@ -80,4 +100,3 @@ a.back {
     width: 25%;
     margin-left: 75%;
 }
-
