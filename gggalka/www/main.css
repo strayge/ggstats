@@ -40,7 +40,7 @@ a.back:hover {
 }
 
 .loading {
-    background: url(http://goodgame.ru/images/chat/ajax_loading.gif);
+    background: url(https://goodgame.ru/images/chat/ajax_loading.gif);
     width: 16px;
     height: 11px;
     position: absolute;
