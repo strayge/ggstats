@@ -59,6 +59,9 @@ class ChatWsClient(WsBaseClient):
 
         get_channels_query = {"type": "get_channels_list", "data": {"start": 0, "count": 200}}
         await self.send(get_channels_query)
+        # fallback
+        for i in range(0,6):
+            self.queue_old_cmd.put({'type': 'send', 'data': {"type": "get_channels_list", "data": {"start": i*45, "count": 50}}})
 
     async def send(self, data):
         s = json.dumps(data)
@@ -74,11 +77,14 @@ class ChatWsClient(WsBaseClient):
             pass
         elif msg_type == 'channels_list':
             self.log.info('channels_list answer ({} streams)'.format(len(msg['data']['channels'])))
-            for channel in msg['data']['channels']:
-                channel_id = channel['channel_id']
-                if channel_id not in self.joined_channels:
-                    self.log.debug('founded new channel: {}'.format(channel_id))
-                    await self.join_channel(channel_id)
+            try:
+                for channel in msg['data']['channels']:
+                    channel_id = channel['channel_id']
+                    if channel_id not in self.joined_channels:
+                        self.log.debug('founded new channel: {}'.format(channel_id))
+                        await self.join_channel(channel_id)
+            except KeyError:
+                self.log.error("Bad channel in 'channels_list' response: {}".format(msg))
         elif msg_type == 'success_join':
             channel_id = str(msg['data']['channel_id'])
             self.joined_channels.add(channel_id)

@@ -51,11 +51,13 @@ class ChatWsClientOld(WsBaseClient):
             channel_id = str(msg['data']['channel_id'])
             self.joined_channels.add(channel_id)
 
-        if msg_type in ['follower']:
+        if msg_type in ['follower', 'channels_list']:
             self.queue_old_cmd_resp.put(received)
 
     async def send(self, data):
         s = json.dumps(data)
+        if 'type' in data and data['type'] == 'get_channels_list':
+            await asyncio.sleep(0.5)
         await self.ws.send(s)
 
     async def join_channel(self, channel_id):
