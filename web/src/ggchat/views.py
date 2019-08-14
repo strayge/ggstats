@@ -298,6 +298,10 @@ def user(request, user_id):
     count_per_section = 10
     if "more" in request.GET:
         count_per_section = 50
+    if 'muchmore' in request.GET:
+        count_per_section = 500
+    if 'muchmuchmore' in request.GET:
+        count_per_section = 10000
 
     username = user_obj.username
     last_messages = Message.objects.filter(user_id=user_id).order_by('-timestamp')[:count_per_section]
@@ -371,6 +375,10 @@ def channel(request, channel_id):
     count_per_section = 10
     if "more" in request.GET:
         count_per_section = 50
+    if 'muchmore' in request.GET:
+        count_per_section = 500
+    if 'muchmuchmore' in request.GET:
+        count_per_section = 10000
 
     last_messages = Message.objects.filter(channel_id=channel_id).order_by('-timestamp')[:count_per_section]
     last_donations = Donation.objects.filter(channel_id=channel_id).order_by('-timestamp')[:count_per_section]
