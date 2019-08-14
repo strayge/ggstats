@@ -328,8 +328,16 @@ class ChatMsgParser:
             self.log.warning('Premium activated by anonymous')
 
     def parse_follower(self, msg):
-        channel_id = msg['data']['channel_id']
-        username = msg['data']['userName']
+        # channel_id = msg['data']['channel_id']
+        # username = msg['data']['userName']
+        if 'channel_id' in msg['data']:
+            channel_id = msg['data']['channel_id']
+        else:
+            channel_id = msg['data']['channel']
+        if 'userName' in msg['data']:
+            username = msg['data']['userName']
+        else:
+            username = msg['data']['username']
 
         user = User.objects.filter(username=username).first()
 
