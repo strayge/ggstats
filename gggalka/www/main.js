@@ -50,6 +50,7 @@ App.controller('ggGalkaCtrl', function($scope, $rootScope, $timeout, $http, $sta
                     var loaded = utils.findById($scope.streams, str.id);
                     if(str.channel.hidden && !loaded) {
                         str.viewers = parseInt(str.viewers);
+                        str.premium = str.channel.premium === 'true';
                         $scope.streams.push(str);
                     }
                 }
@@ -92,6 +93,7 @@ App.controller('ggGalkaCtrl', function($scope, $rootScope, $timeout, $http, $sta
                 $scope.stream = {};
                 $scope.isLoading = true;
                 getNextPage('https://api2.goodgame.ru/streams?only_gg=1&page=1&hidden=1');
+                //angular.element(window.document.body).ready(initPreview);
             } else {
                 var loaded = utils.findById($scope.streams, toParams.streamId);
                 if(loaded) {
@@ -109,3 +111,64 @@ App.controller('ggGalkaCtrl', function($scope, $rootScope, $timeout, $http, $sta
 
 });
 
+var video;
+var last_channel;
+var last_stream_id;
+var timeout;
+
+function stop() {
+    clearTimeout(timeout);
+    if (video) {
+        console.log('stop');
+        last_stream_id = null;
+        video.pause();
+        video.remove();
+    }
+}
+
+function start(stream_id, last_channel, isPrem) {
+    var proxy = 'https://cors-anywhere.herokuapp.com/';
+    var quality = '';
+    if (isPrem) {
+        quality = '_240';
+    }
+    var url = proxy + 'https://hls.goodgame.ru/hls/' + stream_id + quality + '.m3u8';
+    video = document.createElement('video');
+    last_channel.insertBefore(video, last_channel.firstChild);
+    console.log('start');
+    if(Hls.isSupported()) {
+        var hls = new Hls();
+        hls.loadSource(url);
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED,function() {
+            video.play();
+        });
+    }
+    else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = url;
+        video.addEventListener('loadedmetadata',function() {
+            video.play();
+        });
+    }
+}
+
+function initPreview() {
+$('.list').mouseover(function(e) {
+    var hovered = e.target;
+    if (hovered == null) {return;}
+    var channel = hovered.closest('a.channel-block')
+    if (channel == null) { stop(); return;}
+    var stream_id = channel.href.split('/').pop();
+    if (stream_id == last_stream_id) {return;}
+    if (stream_id != last_stream_id) {stop();};
+    last_stream_id = stream_id;
+    if (channel == last_channel) {
+        console.log('same')
+        return;
+    }
+    var last_channel = channel;
+    var isPrem = $(channel).find('.premium').text() === 'true';
+
+    timeout = setTimeout(start, 500, stream_id, last_channel, isPrem);
+})
+};
