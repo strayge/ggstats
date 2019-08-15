@@ -7,7 +7,7 @@
 
 {% block main %}
     {% if range == 'week' %}
-        <h4>За неделю (<a href="{% url 'viewers_week' %}">неделя</a>/<a href="{% url 'viewers_month' %}">месяц</a>)</h4>
+        <h4>За неделю (<a href="{% url 'viewers_month' %}">месяц</a>/<a href="{% url 'viewers_year' %}">год</a>)</h4>
     {% elif range == 'month' %}
         <h4>За месяц (<a href="{% url 'viewers_week' %}">неделя</a>/<a href="{% url 'viewers_year' %}">год</a>)</h4>
     {% elif range == 'year' %}
