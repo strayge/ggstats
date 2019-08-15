@@ -265,7 +265,7 @@ def viewers_year(request):
         to_timestamp = min(now, from_timestamp + datetime.timedelta(hours=12))
     calc_total_stats(from_timestamp, to_timestamp)
 
-    INTERVAL = 2 * 60 * 60
+    INTERVAL = 1 * 60 * 60
     each = round(INTERVAL / DEFAULT_INTERVAL)
 
     full_data = TotalStats.objects.filter(timestamp__gte=year_ago).all()[::each]
