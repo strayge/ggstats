@@ -24,7 +24,7 @@ SECRET_KEY = os.environ['SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
-if os.path.isfile('.debug'):
+if os.path.isfile('.debug') or os.environ.get('DEBUG'):
     DEBUG = True
 
 ALLOWED_HOSTS = ['strayge.com', '127.0.0.1', '*']
@@ -93,9 +93,9 @@ DATABASES = {
         'OPTIONS': {
             'database': os.environ['MYSQL_DATABASE'],
             'user': os.environ['MYSQL_USER'],
-            'password': os.environ['MYSQL_PASSWORD'],
+            'password': '',
             'charset': 'utf8mb4',
-            'host': 'ggstats_db',
+            'host': '127.0.0.1',
             'port': 3306,
         },
         'CONN_MAX_AGE': 900,
