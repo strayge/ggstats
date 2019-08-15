@@ -163,6 +163,7 @@ def viewers_week(request):
     # month_table.append({'month': month, 'viewers_average': viewers_average, 'chat_average': chat_average})
 
     return render_to_response('ggchat/viewers.html', {'title': 'Статистика по зрителям',
+                                                      'range': 'week',
                                                       'chart1': chart_users_total,
                                                       # 'month_table': month_table,
                                                       })
@@ -211,12 +212,13 @@ def viewers_month(request):
                          'y_keyword': 'value',
                          'type': 'area',
                          'name': 'Всего в чате',
+                         'visible': False,
 
                          'data2': data_sum_users_list,
                          'x_keyword2': 'timestamp',
                          'y_keyword2': 'value',
                          'type2': 'area',
-                         'name2': 'Залогиненных в чате',
+                         'name2': 'Залогиненных в чате (все каналы)',
 
                          # 'data3': data_sum_viewers_list,
                          # 'x_keyword3': 'timestamp',
@@ -229,7 +231,7 @@ def viewers_month(request):
                          'x_keyword4': 'timestamp',
                          'y_keyword4': 'value',
                          'type4': 'line',
-                         'name4': 'Зрителей на GG плеере',
+                         'name4': 'Зрителей (без каналов под галкой)',
                          'color4': '#ff0000',
 
                          'zoom': True,
@@ -238,7 +240,8 @@ def viewers_month(request):
                          'y_title': 'Количество',
                          }
     return render_to_response('ggchat/viewers.html', {'chart1': chart_users_total,
-                                                      'title': 'Общее число зрителей'})
+                                                      'title': 'Статистика по зрителям',
+                                                      'range': 'month'})
 
 
 @cache_page(24 * 60 * 60)
@@ -287,12 +290,13 @@ def viewers_year(request):
                          'y_keyword': 'value',
                          'type': 'area',
                          'name': 'Всего в чате',
+                         'visible': False,
 
                          'data2': data_sum_users_list,
                          'x_keyword2': 'timestamp',
                          'y_keyword2': 'value',
                          'type2': 'area',
-                         'name2': 'Залогиненных в чате',
+                         'name2': 'Залогиненных в чате (все каналы)',
 
                          # 'data3': data_sum_viewers_list,
                          # 'x_keyword3': 'timestamp',
@@ -305,7 +309,7 @@ def viewers_year(request):
                          'x_keyword4': 'timestamp',
                          'y_keyword4': 'value',
                          'type4': 'line',
-                         'name4': 'Зрителей на GG плеере',
+                         'name4': 'Зрителей (без каналов под галкой)',
                          'color4': '#ff0000',
 
                          'zoom': True,
@@ -313,4 +317,7 @@ def viewers_year(request):
                          # 'title': 'Зрители',
                          'y_title': 'Количество',
                          }
-    return render_to_response('ggchat/viewers.html', {'chart1': chart_users_total, 'title': 'Общее число зрителей'})
+    return render_to_response(
+        'ggchat/viewers.html',
+        {'chart1': chart_users_total, 'title': 'Статистика по зрителям', 'range': 'year'}
+    )

@@ -6,7 +6,15 @@
 {% endblock %}
 
 {% block main %}
-    <h4>За неделю</h4>
+    {% if range == 'week' %}
+        <h4>За неделю (<a href="{% url 'viewers_week' %}">неделя</a>/<a href="{% url 'viewers_month' %}">месяц</a>)</h4>
+    {% elif range == 'month' %}
+        <h4>За месяц (<a href="{% url 'viewers_week' %}">неделя</a>/<a href="{% url 'viewers_year' %}">год</a>)</h4>
+    {% elif range == 'year' %}
+        <h4>За год (<a href="{% url 'viewers_week' %}">неделя</a>/<a href="{% url 'viewers_month' %}">месяц</a>)</h4>
+    {% else %}
+        <h4><a href="{% url 'viewers_week' %}">Неделя</a>/<a href="{% url 'viewers_month' %}">месяц</a>/<a href="{% url 'viewers_year' %}">год</a></h4>
+    {% endif %}
     <div id="container"></div>
     {% chart_datetime "container" chart1 %}
 
