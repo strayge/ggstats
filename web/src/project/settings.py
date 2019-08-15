@@ -93,9 +93,9 @@ DATABASES = {
         'OPTIONS': {
             'database': os.environ['MYSQL_DATABASE'],
             'user': os.environ['MYSQL_USER'],
-            'password': '',
+            'password': os.environ['MYSQL_PASSWORD'],
             'charset': 'utf8mb4',
-            'host': '127.0.0.1',
+            'host': 'ggstats_db',
             'port': 3306,
         },
         'CONN_MAX_AGE': 900,
