@@ -3,6 +3,7 @@ import datetime
 from django import template
 from django.utils.html import conditional_escape, format_html
 from django.utils.safestring import mark_safe
+import json
 
 register = template.Library()
 
@@ -52,19 +53,22 @@ def chart_datetime(container, chart_data):
     y_title = conditional_escape(chart_data.get('y_title', ''))
     # name = conditional_escape(chart_data.get('name', ''))
     x_type = conditional_escape(chart_data.get('x_type', 'datetime'))
+    tooltips = {}
 
     all_js_series = ''
     for i in range(1, 10):
         if i == 1:
             i = ''
-        if 'data{}'.format(i) in chart_data and 'x_keyword{}'.format(i) in chart_data and 'y_keyword{}'.format(i) in chart_data:
-            data = chart_data.get('data{}'.format(i), [])
-            x_keyword = conditional_escape(chart_data.get('x_keyword{}'.format(i)))
-            y_keyword = conditional_escape(chart_data.get('y_keyword{}'.format(i)))
-            chart_type = conditional_escape(chart_data.get('type{}'.format(i), 'line'))
-            name = conditional_escape(chart_data.get('name{}'.format(i), ''))
-            visible = bool(chart_data.get('visible{}'.format(i), True))
-            color = conditional_escape(chart_data.get('color{}'.format(i), ''))
+        if f'data{i}' in chart_data and f'x_keyword{i}' in chart_data and f'y_keyword{i}' in chart_data:
+            data = chart_data.get(f'data{i}', [])
+            x_keyword = conditional_escape(chart_data.get(f'x_keyword{i}'))
+            y_keyword = conditional_escape(chart_data.get(f'y_keyword{i}'))
+            chart_type = conditional_escape(chart_data.get(f'type{i}', 'line'))
+            name = conditional_escape(chart_data.get(f'name{i}', ''))
+            visible = bool(chart_data.get(f'visible{i}', True))
+            color = conditional_escape(chart_data.get(f'color{i}', ''))
+            tooltip = chart_data.get(f'tooltips{i}', {})
+            tooltips[name] = tooltip
 
             js_data = ''
             for row in data:
@@ -94,70 +98,37 @@ def chart_datetime(container, chart_data):
             js_series = '{' + js_series + '},'
             all_js_series += js_series
 
-    js_chart = ''
-    if zoom:
-        js_chart = "zoomType: 'x'"
+    js_chart = "zoomType: 'x'" if zoom else ''
+    js_xaxis = f"type: '{x_type}',title: {{text: '{x_title}'}}" if x_title else f"type: '{x_type}',"
+    js_yaxis = f"title: {{text: '{y_title}'}}" if y_title else ''
+    js_title = f"text: '{title}'" if title else "text: '', style: {display: 'none'}"
+    js_legend = "enabled: true" if legend else  "enabled: false"
 
-    js_xaxis = "type: '%s'," % x_type
-    if x_title:
-        js_xaxis += "title: {text: '%s'}" % x_title
-
-    js_yaxis = ''
-    if y_title:
-        js_yaxis = "title: {text: '%s'}" % y_title
-
-    js_title = ''
-    if title:
-        js_title = "text: '%s'" % title
-    else:
-        js_title = "text: '', style: {display: 'none'}"
-
-    js_legend = "enabled: false"
-    if legend:
-        js_legend = "enabled: true"
-
-    js = '<script>Highcharts.chart("%s",{chart:{%s},xAxis:{%s},yAxis:{%s},series:[%s],title:{%s},legend:{%s}});</script>' % \
-         (container, js_chart, js_xaxis,  js_yaxis, all_js_series, js_title, js_legend)
-
+    # text += '<span style="color:' + this.series.color + '">' + this.series.name + '</span>: <b>' + this.y + '</b><br/>';
+    js_tooltip = '''
+    formatter: function(tooltip) {
+        elements = tooltip.defaultFormatter.call(this, tooltip);
+        if (tooltips[this.series.name][this.x]) {
+            elements.push(tooltips[this.series.name][this.x]);
+        };
+        return elements;
+    }
+    '''
+    js = f'''
+    <script>
+    tooltips = {json.dumps(tooltips)};
+    Highcharts.chart(
+        "{container}",
+        {{
+            chart:{{{js_chart}}},
+            xAxis:{{{js_xaxis}}},
+            yAxis:{{{js_yaxis}}},
+            series:[{all_js_series}],
+            title:{{{js_title}}},
+            legend:{{{js_legend}}},
+            tooltip:{{{js_tooltip}}}
+        }}
+    );
+    </script>
+    '''
     return mark_safe(js)
-
-'''
-    all_needed_data = ChannelStats.objects.filter(channel_id='5').values('timestamp', 'users').all()
-    data = ''
-    for row in all_needed_data:
-        x = row['timestamp'].timestamp() * 1000
-        y = row['users']
-        data += '[%s, %s],' % (x, y)
-    data = '[' + data + ']'
-    return render_to_response('ggchat/viewers.html', {'data': data})
-
-<script>
-    Highcharts.chart('container', {
-        chart: {
-            zoomType: 'x'
-        },
-        xAxis: {
-            type: 'datetime',
-            title: {
-                text: 'xAxis title'
-            }
-        },
-        series: [{
-            type: 'line',
-            data: {{ data }},
-            name: 'series1 name'
-        }],
-        title: {
-            text: 'Main title'
-        },
-        yAxis: {
-            title: {
-                text: 'yAxis title'
-            }
-        },
-        legend: {
-            enabled: false
-        },
-    });
-</script>
-'''

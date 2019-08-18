@@ -144,10 +144,12 @@ class CommonPremiumPayments(models.Model):
 
 class TotalStats(models.Model):
     timestamp = models.DateTimeField(primary_key=True)
-    clients = models.IntegerField()
-    users = models.IntegerField()
-    viewers = models.IntegerField()
-    viewers_gg = models.IntegerField()
+    clients = models.IntegerField(null=True)
+    users = models.IntegerField(null=True)
+    viewers_gg = models.IntegerField(null=True)
+    viewers_gg_hidden = models.IntegerField(null=True)
+    viewers_gg_top = models.TextField(null=True)
+    viewers_gg_hidden_top = models.TextField(null=True)
 
 
 class PlayerChannelStats(models.Model):

@@ -5,7 +5,6 @@ __pycache__/
 
 # Django stuff:
 local_settings.py
-migrations/
 
 # virtualenv
 .venv
