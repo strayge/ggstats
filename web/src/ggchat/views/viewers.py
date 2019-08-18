@@ -122,10 +122,10 @@ def viewers_common(from_date, interval_secs, range):
 
     for total_stats in full_data:
         timestamp_js = int(total_stats.timestamp.timestamp() * 1000)
-        data_sum_users_list.append({'timestamp': timestamp_js, 'value': total_stats.users})
-        data_sum_clients_list.append({'timestamp': timestamp_js, 'value': total_stats.clients})
-        data_sum_viewers_gg_list.append({'timestamp': timestamp_js, 'value': total_stats.viewers_gg})
-        data_sum_viewers_gg_hidden_list.append({'timestamp': timestamp_js, 'value': total_stats.viewers_gg_hidden})
+        data_sum_users_list.append({'timestamp': timestamp_js, 'value': total_stats.users or 0})
+        data_sum_clients_list.append({'timestamp': timestamp_js, 'value': total_stats.clients or 0})
+        data_sum_viewers_gg_list.append({'timestamp': timestamp_js, 'value': total_stats.viewers_gg or 0})
+        data_sum_viewers_gg_hidden_list.append({'timestamp': timestamp_js, 'value': total_stats.viewers_gg_hidden or 0})
 
         if total_stats.viewers_gg_top and total_stats.viewers_gg_hidden_top:
             data_viewers_gg_top[timestamp_js] = json.loads(total_stats.viewers_gg_top)
