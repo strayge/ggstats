@@ -165,7 +165,7 @@ def viewers_common(from_date, interval_secs, range):
         'name5': 'Зрителей (каналы под галкой)',
         'color5': '#cccccc',
         'tooltips5': tooltip_from_dict(data_viewers_gg_hidden_top),
-        'visible5': False,
+        # 'visible5': False,
 
         'zoom': True,
         'legend': True,
