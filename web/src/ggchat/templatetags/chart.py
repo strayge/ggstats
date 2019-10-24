@@ -108,7 +108,7 @@ def chart_datetime(container, chart_data):
     js_tooltip = '''
     formatter: function(tooltip) {
         elements = tooltip.defaultFormatter.call(this, tooltip);
-        if (tooltips[this.series.name][this.x]) {
+        if (tooltips[this.series.name] && tooltips[this.series.name][this.x]) {
             elements.push(tooltips[this.series.name][this.x]);
         };
         return elements;
