@@ -15,12 +15,16 @@ def channel(request, channel_id):
         return render_to_response('ggchat/channel.html', {'title': 'Канал #{}'.format(channel_id)})
 
     count_per_section = 10
+    chart_days = 7
     if "more" in request.GET:
         count_per_section = 50
+        chart_days = 30
     if 'muchmore' in request.GET:
         count_per_section = 500
+        chart_days = 365
     if 'muchmuchmore' in request.GET:
         count_per_section = 10000
+        chart_days = 365
 
     last_messages = Message.objects.filter(channel_id=channel_id).order_by('-timestamp')[:count_per_section]
     last_donations = Donation.objects.filter(channel_id=channel_id).order_by('-timestamp')[:count_per_section]
@@ -28,7 +32,7 @@ def channel(request, channel_id):
     last_follows = Follow.objects.filter(channel_id=channel_id).order_by('-timestamp')[:count_per_section]
     active_premiums = PremiumStatus.objects.filter(channel_id=channel_id, ended=None)
 
-    week_ago = timezone.now() - datetime.timedelta(days=7)
+    week_ago = timezone.now() - datetime.timedelta(days=chart_days)
     chart_clients_data = ChannelStats.objects.filter(channel_id=channel_id, timestamp__gte=week_ago).order_by('timestamp').values('timestamp', 'clients').all()
     chart_users_data = ChannelStats.objects.filter(channel_id=channel_id, timestamp__gte=week_ago).order_by('timestamp').values('timestamp', 'users').all()
     viewers_data_pre = PlayerChannelStats.objects.filter(channel_id=channel_id, timestamp__gte=week_ago).order_by('timestamp').values('timestamp', 'viewers', 'status').all()
