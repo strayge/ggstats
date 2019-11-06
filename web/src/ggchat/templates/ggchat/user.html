@@ -137,8 +137,10 @@
                             <td>{% channel_link ban.channel %}</td>
                             <td><a href="{% url 'user' ban.user_id %}">{{ ban.user.username }}</a></td>
                             <td>
-                                {% if ban.permanent %}
+                                {% if ban.ban_type == 2 %}
                                     Перманентно
+                                {% elif ban.ban_type == 1 %}
+                                    До конца стрима
                                 {% elif ban.duration == 0 %}
                                     Разбанен
                                 {% elif ban.duration < 172800 %}
@@ -169,8 +171,10 @@
                             <td>{% channel_link ban.channel %}</td>
                             <td><a href="{% url 'user' ban.moderator_id %}">{{ ban.moderator.username }}</a></td>
                             <td>
-                                {% if ban.permanent %}
+                                {% if ban.ban_type == 2 %}
                                     Перманентно
+                                {% elif ban.ban_type == 1 %}
+                                    До конца стрима
                                 {% elif ban.duration == 0 %}
                                     Разбанен
                                 {% elif ban.duration < 172800 %}
