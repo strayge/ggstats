@@ -174,16 +174,6 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
-            name='UserInChat',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('start', models.DateTimeField(db_index=True, default=django.utils.timezone.now)),
-                ('end', models.DateTimeField(default=django.utils.timezone.now)),
-                ('channel', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='ggchat.Channel')),
-                ('user', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='ggchat.User')),
-            ],
-        ),
-        migrations.CreateModel(
             name='Warning',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
@@ -253,9 +243,5 @@ class Migration(migrations.Migration):
             model_name='ban',
             name='user',
             field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='ggchat.User'),
-        ),
-        migrations.AlterIndexTogether(
-            name='userinchat',
-            index_together=set([('channel', 'user')]),
         ),
     ]
