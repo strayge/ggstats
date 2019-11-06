@@ -124,15 +124,15 @@ class ChatMsgParser:
             self.parse_users_list(msg)
 
         elif msg_type == 'new_job':
-            # {'type': 'new_job', 'data': {'channel_id': 5, 'job': {'id': 303, 'creator': {'obj_key': '9:429281', 'id': '429281', 'nickname': 'overmind88_', 'avatar': '/files/avatars/av_429281_9DZQ.png', 'title': 'overmind88_'}, 'created': '2018-12-07T18:01:02+03:00', 'status': 1, 'user': {'obj_key': '9:1', 'id': '1', 'nickname': 'Miker', 'avatar': '/files/avatars/av_1_mtmA.png', 'title': 'Miker'}, 'title': 'Сказать, что фибо не очень', 'description': 'Громко и чётко в прямом эфире произнести "фибо не очень"', 'updated': '2018-12-07T18:01:02+03:00', 'started': '2018-12-07T18:01:02+03:00', 'amount': 322, 'paid': False}}}
+            # {'type': 'new_job', 'data': {'channel_id': 5, 'job': {'id': 303, 'creator': {'obj_key': '9:429281', 'id': '429281', 'nickname': 'overmind88_', 'avatar': '/files/avatars/av_429281_9DZQ.png', 'title': 'overmind88_'}, 'created': '2018-12-07T18:01:02+03:00', 'status': 1, 'user': {'obj_key': '9:1', 'id': '1', 'nickname': 'Miker', 'avatar': '/files/avatars/av_1_mtmA.png', 'title': 'Miker'}, 'title': 'Сказать, что фибо не очень', 'description': 'Громко и чётко в прямом эфире произнести "фибо не очень"', 'updated': '2018-12-07T18:01:02+03:00', 'started': '2018-12-07T18:01:02+03:00', 'amount': 322, 'paid': False}}}  # noqa
             pass
 
         elif msg_type == 'job_prize_increased':
-            # {'type': 'job_prize_increased', 'data': {'channel_id': 5, 'job': {'id': 299, 'creator': {'obj_key': '9:666', 'id': '666', 'nickname': 'lokki7', 'avatar': '/files/avatars/av_666_PG1Z.jpg', 'title': 'lokki7'}, 'created': '2018-12-07T17:59:53+03:00', 'status': 2, 'user': {'obj_key': '9:1', 'id': '1', 'nickname': 'Miker', 'avatar': '/files/avatars/av_1_mtmA.png', 'title': 'Miker'}, 'title': 'Нормально потестить журнал заданий', 'description': 'ну нормально чтобы было все', 'updated': '2018-12-07T18:00:03+03:00', 'started': '2018-12-07T18:00:03+03:00', 'amount': 325, 'paid': False}, 'user': {'obj_key': '9:222799', 'id': '222799', 'nickname': 'Speller_', 'avatar': '/files/avatars/av_222799_DBaM.jpg', 'title': 'Speller_'}, 'amount': '2.00'}}
+            # {'type': 'job_prize_increased', 'data': {'channel_id': 5, 'job': {'id': 299, 'creator': {'obj_key': '9:666', 'id': '666', 'nickname': 'lokki7', 'avatar': '/files/avatars/av_666_PG1Z.jpg', 'title': 'lokki7'}, 'created': '2018-12-07T17:59:53+03:00', 'status': 2, 'user': {'obj_key': '9:1', 'id': '1', 'nickname': 'Miker', 'avatar': '/files/avatars/av_1_mtmA.png', 'title': 'Miker'}, 'title': 'Нормально потестить журнал заданий', 'description': 'ну нормально чтобы было все', 'updated': '2018-12-07T18:00:03+03:00', 'started': '2018-12-07T18:00:03+03:00', 'amount': 325, 'paid': False}, 'user': {'obj_key': '9:222799', 'id': '222799', 'nickname': 'Speller_', 'avatar': '/files/avatars/av_222799_DBaM.jpg', 'title': 'Speller_'}, 'amount': '2.00'}}  # noqa
             pass
 
         elif msg_type == 'update_job':
-            # {'type': 'update_job', 'data': {'channel_id': 5, 'job': {'id': 557, 'creator': {'obj_key': '9:45989', 'id': '45989', 'nickname': 'kodo_day', 'avatar': '/files/avatars/avatar.png', 'title': 'kodo_day'}, 'created': '2018-12-10T23:02:02+03:00', 'status': 5, 'user': {'obj_key': '9:1', 'id': '1', 'nickname': 'Miker', 'avatar': '/files/avatars/av_1_mtmA.png', 'title': 'Miker'}, 'title': '3х без ранений', 'description': 'Три миссии подряд без ранений', 'updated': '2018-12-13T12:38:53+03:00', 'started': '2018-12-13T12:38:53+03:00', 'amount': 0, 'paid': False}}}
+            # {'type': 'update_job', 'data': {'channel_id': 5, 'job': {'id': 557, 'creator': {'obj_key': '9:45989', 'id': '45989', 'nickname': 'kodo_day', 'avatar': '/files/avatars/avatar.png', 'title': 'kodo_day'}, 'created': '2018-12-10T23:02:02+03:00', 'status': 5, 'user': {'obj_key': '9:1', 'id': '1', 'nickname': 'Miker', 'avatar': '/files/avatars/av_1_mtmA.png', 'title': 'Miker'}, 'title': '3х без ранений', 'description': 'Три миссии подряд без ранений', 'updated': '2018-12-13T12:38:53+03:00', 'started': '2018-12-13T12:38:53+03:00', 'amount': 0, 'paid': False}}}  # noqa
             pass
 
         else:
@@ -145,13 +145,11 @@ class ChatMsgParser:
         moderator_id = msg['data']['moder_id']
         moderator_username = msg['data']['moder_name']
         reason = msg['data']['reason']
-        duration = 0 if msg['data']['duration'] == '' else int(msg['data']['duration'])
+        duration = int(msg['data'].get('duration', 0))
+        ban_type = int(msg['data'].get('type', 0))
         show = bool(msg['data']['show'])
-        if 'permanent' in msg['data']:
-            permanent = bool(msg['data']['permanent'])
-        else:
-            # Alice sends msg without 'permanent' key
-            permanent = False
+
+        permanent = ban_type == 2
 
         channel = Channel.objects.filter(channel_id=channel_id).first()
         user = User(user_id=user_id, username=username)
@@ -163,8 +161,16 @@ class ChatMsgParser:
             channel = Channel(channel_id=channel_id, streamer=None)
             channel.save()
 
-        ban = Ban(user=user, channel=channel, moderator=moderator, duration=duration,
-                  reason=reason, show=show, permanent=permanent)
+        ban = Ban(
+            user=user,
+            channel=channel,
+            moderator=moderator,
+            duration=duration,
+            reason=reason,
+            show=show,
+            permanent=permanent,
+            ban_type=ban_type,
+        )
         ban.save()
 
         self.mark_user_online(channel_id, moderator_id, moderator_username)
@@ -328,12 +334,11 @@ class ChatMsgParser:
             self.log.warning('Premium activated by anonymous')
 
     def parse_follower(self, msg):
-        # channel_id = msg['data']['channel_id']
-        # username = msg['data']['userName']
         if 'channel_id' in msg['data']:
             channel_id = msg['data']['channel_id']
         else:
             channel_id = msg['data']['channel']
+
         if 'userName' in msg['data']:
             username = msg['data']['userName']
         else:
