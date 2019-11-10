@@ -124,7 +124,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for moder in stupid_moders %}
+                    {% for moder in aggressive_moders %}
                         <tr>
                             <td><a href="{% url 'user' moder.moderator_id %}"> {{ moder.moderator__username }}</a></td>
                             <td>{{ moder.count }}</tr>
