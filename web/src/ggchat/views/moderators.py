@@ -1,6 +1,5 @@
 from django.db.models import Count
 from django.shortcuts import render_to_response
-from django.utils import timezone
 from django.views.decorators.cache import cache_page
 
 from ggchat.models import *
@@ -17,9 +16,11 @@ def moderators(request):
     warns_dict = {}
     for w in warns:
         moderator_id = w['moderator_id']
-        warns_dict[moderator_id] = {'moderator_id': moderator_id,
-                                    'moderator__username': w['moderator__username'],
-                                    'score': w['count']}
+        warns_dict[moderator_id] = {
+            'moderator_id': moderator_id,
+            'moderator__username': w['moderator__username'],
+            'score': w['count'],
+        }
     for b in bans:
         moderator_id = b['moderator_id']
         count = b['count']
@@ -34,11 +35,12 @@ def moderators(request):
 
     aggressive_moders = Ban.objects.filter(timestamp__gte=week_ago, ban_type=2).values('moderator_id', 'moderator__username').annotate(count=Count('timestamp')).order_by('-count')[:20]
 
-    content = {'warns': warns[:20],
-               'bans': bans[:20],
-               'removed_msgs': removed_msgs,
-               'loyal_moders': loyal_moders[:20],
-               'aggressive_moders': aggressive_moders,
-               }
+    content = {
+        'warns': warns[:20],
+        'bans': bans[:20],
+        'removed_msgs': removed_msgs,
+        'loyal_moders': loyal_moders[:20],
+        'aggressive_moders': aggressive_moders,
+    }
 
     return render_to_response('ggchat/moderators.html', content)

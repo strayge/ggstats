@@ -31,9 +31,10 @@ def chathistory(request, message_id, hash):
     timestamp_to = timestamp + datetime.timedelta(minutes=time_range_in_minutes)
     messages = Message.objects.filter(channel_id=channel_id, timestamp__gte=timestamp_from, timestamp__lte=timestamp_to).order_by('-timestamp')[:1000]
 
-    content = {'channel': message.channel,
-               'messages': messages,
-               'selected_message_id': message.id,
-               'show_chat_links': is_admin(request),
-               }
+    content = {
+        'channel': message.channel,
+        'messages': messages,
+        'selected_message_id': message.id,
+        'show_chat_links': is_admin(request),
+    }
     return render_to_response('ggchat/chathistory.html', content)

@@ -1,16 +1,12 @@
-import asyncio
 import json
 import time
-
-import websockets
-
-# from ggchat.management.commands._common import setup_logger
 
 from ggchat.management.commands._ws_base import WsBaseClient
 
 WS_ENDPOINT = 'wss://chat-1.goodgame.ru/chat2/'
 
-PREDEFINED_CHANNELS = [] #'5', '94546', 'r128', '13214']
+PREDEFINED_CHANNELS = []  # '5', '94546', 'r128', '13214']
+
 
 class ChatWsClient(WsBaseClient):
     def __init__(self, log_level, queue_msg_parse, queue_old_cmd=None, queue_old_cmd_resp=None):
@@ -33,9 +29,6 @@ class ChatWsClient(WsBaseClient):
             await self.join_channel(channel_id)
 
     async def ws_periodic_tasks(self):
-        # while not self.queue_old_cmd_resp.empty():
-        #     received = self.queue_old_cmd_resp.get()
-        #     await self.ws_received(received)
         if time.time() > self.last_users_check + self.CHECK_USERS_PERIOD:
             self.log.info('users check')
             self.last_users_check = time.time()
@@ -49,19 +42,12 @@ class ChatWsClient(WsBaseClient):
             await self.request_channels()
 
     async def join_channel(self, channel_id):
-        # self.queue_old_cmd.put({'type': 'join', 'data': channel_id})
         join_channel_query = {"type": "join", "data": {"channel_id": str(channel_id), "hidden": False}}
         await self.send(join_channel_query)
 
     async def request_channels(self):
-        # sync channels
-        # self.queue_old_cmd.put({'type': 'channels', 'data': self.joined_channels})
-
         get_channels_query = {"type": "get_channels_list", "data": {"start": 0, "count": 200}}
         await self.send(get_channels_query)
-        # fallback
-        # for i in range(0,6):
-        #     self.queue_old_cmd.put({'type': 'send', 'data': {"type": "get_channels_list", "data": {"start": i*45, "count": 50}}})
 
     async def send(self, data):
         s = json.dumps(data)

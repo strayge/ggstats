@@ -1,11 +1,13 @@
 import calendar
 import datetime
+import json
+
 from django import template
 from django.utils.html import conditional_escape, format_html
 from django.utils.safestring import mark_safe
-import json
 
 register = template.Library()
+
 
 @register.simple_tag()
 def chart_load_js():
@@ -35,10 +37,9 @@ def chart_load_js():
             }
     });
     '''
-
     out += '<script>%s</script>\n' % highcharts_set_lang
-
     return mark_safe(out)
+
 
 @register.simple_tag()
 def chart_datetime(container, chart_data):
@@ -89,7 +90,7 @@ def chart_datetime(container, chart_data):
                 js_series += "name: '%s'," % name
 
             # true by default
-            if visible == False:
+            if not visible:
                 js_series += "visible: false,"
 
             if color:
@@ -102,7 +103,7 @@ def chart_datetime(container, chart_data):
     js_xaxis = f"type: '{x_type}',title: {{text: '{x_title}'}}" if x_title else f"type: '{x_type}',"
     js_yaxis = f"title: {{text: '{y_title}'}}" if y_title else ''
     js_title = f"text: '{title}'" if title else "text: '', style: {display: 'none'}"
-    js_legend = "enabled: true" if legend else  "enabled: false"
+    js_legend = "enabled: true" if legend else "enabled: false"
 
     # text += '<span style="color:' + this.series.color + '">' + this.series.name + '</span>: <b>' + this.y + '</b><br/>';
     js_tooltip = '''
@@ -114,6 +115,7 @@ def chart_datetime(container, chart_data):
         return elements;
     }
     '''
+
     js = f'''
     <script>
     tooltips = {json.dumps(tooltips)};

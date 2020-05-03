@@ -7,7 +7,7 @@ services:
     container_name: ggstats_fetcher
     hostname: ggstats_fetcher
     restart: always
-    command: python3 manage.py fetcher2
+    command: python3 manage.py fetcher
     volumes:
       - ./web/src:/src
     environment:

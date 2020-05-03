@@ -1,7 +1,6 @@
 import json
 
 from django.shortcuts import render_to_response
-from django.utils import timezone
 from django.views.decorators.cache import cache_page
 
 from ggchat.models import *
@@ -11,9 +10,11 @@ DEFAULT_INTERVAL = 20 * 60
 
 def calc_total_stats(from_ts, to_ts):
     full_data_chat = ChannelStats.objects.filter(timestamp__gte=from_ts, timestamp__lte=to_ts).values(
-        'channel_id', 'timestamp', 'users', 'clients').all()
+        'channel_id', 'timestamp', 'users', 'clients',
+    ).all()
     full_data_player = PlayerChannelStats.objects.filter(timestamp__gte=from_ts, timestamp__lte=to_ts,).values(
-        'channel_id', 'timestamp', 'viewers', 'viewers_gg', 'status', 'status_gg', 'hidden', 'channel__streamer__username').all()
+        'channel_id', 'timestamp', 'viewers', 'viewers_gg', 'status', 'status_gg', 'hidden', 'channel__streamer__username',
+    ).all()
 
     data_per_channel = {}
     top_gg = {}

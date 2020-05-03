@@ -3,14 +3,47 @@ import queue
 import time
 
 import requests
-from ggchat.management.commands._common import setup_logger
 
-import django
-from django.utils import timezone
+from ggchat.management.commands._common import setup_logger
 from ggchat.models import *
 
-
 SAVE_STATS_PERIOD = 10 * 60
+NON_LOGGING_MESSAGES = [
+    'welcome',
+    'success_join',
+    'channel_counters',
+    'channels_list',
+    'error',
+    'message',
+    'channel_history',
+    'users_list',
+    'update_channel_info',
+]
+KNOWN_MESSAGES = [
+    # skipped
+    'welcome',
+    'channels_list',
+    'random_result',
+    'new_poll',
+    'error',
+    'setting',
+    'update_channel_info',
+    'new_job',
+    'job_prize_increased',
+    'update_job',
+    # processed
+    'success_join',
+    'channel_counters',
+    'premium',
+    'payment',
+    'user_ban',
+    'user_warn',
+    'remove_message',
+    'follower',
+    'channel_history',
+    'message',
+    'users_list',
+]
 
 
 class ChatMsgParser:
@@ -52,8 +85,7 @@ class ChatMsgParser:
             self.get_player_counters()
 
     def log_msg(self, msg_type, msg):
-        if msg_type not in ['welcome', 'success_join', 'channel_counters', 'channels_list', 'error', 'message',
-                            'channel_history', 'users_list', 'update_channel_info']:
+        if msg_type not in NON_LOGGING_MESSAGES:
             try:
                 encoding = locale.getpreferredencoding()
                 s = msg.__repr__().encode(encoding, 'ignore').decode(encoding)
@@ -67,28 +99,11 @@ class ChatMsgParser:
         msg_type = msg['type'] if 'type' in msg else ''
         self.log_msg(msg_type, msg)
 
-        if msg_type == 'welcome':
-            pass
+        if msg_type not in KNOWN_MESSAGES:
+            self.log.warning('Unknown type: {}'.format(msg))
+            return
 
-        elif msg_type == 'channels_list':
-            pass
-
-        elif msg_type == 'random_result':
-            pass
-
-        elif msg_type == 'new_poll':
-            pass
-
-        elif msg_type == 'error':
-            pass
-
-        elif msg_type == 'setting':
-            pass
-
-        elif msg_type == 'update_channel_info':
-            pass
-
-        elif msg_type == 'success_join':
+        if msg_type == 'success_join':
             self.parse_channel_join(msg)
 
         elif msg_type == 'channel_counters':
@@ -122,21 +137,6 @@ class ChatMsgParser:
 
         elif msg_type == 'users_list':
             self.parse_users_list(msg)
-
-        elif msg_type == 'new_job':
-            # {'type': 'new_job', 'data': {'channel_id': 5, 'job': {'id': 303, 'creator': {'obj_key': '9:429281', 'id': '429281', 'nickname': 'overmind88_', 'avatar': '/files/avatars/av_429281_9DZQ.png', 'title': 'overmind88_'}, 'created': '2018-12-07T18:01:02+03:00', 'status': 1, 'user': {'obj_key': '9:1', 'id': '1', 'nickname': 'Miker', 'avatar': '/files/avatars/av_1_mtmA.png', 'title': 'Miker'}, 'title': 'Сказать, что фибо не очень', 'description': 'Громко и чётко в прямом эфире произнести "фибо не очень"', 'updated': '2018-12-07T18:01:02+03:00', 'started': '2018-12-07T18:01:02+03:00', 'amount': 322, 'paid': False}}}  # noqa
-            pass
-
-        elif msg_type == 'job_prize_increased':
-            # {'type': 'job_prize_increased', 'data': {'channel_id': 5, 'job': {'id': 299, 'creator': {'obj_key': '9:666', 'id': '666', 'nickname': 'lokki7', 'avatar': '/files/avatars/av_666_PG1Z.jpg', 'title': 'lokki7'}, 'created': '2018-12-07T17:59:53+03:00', 'status': 2, 'user': {'obj_key': '9:1', 'id': '1', 'nickname': 'Miker', 'avatar': '/files/avatars/av_1_mtmA.png', 'title': 'Miker'}, 'title': 'Нормально потестить журнал заданий', 'description': 'ну нормально чтобы было все', 'updated': '2018-12-07T18:00:03+03:00', 'started': '2018-12-07T18:00:03+03:00', 'amount': 325, 'paid': False}, 'user': {'obj_key': '9:222799', 'id': '222799', 'nickname': 'Speller_', 'avatar': '/files/avatars/av_222799_DBaM.jpg', 'title': 'Speller_'}, 'amount': '2.00'}}  # noqa
-            pass
-
-        elif msg_type == 'update_job':
-            # {'type': 'update_job', 'data': {'channel_id': 5, 'job': {'id': 557, 'creator': {'obj_key': '9:45989', 'id': '45989', 'nickname': 'kodo_day', 'avatar': '/files/avatars/avatar.png', 'title': 'kodo_day'}, 'created': '2018-12-10T23:02:02+03:00', 'status': 5, 'user': {'obj_key': '9:1', 'id': '1', 'nickname': 'Miker', 'avatar': '/files/avatars/av_1_mtmA.png', 'title': 'Miker'}, 'title': '3х без ранений', 'description': 'Три миссии подряд без ранений', 'updated': '2018-12-13T12:38:53+03:00', 'started': '2018-12-13T12:38:53+03:00', 'amount': 0, 'paid': False}}}  # noqa
-            pass
-
-        else:
-            self.log.warning('Unknown type: {}'.format(msg))
 
     def parse_ban(self, msg):
         channel_id = msg['data']['channel_id']
@@ -299,10 +299,11 @@ class ChatMsgParser:
 
         # donations to cups, showed on all subscribed channels
         if link:
-            latest_donation_with_this_url = Donation.objects.filter(link=link, user=user,
-                                                                    amount=amount,
-                                                                    timestamp__gte=timezone.now() - timezone.timedelta(
-                                                                        seconds=15)).first()
+            latest_donation_with_this_url = Donation.objects.filter(
+                link=link, user=user,
+                amount=amount,
+                timestamp__gte=timezone.now() - timezone.timedelta(seconds=15),
+            ).first()
             if not latest_donation_with_this_url:
                 donation = Donation(user=user, channel=None, amount=amount, text=text, link=link, voice=voice)
                 donation.save()
@@ -378,9 +379,7 @@ class ChatMsgParser:
             streamer_username = msg['data']['channel_streamer']['name']
             streamer = User(user_id=streamer_id, username=streamer_username)
             streamer.save()
-            # print('channel_streamer', channel_id)
         else:
-            # print('NOT channel_streamer', channel_id)
             streamer = None
 
         # save channel
@@ -471,7 +470,7 @@ class ChatMsgParser:
                         for s in page['streams']:
                             streams[str(s['id'])] = s
                     # other pages
-                    for pagenum in range(2, total_pages+1):
+                    for pagenum in range(2, total_pages + 1):
                         with session.get(stream_url.format(pagenum), timeout=10) as resp:
                             page = resp.json()
                             for s in page['streams']:
@@ -503,13 +502,14 @@ class ChatMsgParser:
                     else:
                         hidden = None
 
-                    player_stats = PlayerChannelStats(channel_id=channel_id,
-                                                      chat=player_in_chat,
-                                                      viewers=player_viewers,
-                                                      viewers_gg=player_viewers_gg,
-                                                      status=player_status,
-                                                      status_gg=player_status_gg,
-                                                      hidden=hidden,
-                                                      )
+                    player_stats = PlayerChannelStats(
+                        channel_id=channel_id,
+                        chat=player_in_chat,
+                        viewers=player_viewers,
+                        viewers_gg=player_viewers_gg,
+                        status=player_status,
+                        status_gg=player_status_gg,
+                        hidden=hidden,
+                    )
                     player_stats.save()
         self.log.info('periodic_processing end')

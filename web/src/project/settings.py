@@ -3,10 +3,8 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-SECRET_KEY = os.environ['SECRET_KEY']
-DEBUG = False
-if os.path.isfile('.debug') or os.environ.get('DEBUG'):
-    DEBUG = True
+SECRET_KEY = os.environ.get('SECRET_KEY', 'FOR_TEST_ONLY')
+DEBUG = os.path.isfile('.debug') or os.environ.get('DEBUG')
 
 ALLOWED_HOSTS = ['strayge.com', '127.0.0.1', '*']
 
@@ -44,6 +42,16 @@ DATABASES = {
         'CONN_MAX_AGE': 900,
     }
 }
+
+# LOCAL
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+#         'CONN_MAX_AGE': 60,
+#         'timeout': 20,
+#     }
+# }
 
 LANGUAGE_CODE = 'ru-RU'
 TIME_ZONE = 'UTC'

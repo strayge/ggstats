@@ -1,6 +1,5 @@
 from django.db.models import Count, Sum
 from django.shortcuts import render_to_response
-from django.utils import timezone
 from django.views.decorators.cache import cache_page
 
 from ggchat.models import *
@@ -33,10 +32,11 @@ def users(request):
 
     # todo: активный большую часть времени ???
 
-    content = {'max_premiums': max_premiums,
-               'max_sum_donations': max_sum_donations,
-               'max_count_donations': max_count_donations,
-               'max_messages': max_messages[:20],
-               # 'pekas': pekas[:20],
-               }
+    content = {
+        'max_premiums': max_premiums,
+        'max_sum_donations': max_sum_donations,
+        'max_count_donations': max_count_donations,
+        'max_messages': max_messages[:20],
+        # 'pekas': pekas[:20],
+    }
     return render_to_response('ggchat/users.html', content)

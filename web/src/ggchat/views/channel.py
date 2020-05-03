@@ -1,7 +1,6 @@
 import itertools
 
 from django.shortcuts import render_to_response
-from django.utils import timezone
 from django.views.decorators.cache import cache_page
 
 from ggchat.helpers import is_admin
@@ -51,38 +50,39 @@ def channel(request, channel_id):
         del(x['status_gg'])
         viewers_gg_data.append(x)
 
-    chart_people = {'data': chart_clients_data,
-                    'x_keyword': 'timestamp',
-                    'y_keyword': 'clients',
-                    'type': 'area',
-                    'name': 'Всего в чате',
-                    'visible': False,
+    chart_people = {
+        'data': chart_clients_data,
+        'x_keyword': 'timestamp',
+        'y_keyword': 'clients',
+        'type': 'area',
+        'name': 'Всего в чате',
+        'visible': False,
 
-                    'data2': chart_users_data,
-                    'x_keyword2': 'timestamp',
-                    'y_keyword2': 'users',
-                    'type2': 'area',
-                    'name2': 'Залогиненных в чате',
+        'data2': chart_users_data,
+        'x_keyword2': 'timestamp',
+        'y_keyword2': 'users',
+        'type2': 'area',
+        'name2': 'Залогиненных в чате',
 
-                    'data3': viewers_data,
-                    'x_keyword3': 'timestamp',
-                    'y_keyword3': 'viewers',
-                    'type3': 'line',
-                    'name3': 'Всего зрителей',
-                    'color3': '#cccccc',
+        'data3': viewers_data,
+        'x_keyword3': 'timestamp',
+        'y_keyword3': 'viewers',
+        'type3': 'line',
+        'name3': 'Всего зрителей',
+        'color3': '#cccccc',
 
-                    'data4': viewers_gg_data,
-                    'x_keyword4': 'timestamp',
-                    'y_keyword4': 'viewers_gg',
-                    'type4': 'line',
-                    'name4': 'Зрителей на GG плеере',
-                    'color4': '#ff0000',
+        'data4': viewers_gg_data,
+        'x_keyword4': 'timestamp',
+        'y_keyword4': 'viewers_gg',
+        'type4': 'line',
+        'name4': 'Зрителей на GG плеере',
+        'color4': '#ff0000',
 
-                    'zoom': True,
-                    'legend': True,
-                    'title': '',
-                    'y_title': 'Количество',
-                    }
+        'zoom': True,
+        'legend': True,
+        'title': '',
+        'y_title': 'Количество',
+    }
 
     donates_data = Donation.objects.filter(channel_id=channel_id, timestamp__gte=week_ago).order_by('-timestamp').values('timestamp', 'amount')
     donates_grouped = [list(g) for t, g in itertools.groupby(donates_data, key=lambda donate: donate['timestamp'].date())]
@@ -94,27 +94,29 @@ def channel(request, channel_id):
             amount += donate['amount']
         donates_grouped_and_summed.append({'date': date, 'amount': amount})
 
-    chart_income = {'data': donates_grouped_and_summed,
-                    'x_keyword': 'date',
-                    'y_keyword': 'amount',
-                    'type': 'column',
-                    'name': 'Донат',
+    chart_income = {
+        'data': donates_grouped_and_summed,
+        'x_keyword': 'date',
+        'y_keyword': 'amount',
+        'type': 'column',
+        'name': 'Донат',
 
-                    # 'zoom': True,
-                    'legend': True,
-                    'title': '',
-                    'y_title': 'Рублей',
-                    }
+        # 'zoom': True,
+        'legend': True,
+        'title': '',
+        'y_title': 'Рублей',
+    }
 
-    content = {'channel': channel_obj,
-               'messages': last_messages,
-               'donations': last_donations,
-               'premiums': last_premiums,
-               'follows': last_follows,
-               'active_premiums': active_premiums,
-               'chart_people': chart_people,
-               'chart_income': chart_income,
-               'show_chat_links': is_admin(request),
+    content = {
+        'channel': channel_obj,
+        'messages': last_messages,
+        'donations': last_donations,
+        'premiums': last_premiums,
+        'follows': last_follows,
+        'active_premiums': active_premiums,
+        'chart_people': chart_people,
+        'chart_income': chart_income,
+        'show_chat_links': is_admin(request),
     }
 
     return render_to_response('ggchat/channel.html', content)

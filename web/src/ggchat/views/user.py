@@ -1,6 +1,5 @@
-from django.db.models import Sum, Q
+from django.db.models import Q, Sum
 from django.shortcuts import render_to_response
-from django.utils import timezone
 from django.views.decorators.cache import cache_page
 
 from ggchat.helpers import is_admin
@@ -55,23 +54,24 @@ def user(request, user_id):
     chat_top_time.sort(key=lambda x: x[1], reverse=True)
     chat_top_time = chat_top_time[:count_per_section]
 
-    content = {'name': username,
-               'messages': last_messages,
-               'donations': last_donations,
-               'premiums': last_premiums,
-               'follows': last_follows,
-               'active_premiums': active_premiums,
-               'user_id': user_id,
-               'channel': channel,
-               'received_bans': received_bans,
-               'bans': bans,
-               'removed_messages': removed_messages,
-               'show_chat_links': is_admin(request),
-               'donations_by_channel': donations_by_channel,
-               'donations_total': donations_total,
-               'timeinchat': timeinchat,
-               'timeinchat_weekly': chat_top_time,
-               }
+    content = {
+        'name': username,
+        'messages': last_messages,
+        'donations': last_donations,
+        'premiums': last_premiums,
+        'follows': last_follows,
+        'active_premiums': active_premiums,
+        'user_id': user_id,
+        'channel': channel,
+        'received_bans': received_bans,
+        'bans': bans,
+        'removed_messages': removed_messages,
+        'show_chat_links': is_admin(request),
+        'donations_by_channel': donations_by_channel,
+        'donations_total': donations_total,
+        'timeinchat': timeinchat,
+        'timeinchat_weekly': chat_top_time,
+    }
 
     return render_to_response('ggchat/user.html', content)
 

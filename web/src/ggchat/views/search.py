@@ -1,6 +1,5 @@
 from django.http import HttpResponseForbidden
 from django.shortcuts import render_to_response
-from django.utils import timezone
 from django.views.decorators.cache import cache_page
 
 from ggchat.helpers import calculate_hash, is_admin
@@ -36,10 +35,11 @@ def search(request, channel_id, text):
             first_message = messages_in_range[len(messages_in_range)-1]['message_id']
             messages = Message.objects.filter(channel_id=channel_id, message_id__gte=first_message, text__contains=text).order_by('-timestamp')
 
-    content = {'messages': messages,
-               'show_chat_links': is_admin(request),
-               'key': valid_key,
-               'channel_id': channel_id,
-               'text': text,
-               }
+    content = {
+        'messages': messages,
+        'show_chat_links': is_admin(request),
+        'key': valid_key,
+        'channel_id': channel_id,
+        'text': text,
+    }
     return render_to_response('ggchat/search.html', content)

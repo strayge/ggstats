@@ -1,5 +1,4 @@
 import asyncio
-import json
 import logging
 
 import websockets
@@ -43,10 +42,12 @@ class WsBaseClient:
                         self.log.debug('ping ok')
                         continue
                     await self.ws_received(msg)
-            except (websockets.exceptions.ConnectionClosed,
-                    websockets.exceptions.InvalidHandshake,
-                    websockets.exceptions.WebSocketProtocolError,
-                    websockets.exceptions.PayloadTooBig):
+            except (
+                websockets.exceptions.ConnectionClosed,
+                websockets.exceptions.InvalidHandshake,
+                websockets.exceptions.WebSocketProtocolError,
+                websockets.exceptions.PayloadTooBig,
+            ):
                 self.log.error('WS error')
             except:
                 self.log.exception('Unknown error')

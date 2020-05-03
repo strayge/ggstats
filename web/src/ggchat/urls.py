@@ -1,18 +1,3 @@
-"""project URL Configuration
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/1.11/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  url(r'^$', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  url(r'^$', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.conf.urls import url, include
-    2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
-"""
 from django.conf.urls import url
 
 from ggchat.views.channel import channel
@@ -21,10 +6,10 @@ from ggchat.views.chats import chats
 from ggchat.views.moderators import moderators
 from ggchat.views.money import money
 from ggchat.views.search import search
-from ggchat.views.simple import index, stats, voice_player, removed
+from ggchat.views.simple import index, removed, stats, voice_player
 from ggchat.views.user import user, user_by_name
 from ggchat.views.users import users
-from ggchat.views.viewers import viewers_week, viewers_month, viewers_year
+from ggchat.views.viewers import viewers_month, viewers_week, viewers_year
 
 urlpatterns = [
     url(r'^$', index, name='index'),

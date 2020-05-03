@@ -34,9 +34,9 @@ def removed(request):
 
     removed_messages = Message.objects.filter(removed=True).order_by('-timestamp')[:1000]
 
-    content = {'removed_messages': removed_messages,
-               'show_chat_links': is_admin(request),
-               }
+    content = {
+        'removed_messages': removed_messages,
+        'show_chat_links': is_admin(request),
+    }
 
     return render_to_response('ggchat/removed.html', content)
-

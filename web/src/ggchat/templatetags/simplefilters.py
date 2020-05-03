@@ -6,12 +6,14 @@ from django.utils.html import format_html
 
 register = template.Library()
 
+
 @register.filter
 def div_int(value, arg):
     try:
         return int(value) // int(arg)
     except (ValueError, ZeroDivisionError):
         return None
+
 
 @register.filter
 def chat_hash(message_id):
@@ -20,6 +22,7 @@ def chat_hash(message_id):
         return hashlib.md5((str(message_id) + secret_post).encode('utf-8')).hexdigest()
     except:
         return "DEADBEEF"
+
 
 @register.simple_tag
 def channel_link(value):

@@ -1,6 +1,5 @@
-from django.db.models import Count, Sum
+from django.db.models import Count
 from django.shortcuts import render_to_response
-from django.utils import timezone
 from django.views.decorators.cache import cache_page
 
 from ggchat.models import *
@@ -27,8 +26,9 @@ def chats(request):
 
     # todo: наиболее популярные смайлы
 
-    content = {'deleted_messages': deleted_messages,
-               'popular_chats': popular_chats,
-               'top_trols': top_trols,
-               }
+    content = {
+        'deleted_messages': deleted_messages,
+        'popular_chats': popular_chats,
+        'top_trols': top_trols,
+    }
     return render_to_response('ggchat/chats.html', content)
