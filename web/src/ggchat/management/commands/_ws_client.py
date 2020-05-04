@@ -1,5 +1,6 @@
 import json
 import time
+from asyncio import sleep
 
 from ggchat.management.commands._ws_base import WsBaseClient
 
@@ -44,6 +45,7 @@ class ChatWsClient(WsBaseClient):
     async def join_channel(self, channel_id):
         join_channel_query = {"type": "join", "data": {"channel_id": str(channel_id), "hidden": False}}
         await self.send(join_channel_query)
+        await sleep(0.1)  # prevent blocking by rate limit
 
     async def request_channels(self):
         get_channels_query = {"type": "get_channels_list", "data": {"start": 0, "count": 200}}
