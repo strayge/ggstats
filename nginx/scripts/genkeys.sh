@@ -6,6 +6,10 @@ SSL_CHAIN_CERT="le-chain-crt.pem"
 
 DIR="/etc/nginx/ssl/"
 
+if [ -f "$DIR$SSL_KEY" ]; then
+    exit 0
+fi
+
 openssl req \
         -x509 \
         -nodes \
