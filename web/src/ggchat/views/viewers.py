@@ -174,7 +174,7 @@ def viewers_common(from_date, interval_secs, range):
         'y_title': 'Количество',
     }
     return render_to_response(
-        'ggchat/viewers.html',
+        'ggchat/chart.html',
         {'chart1': chart_users_total, 'title': 'Статистика по зрителям', 'range': range}
     )
 

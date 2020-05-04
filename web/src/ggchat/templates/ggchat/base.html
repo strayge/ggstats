@@ -48,13 +48,14 @@
             <span class="icon-bar"></span>
         </button>
         {# Title #}
-        <a class="navbar-brand" href="{% url "index" %}">GG Stats</a>
+        <a class="navbar-brand" href="{% url "week" %}">GG Stats</a>
         {# Left nav bar #}
         <div class="collapse navbar-collapse navbar-ex1-collapse">
             <ul class="nav navbar-nav side-nav">
-                {# items #}
-                <li><a href="{% url 'index' %}"><i class="fa fa-fw fa-lg fa-square-o"></i> Главная</a></li>
-                <li><a href="{% url 'viewers_week' %}"><i class="fa fa-fw fa-lg fa-line-chart"></i> Посещаемость</a></li>
+                <li><a href="{% url 'week' %}"><i class="fa fa-fw fa-lg fa-bar-chart"></i> Неделя</a></li>
+                <li><a href="{% url 'month' %}"><i class="fa fa-fw fa-lg fa-area-chart"></i> Месяц</a></li>
+                <li><a href="{% url 'year' %}"><i class="fa fa-fw fa-lg fa-line-chart"></i> Год</a></li>
+                <li><a href="{% url 'info' %}"><i class="fa fa-fw fa-lg fa-info-circle"></i> О проекте</a></li>
             </ul>
         </div>
     </nav>
