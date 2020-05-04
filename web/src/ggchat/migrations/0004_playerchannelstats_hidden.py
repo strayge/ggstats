@@ -11,10 +11,4 @@ class Migration(migrations.Migration):
         ('ggchat', '0003_auto_20181002_0138'),
     ]
 
-    operations = [
-        migrations.AddField(
-            model_name='playerchannelstats',
-            name='hidden',
-            field=models.NullBooleanField(),
-        ),
-    ]
+    operations = []
