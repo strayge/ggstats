@@ -20,7 +20,7 @@ services:
     logging: &default_logging
       driver: json-file
       options:
-        max-size: "10m"
+        max-size: "5m"
         max-file: "2"
     healthcheck:
       test: ["CMD-SHELL", "find /src/*.log -mmin -5 | grep '.*'"]
@@ -43,8 +43,11 @@ services:
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       SECRET_KEY: ${SECRET_KEY}
-    ports:
-      - "8080:8080"
+    #ports:
+    #  - "8080:8080"
+    networks:
+      - default
+      - nginx
     depends_on:
       - db
     healthcheck:
@@ -58,8 +61,6 @@ services:
     container_name: ggstats_db
     hostname: ggstats_db
     restart: always
-    ports:
-      - "3306:3306"
     logging: *default_logging
     volumes:
       - ./mysql_data:/var/lib/mysql
@@ -75,41 +76,6 @@ services:
     labels:
       autoheal: "true"
 
-  nginx:
-    build: nginx
-    container_name: ggstats_nginx
-    hostname: ggstats_nginx
-    restart: always
-    logging: *default_logging
-    volumes:
-      - ./nginx/ssl:/etc/nginx/ssl
-      - ./web/nginx.conf:/etc/nginx/service-ggstats.conf
-      - ./gggalka/nginx.conf:/etc/nginx/service-gggalka.conf
-      - ./nginx/service.conf:/etc/nginx/service.conf
-      - ./nginx/www:/www
-      - ./web/static:/static
-      - ./gggalka/www:/gggalka
-    depends_on:
-      - web
-    ports:
-      - "80:80"
-      - "443:443"
-    environment:
-      - TZ=UTC
-      - LETSENCRYPT=${LETSENCRYPT}
-      - LE_EMAIL=${LE_EMAIL}
-      - LE_FQDN=${LE_FQDN}
-
-  rss:
-    build: rss
-    container_name: ggstats_rss
-    hostname: ggstats_rss
-    command: python3 main.py
-    volumes:
-      - ./rss/src:/src
-      - ./web/static:/static
-      - ./rss/data:/data
-
   # https://github.com/moby/moby/issues/28400
   # https://github.com/willfarrell/docker-autoheal
   autoheal:
@@ -120,3 +86,8 @@ services:
     logging: *default_logging
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+
+networks:
+  nginx:
+    external:
+      name: nginx_nginx

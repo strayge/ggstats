@@ -27,7 +27,6 @@ ws_client.log.*
 
 # data
 mysql_data
-mysql_data1
 nginx/ssl/
 *.pickle
 
@@ -37,7 +36,7 @@ nginx/ssl/
 
 # compiled static
 web/static/
-
+!web/static/.keep
 
 # backups
 *.bak
