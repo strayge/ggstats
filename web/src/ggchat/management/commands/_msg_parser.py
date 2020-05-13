@@ -3,17 +3,20 @@ import queue
 import time
 
 import requests
+from django.utils import timezone
 
 from ggchat.management.commands._common import setup_logger
 from ggchat.models import *
 
 SAVE_STATS_PERIOD = 10 * 60
 NON_LOGGING_MESSAGES = [
+    'follower',
     'channel_counters',
     'channel_history',
     'channels_list',
     'error',
     'message',
+    'setting',
     'success_join',
     'update_channel_info',
     'users_list',
@@ -102,8 +105,99 @@ class ChatMsgParser:
             self.log.warning('Unknown type: {}'.format(msg))
             return
 
-        if msg_type == 'channel_counters':
+        if msg_type == 'success_join':
+            self.parse_channel_join(msg)
+
+        elif msg_type == 'channel_counters':
             self.parse_counters(msg)
+
+        elif msg_type == 'payment':
+            self.parse_payment(msg)
+
+        elif msg_type == 'user_ban':
+            self.parse_ban(msg)
+
+    def parse_ban(self, msg):
+        channel_id = msg['data']['channel_id']
+        user_id = msg['data']['user_id']
+        username = msg['data']['user_name']
+        moderator_id = msg['data']['moder_id']
+        moderator_username = msg['data']['moder_name']
+        reason = msg['data']['reason']
+        duration = int(msg['data'].get('duration', 0))
+        ban_type = int(msg['data'].get('type', 0))
+        show = bool(msg['data']['show'])
+        permanent = ban_type == 2
+
+        channel = Channel.objects.filter(channel_id=channel_id).first()
+        if not channel:
+            channel = Channel(channel_id=channel_id, streamer=None)
+            channel.save()
+        user = User.objects.filter(user_id=user_id).first()
+        if not user:
+            user = User(user_id=user_id, username=username)
+            user.save()
+        moderator = User.objects.filter(user_id=moderator_id).first()
+        if not moderator:
+            moderator = User(user_id=moderator_id, username=moderator_username)
+            moderator.save()
+
+        Ban(
+            user=user,
+            channel=channel,
+            moderator=moderator,
+            duration=duration,
+            reason=reason,
+            show=show,
+            permanent=permanent,
+            ban_type=ban_type,
+        ).save()
+
+    def parse_payment(self, msg):
+        channel_id = msg['data']['channel_id']
+        username = msg['data']['userName']
+        amount = msg['data']['amount']
+        text = msg['data']['message']
+        link = msg['data']['link']
+        user_id = msg['data']['userId']
+        voice = msg['data'].get('voice')
+        if user_id == 0:
+            username = 'Неизвестный'
+        user = User.objects.filter(user_id=user_id).first()
+        if not user:
+            user = User(user_id=user_id, username=username)
+            user.save()
+
+        # donations to cups, showed on all subscribed channels
+        if link:
+            latest_donation_with_this_url = Donation.objects.filter(
+                link=link, user=user,
+                amount=amount,
+                timestamp__gte=timezone.now() - timezone.timedelta(seconds=15),
+            ).first()
+            if not latest_donation_with_this_url:
+                donation = Donation(user=user, channel=None, amount=amount, text=text, link=link, voice=voice)
+                donation.save()
+        else:
+            channel = Channel.objects.filter(channel_id=channel_id).first()
+            if channel:
+                donation = Donation(user=user, channel=channel, amount=amount, text=text, link=link, voice=voice)
+                donation.save()
+
+    def parse_channel_join(self, msg):
+        channel_id = str(msg['data']['channel_id'])
+        streamer = None
+        if 'id' in msg['data']['channel_streamer']:
+            streamer_id = msg['data']['channel_streamer']['id']
+            streamer_username = msg['data']['channel_streamer']['name']
+            streamer = User.objects.filter(user_id=streamer_id).first()
+            if not streamer:
+                streamer = User(user_id=streamer_id, username=streamer_username)
+                streamer.save()
+        channel = Channel.objects.filter(channel_id=channel_id).first()
+        if not channel:
+            channel = Channel(channel_id=channel_id, streamer=streamer)
+            channel.save()
 
     def parse_counters(self, msg):
         channel_id = msg['data']['channel_id']
