@@ -231,8 +231,10 @@ class ChatMsgParser:
 
         # one time per SAVE_STATS_PERIOD//60 minutes save player's stats for all joined channels
         if not last_time_save_player_stats or timezone.now() > last_time_save_player_stats + timezone.timedelta(minutes=SAVE_STATS_PERIOD // 60):
-            channels_ids_str = ','.join(self.joined_channels_last_period)
+            # GG does not return info for "cup" chat channels
+            channels_ids_str = ','.join(filter(lambda x: not x.startswith('cup:'), self.joined_channels_last_period))
             self.joined_channels_last_period = set()
+            # limit for url length is 8KB
             url_gg = 'https://goodgame.ru/api/getggchannelstatus?id={}&fmt=json'.format(channels_ids_str)
             url_all = 'https://goodgame.ru/api/getchannelstatus?id={}&fmt=json'.format(channels_ids_str)
             answer_gg = {}
