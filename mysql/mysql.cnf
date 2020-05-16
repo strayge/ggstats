@@ -17,6 +17,7 @@ max_allowed_packet = 1024M
 sort_buffer_size = 128K
 skip-name-resolve = 1
 query_cache_limit = 2M
+innodb_file_per_table = 1
 
 [client]
 default-character-set = utf8mb4
