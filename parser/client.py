@@ -1,5 +1,6 @@
 import logging
 import time
+import httpx
 
 from motor.motor_asyncio import AsyncIOMotorClient
 
@@ -7,10 +8,19 @@ from ws import WsClient
 
 
 class Client(WsClient):
+    COUNTERS_INTERVAL = 10 * 60
+
     def __init__(self, mongo: AsyncIOMotorClient):
         super().__init__()
         self.mongo = mongo
         self._connected_channels = set()
+        self._last_counters_ts = int(time.time()) - self.COUNTERS_INTERVAL + 60
+        self._counters = {}
+        self.http = httpx.AsyncClient()
+        self.mongo.gg.premiums.create_index([('channel_id', 1)])
+        self.mongo.gg.payments.create_index([('channel_id', 1)])
+        self.mongo.gg.messages.create_index([('channel_id', 1)])
+        self.mongo.gg.counters.create_index([('channel_id', 1)])
 
     async def on_start(self):
         logging.info('start')
@@ -41,6 +51,13 @@ class Client(WsClient):
             users = msg['data']['users_in_channel']
             if users == 0:
                 await self.send_leave_channel(channel_id)
+            else:
+                self._counters[channel_id] = msg['data']
+                now = int(time.time())
+                if now - self._last_counters_ts > self.COUNTERS_INTERVAL:
+                    await self.save_counters()
+                    self._last_counters_ts = now
+                    self._counters.clear()
         elif msg_type == 'update_channel_info':
             # {'type': 'update_channel_info', 'data': {'channel_id': '5', 'premium_only': 0, 'started': 0}}
             ...
@@ -129,6 +146,23 @@ class Client(WsClient):
             users.append(user)
         if users:
             await self.mongo.gg.users.insert_many(users)
+
+    async def save_counters(self):
+        channels = list(self._counters.keys())
+        request = await self.http.get(f'https://goodgame.ru/api/4/streams/2/ids?ids={",".join(channels)}')
+        request.raise_for_status()
+        request_json = request.json()
+        now = int(time.time())
+        counters = []
+        for channel_id, chat_counters in self._counters.items():
+            counters.append({
+                'channel_id': channel_id,
+                'timestamp': now,
+                'clients': chat_counters['clients_in_channel'],
+                'users': chat_counters['users_in_channel'],
+                'viewers': request_json.get(channel_id, {}).get('viewers'),
+            })
+        await self.mongo.gg.counters.insert_many(counters)
 
     async def save_message(self, msg: dict):
         now = int(time.time())

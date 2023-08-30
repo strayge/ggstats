@@ -2,13 +2,14 @@ services:
   mongo:
     image: mongo
     restart: unless-stopped
-    # environment:
-    #   MONGO_INITDB_ROOT_USERNAME: root
-    #   MONGO_INITDB_ROOT_PASSWORD: root
     ports:
       - 127.0.0.1:27017:27017
     volumes:
       - mongo-data:/data/db
+    deploy:
+      resources:
+        limits:
+          memory: 256M
 
   mongo-express:
     image: mongo-express
