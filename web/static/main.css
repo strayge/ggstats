@@ -1,0 +1,76 @@
+/*!
+ * Based on "SB Admin" Bootstrap theme (http://startbootstrap.com/) (MIT)
+ */
+
+ body {
+    /*background-color: #fff;*/
+}
+
+a {
+    color: #5151aa;
+}
+
+#wrapper {
+    padding-left: 0;
+}
+
+#page-wrapper {
+    width: 100%;
+    padding: 35px;
+    /*background-color: #fff;*/
+}
+
+@media(min-width:768px) {
+    #wrapper {
+        padding-left: 225px;
+    }
+
+    #page-wrapper {
+        padding: 30px;
+    }
+}
+
+/* Side Navigation */
+
+@media(min-width:768px) {
+    .side-nav {
+        position: fixed;
+        top: 51px;
+        left: 225px;
+        width: 225px;
+        margin-left: -225px;
+        border: none;
+        border-radius: 0;
+        overflow-y: auto;
+        background-color: #222;
+        bottom: 0;
+        overflow-x: hidden;
+        padding-bottom: 40px;
+    }
+
+    .side-nav>li>a {
+        width: 225px;
+    }
+
+    .side-nav li a:hover,
+    .side-nav li a:focus {
+        outline: none;
+        background-color: #333 !important;
+    }
+}
+
+.navbar-inverse {
+    background-image: none !important;
+}
+
+.navbar-inverse .navbar-nav > li > a {
+    color: #ddd !important;
+}
+
+/* save tables width */
+table {
+	table-layout: fixed;
+}
+td {
+	word-wrap: break-word;
+}

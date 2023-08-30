@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block page_title %}
+    {% if user_id %}
+        Пользователь {% if name %} <a href="https://goodgame.ru/user/{{ user_id }}/">{{ name }}</a> {% endif %} #{{ user_id }}
+        {% if channel %}
+            (Канал #{{ channel.channel_id }})
+        {% endif %}
+    {% else %}
+        Неизвестный пользователь
+    {% endif %}
+{% endblock %}
+
+{% block main %}
+    {% if name == None %}
+        <p>Пользователь не найден =(</p>
+    {% else %}
+        {# row 1 #}
+        <div class="row">
+
+                {% if donations|length %}
+                <h4>Последние донаты</h4>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover table-striped">
+                        <thead>
+                        <tr><th>Дата</th><th>Канал</th><th>Сумма</th><th>Сообщение</th></tr>
+                        </thead>
+                        <colgroup>
+                        	<col class="col-md-2">
+                        	<col class="col-md-1">
+                        	<col class="col-md-1">
+                        	<col class="col-md-4">
+                        </colgroup>
+                        <tbody>
+                        {% for donation in donations %}
+                            <tr>
+                            <td>{{ donation.timestamp }}</td>
+                            <td>
+                                {% if donation.channel.streamer.username %}
+                                    {{ donation.channel.streamer.username }}
+                                {% elif donation.link %}
+                                    <a href="{{ donation.link }}">{{ donation.link }}</a>
+                                {% else %}
+                                    #{{ donation.channel_id }}
+                                {% endif %}
+                            </td>
+                            <td>{{ donation.amount }}</td>
+                            <td>
+                                {% if donation.voice %}
+                                    donation.voice
+                                {% endif %}
+                                {{ donation.text }}
+                            </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+
+                {% if received_bans|length %}
+                <h4>Полученные баны</h4>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover table-striped">
+                        <thead>
+                        <tr> <th>Дата</th> <th>Канал</th> <th>Модератор</th> <th>Длительность</th> <th>Причина</th> </tr>
+                        </thead>
+                        <tbody>
+                        {% for ban in received_bans %}
+                            <tr>
+                            <td>{{ ban.timestamp }}</td>
+                            <td>
+                                {% if ban.channel.streamer %}
+                                    {{ ban.channel.streamer.username }}
+                                {% else %}
+                                    #{{ ban.channel_id }}
+                                {% endif %}
+                            </td>
+                            <td><a href="{% url 'user' ban.moderator_id %}">{{ ban.moderator.username }}</a></td>
+                            <td>
+                                {% if ban.ban_type == 2 %}
+                                    Перманентно
+                                {% elif ban.ban_type == 1 %}
+                                    До конца стрима
+                                {% elif ban.duration == 0 %}
+                                    Разбанен
+                                {% elif ban.duration < 172800 %}
+                                    {% widthratio ban.duration 60 1 %} минут
+                                {% else %}
+                                    {% widthratio ban.duration 86400 1 %} дней
+                                {% endif %}
+                            </td>
+                            <td>{{ ban.reason }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+
+
+        </div>
+
+    {% endif %}
+{% endblock %}

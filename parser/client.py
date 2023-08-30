@@ -161,8 +161,14 @@ class Client(WsClient):
                 'clients': chat_counters['clients_in_channel'],
                 'users': chat_counters['users_in_channel'],
                 'viewers': request_json.get(channel_id, {}).get('viewers'),
+                'hidden': bool(request_json.get(channel_id, {}).get('hidden')),
             })
         await self.mongo.gg.counters.insert_many(counters)
+
+        names = []
+        for channel_id, data in request_json.items():
+            names.append({'_id': channel_id, 'name': data['key']})
+        await self.mongo.gg.channels.insert_many(names, ordered=False)
 
     async def save_message(self, msg: dict):
         now = int(time.time())

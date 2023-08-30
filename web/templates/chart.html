@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block head %}
+    {{ chart_load_js()|safe }}
+{% endblock %}
+
+{% block main %}
+
+    {% if range == 'week' %}
+        <h4>За неделю</h4>
+    {% elif range == 'month' %}
+        <h4>За месяц</h4>
+    {% elif range == 'year' %}
+        <h4>За год</h4>
+    {% else %}
+        <h4></h4>
+    {% endif %}
+    <div id="container"></div>
+    {{ chart_datetime("container", chart1)|safe }}
+
+{% endblock %}

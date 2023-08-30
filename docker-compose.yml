@@ -26,5 +26,16 @@ services:
     depends_on:
       - mongo
 
+  web:
+    image: python:3.11-alpine
+    restart: unless-stopped
+    command: sh -c 'cd /app && pip install -r requirements.txt && python main.py'
+    volumes:
+      - ./web:/app/
+    ports:
+      - 127.0.0.1:1234:8080
+    depends_on:
+      - mongo
+
 volumes:
   mongo-data:
